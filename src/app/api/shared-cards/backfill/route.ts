@@ -58,3 +58,9 @@ export async function POST() {
 }
 
 
+// Convenience: allow triggering from browser via GET
+export async function GET() {
+  return POST();
+}
+
+
