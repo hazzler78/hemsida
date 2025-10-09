@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 export const runtime = 'edge';
 
@@ -25,7 +25,7 @@ async function fetchImage(url: string): Promise<string | null> {
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     const supabase = getSupabaseServerClient();
     const { data } = await supabase
