@@ -342,7 +342,11 @@ export default function Media() {
               {filtered.map((card) => (
                 <MediaCard key={card.id} href={card.href || card.url} isExpanded={false} target="_blank" rel="noopener noreferrer">
                   {card.image_url && (
-                    <CardImage src={card.image_url} alt={card.title} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                    <CardImage
+                      src={`/api/image-proxy?src=${encodeURIComponent(card.image_url)}`}
+                      alt={card.title}
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
                   )}
                   <CardHeader>
                     <CardTitle>{card.title}</CardTitle>

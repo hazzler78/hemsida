@@ -106,7 +106,12 @@ async function fetchPageSummary(url: string): Promise<{ title: string; text: str
     let imageUrl = (ogImageMatch && ogImageMatch[2]) || (twitterImageMatch && twitterImageMatch[1]) || (linkImageSrcMatch && linkImageSrcMatch[1]) || (firstImgMatch && firstImgMatch[1]) || null;
     
     // Make relative URLs absolute
-    if (imageUrl && !imageUrl.startsWith('http')) {
+    if (imageUrl && imageUrl.startsWith('//')) {
+      try {
+        const base = new URL(url);
+        imageUrl = `${base.protocol}${imageUrl}`;
+      } catch {}
+    } else if (imageUrl && !imageUrl.startsWith('http')) {
       try {
         const base = new URL(url);
         imageUrl = new URL(imageUrl, base.origin).href;
