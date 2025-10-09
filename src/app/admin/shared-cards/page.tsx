@@ -59,7 +59,8 @@ export default function AdminSharedCards() {
             </div>
             <div style={{ display: 'grid', gap: 8, marginTop: 8 }}>
               {item.image_url && (
-                <img src={item.image_url} alt={item.title} style={{ width: '100%', maxHeight: 200, objectFit: 'cover', borderRadius: 8 }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={item.image_url} alt={item.title || 'shared card image'} style={{ width: '100%', maxHeight: 200, objectFit: 'cover', borderRadius: 8 }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
               )}
               <input style={{ padding: 8, border: '1px solid #e5e7eb', borderRadius: 8 }} value={item.title} onChange={e => setItems(prev => prev.map(p => p.id === item.id ? { ...p, title: e.target.value } : p))} />
               <textarea style={{ padding: 8, border: '1px solid #e5e7eb', borderRadius: 8, minHeight: 120 }} value={item.summary} onChange={e => setItems(prev => prev.map(p => p.id === item.id ? { ...p, summary: e.target.value } : p))} />
