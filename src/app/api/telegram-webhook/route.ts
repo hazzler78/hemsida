@@ -87,7 +87,7 @@ function extractUrl(text: string): string | null {
   return urlMatch ? urlMatch[0] : null;
 }
 
-// Fetch page and extract title + readable text + image (simple heuristic, no external deps)
+// Fetch page and extract title + readable text + image (multi-heuristic)
 async function fetchPageSummary(url: string): Promise<{ title: string; text: string; image: string | null } | null> {
   try {
     const res = await fetch(url, { headers: { 'User-Agent': 'elchef-telegram-bot/1.0' } });
@@ -97,10 +97,13 @@ async function fetchPageSummary(url: string): Promise<{ title: string; text: str
     const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
     const title = titleMatch ? titleMatch[1].trim().replace(/\s+/g, ' ') : url;
 
-    // Extract og:image
-    const ogImageMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["'][^>]*>/i) ||
-      html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["'][^>]*>/i);
-    let imageUrl = ogImageMatch ? ogImageMatch[1] : null;
+    // Image extraction heuristics: og:image → twitter:image → link[image_src] → first <img>
+    const ogImageMatch = html.match(/<meta[^>]+property=["']og:image(:secure_url)?["'][^>]+content=["']([^"']+)["'][^>]*>/i) ||
+      html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image(:secure_url)?["'][^>]*>/i);
+    const twitterImageMatch = html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["'][^>]*>/i);
+    const linkImageSrcMatch = html.match(/<link[^>]+rel=["']image_src["'][^>]+href=["']([^"']+)["'][^>]*>/i);
+    const firstImgMatch = html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
+    let imageUrl = (ogImageMatch && ogImageMatch[2]) || (twitterImageMatch && twitterImageMatch[1]) || (linkImageSrcMatch && linkImageSrcMatch[1]) || (firstImgMatch && firstImgMatch[1]) || null;
     
     // Make relative URLs absolute
     if (imageUrl && !imageUrl.startsWith('http')) {
@@ -110,6 +113,14 @@ async function fetchPageSummary(url: string): Promise<{ title: string; text: str
       } catch {
         imageUrl = null;
       }
+    }
+
+    // Fallback to site favicon if still missing
+    if (!imageUrl) {
+      try {
+        const base = new URL(url);
+        imageUrl = new URL('/favicon.ico', base.origin).href;
+      } catch {}
     }
 
     // Prefer meta description when available
