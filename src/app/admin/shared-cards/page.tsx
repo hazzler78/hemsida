@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-type Card = { id: number; title: string; summary: string; url: string; created_at: string };
+type Card = { id: number; title: string; summary: string; url: string; image_url?: string | null; created_at: string };
 
 export default function AdminSharedCards() {
   const [items, setItems] = useState<Card[]>([]);
@@ -32,7 +32,8 @@ export default function AdminSharedCards() {
   }
 
   async function save(item: Card) {
-    await fetch('/api/shared-cards', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(item) });
+    const payload = { id: item.id, title: item.title, summary: item.summary, url: item.url, image_url: item.image_url };
+    await fetch('/api/shared-cards', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     await load();
   }
 
@@ -57,9 +58,13 @@ export default function AdminSharedCards() {
               <div style={{ fontSize: 12, color: '#6b7280' }}>{new Date(item.created_at).toLocaleString('sv-SE')}</div>
             </div>
             <div style={{ display: 'grid', gap: 8, marginTop: 8 }}>
+              {item.image_url && (
+                <img src={item.image_url} alt={item.title} style={{ width: '100%', maxHeight: 200, objectFit: 'cover', borderRadius: 8 }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+              )}
               <input style={{ padding: 8, border: '1px solid #e5e7eb', borderRadius: 8 }} value={item.title} onChange={e => setItems(prev => prev.map(p => p.id === item.id ? { ...p, title: e.target.value } : p))} />
               <textarea style={{ padding: 8, border: '1px solid #e5e7eb', borderRadius: 8, minHeight: 120 }} value={item.summary} onChange={e => setItems(prev => prev.map(p => p.id === item.id ? { ...p, summary: e.target.value } : p))} />
               <input style={{ padding: 8, border: '1px solid #e5e7eb', borderRadius: 8 }} value={item.url} onChange={e => setItems(prev => prev.map(p => p.id === item.id ? { ...p, url: e.target.value } : p))} />
+              <input placeholder="Bild-URL (valfri)" style={{ padding: 8, border: '1px solid #e5e7eb', borderRadius: 8 }} value={item.image_url || ''} onChange={e => setItems(prev => prev.map(p => p.id === item.id ? { ...p, image_url: e.target.value } : p))} />
             </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
               <button onClick={() => save(item)} style={{ padding: '8px 12px', background: 'var(--primary)', color: '#fff', borderRadius: 8, border: 'none' }}>Spara</button>

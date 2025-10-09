@@ -64,17 +64,18 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PATCH: update title/summary/url
+// PATCH: update title/summary/url/image_url
 export async function PATCH(request: NextRequest) {
   try {
     const supabase = getSupabaseServerClient();
     const body = await request.json();
-    const { id, title, summary, url } = body || {};
+    const { id, title, summary, url, image_url } = body || {};
     if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
-    const payload: { title?: string; summary?: string; url?: string } = {};
+    const payload: { title?: string; summary?: string; url?: string; image_url?: string | null } = {};
     if (title !== undefined) payload.title = title;
     if (summary !== undefined) payload.summary = summary;
     if (url !== undefined) payload.url = url;
+    if (image_url !== undefined) payload.image_url = image_url;
     const { error } = await supabase.from('shared_cards').update(payload).eq('id', id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
