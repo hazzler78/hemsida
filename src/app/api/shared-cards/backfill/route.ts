@@ -33,34 +33,48 @@ async function fetchImage(url: string): Promise<string | null> {
   }
 }
 
+async function runBackfill(force: boolean) {
+  const supabase = getSupabaseServerClient();
+  const baseQuery = supabase
+    .from('shared_cards')
+    .select('id,url')
+    .limit(50);
+
+  const { data, error } = force
+    ? await baseQuery.order('created_at', { ascending: false })
+    : await baseQuery.is('image_url', null);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (!data || data.length === 0) return NextResponse.json({ updated: 0 });
+
+  let updated = 0;
+  for (const row of data) {
+    const img = await fetchImage(row.url as string);
+    if (img) {
+      const { error: upErr } = await supabase.from('shared_cards').update({ image_url: img }).eq('id', row.id);
+      if (!upErr) updated += 1;
+    }
+  }
+  return NextResponse.json({ updated });
+}
+
 export async function POST() {
   try {
-    const supabase = getSupabaseServerClient();
-    const { data } = await supabase
-      .from('shared_cards')
-      .select('id,url')
-      .is('image_url', null)
-      .limit(50);
-    if (!data || data.length === 0) return NextResponse.json({ updated: 0 });
-
-    let updated = 0;
-    for (const row of data) {
-      const img = await fetchImage(row.url as string);
-      if (img) {
-        const { error } = await supabase.from('shared_cards').update({ image_url: img }).eq('id', row.id);
-        if (!error) updated += 1;
-      }
-    }
-    return NextResponse.json({ updated });
+    return await runBackfill(false);
   } catch {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
 
-
-// Convenience: allow triggering from browser via GET
-export async function GET() {
-  return POST();
+// Allow triggering from browser: /api/shared-cards/backfill?force=1
+export async function GET(request: Request) {
+  try {
+    const url = new URL(request.url);
+    const force = url.searchParams.get('force') === '1';
+    return await runBackfill(force);
+  } catch {
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
 }
 
 
