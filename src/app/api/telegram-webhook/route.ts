@@ -105,6 +105,11 @@ async function fetchPageSummary(url: string): Promise<{ title: string; text: str
     const firstImgMatch = html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
     let imageUrl = (ogImageMatch && ogImageMatch[2]) || (twitterImageMatch && twitterImageMatch[1]) || (linkImageSrcMatch && linkImageSrcMatch[1]) || (firstImgMatch && firstImgMatch[1]) || null;
     
+    // Fix HTML entities sometimes present in meta tags
+    if (imageUrl) {
+      imageUrl = imageUrl.replace(/&amp;/g, '&');
+    }
+
     // Make relative URLs absolute
     if (imageUrl && imageUrl.startsWith('//')) {
       try {
