@@ -87,8 +87,8 @@ function extractUrl(text: string): string | null {
   return urlMatch ? urlMatch[0] : null;
 }
 
-// Fetch page and extract title + readable text (simple heuristic, no external deps)
-async function fetchPageSummary(url: string): Promise<{ title: string; text: string } | null> {
+// Fetch page and extract title + readable text + image (simple heuristic, no external deps)
+async function fetchPageSummary(url: string): Promise<{ title: string; text: string; image: string | null } | null> {
   try {
     const res = await fetch(url, { headers: { 'User-Agent': 'elchef-telegram-bot/1.0' } });
     if (!res.ok) return null;
@@ -96,6 +96,21 @@ async function fetchPageSummary(url: string): Promise<{ title: string; text: str
 
     const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
     const title = titleMatch ? titleMatch[1].trim().replace(/\s+/g, ' ') : url;
+
+    // Extract og:image
+    const ogImageMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["'][^>]*>/i) ||
+      html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["'][^>]*>/i);
+    let imageUrl = ogImageMatch ? ogImageMatch[1] : null;
+    
+    // Make relative URLs absolute
+    if (imageUrl && !imageUrl.startsWith('http')) {
+      try {
+        const base = new URL(url);
+        imageUrl = new URL(imageUrl, base.origin).href;
+      } catch {
+        imageUrl = null;
+      }
+    }
 
     // Prefer meta description when available
     const metaDescMatch = html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["'][^>]*>/i) ||
@@ -116,7 +131,7 @@ async function fetchPageSummary(url: string): Promise<{ title: string; text: str
     // Limit to avoid sending huge prompts
     const limited = combined.slice(0, 6000);
 
-    return { title, text: limited };
+    return { title, text: limited, image: imageUrl };
   } catch {
     return null;
   }
@@ -251,6 +266,7 @@ export async function POST(request: NextRequest) {
                 title: decodedTitle,
                 summary: summaryText,
                 url: sharedUrl,
+                image_url: page.image,
                 source_host: (() => { try { return new URL(sharedUrl).hostname; } catch { return null; } })(),
               }
             ]);

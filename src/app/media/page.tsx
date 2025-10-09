@@ -91,6 +91,17 @@ const MediaCard = styled(Link)<{ isExpanded: boolean }>`
   `}
 `;
 
+const CardImage = styled.img`
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  
+  @media (max-width: 600px) {
+    height: 160px;
+  }
+`;
+
 const CardHeader = styled.div`
   padding: 1.5rem;
   border-bottom: 1px solid rgba(0,0,0,0.05);
@@ -217,6 +228,7 @@ type SharedCard = {
   title: string;
   summary: string;
   url: string;
+  image_url?: string | null;
   created_at: string;
   type?: string;
   tag?: string;
@@ -329,6 +341,9 @@ export default function Media() {
             <CardsGrid>
               {filtered.map((card) => (
                 <MediaCard key={card.id} href={card.href || card.url} isExpanded={false} target="_blank" rel="noopener noreferrer">
+                  {card.image_url && (
+                    <CardImage src={card.image_url} alt={card.title} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                  )}
                   <CardHeader>
                     <CardTitle>{card.title}</CardTitle>
                     <MarkdownContent dangerouslySetInnerHTML={{ __html: renderMarkdown(card.summary || '') }} />
@@ -350,4 +365,4 @@ export default function Media() {
       </Section>
     </PageBackground>
   );
-}
+} 
