@@ -275,9 +275,10 @@ export async function POST(request: NextRequest) {
         // Save card to Supabase for website listing
         try {
           const supabase = getSupabaseServerClient();
+          // Upsert on URL (requires unique index on url)
           const { error } = await supabase
             .from('shared_cards')
-            .insert([
+            .upsert([
               {
                 title: decodedTitle,
                 summary: summaryText,
@@ -285,10 +286,10 @@ export async function POST(request: NextRequest) {
                 image_url: page.image,
                 source_host: (() => { try { return new URL(sharedUrl).hostname; } catch { return null; } })(),
               }
-            ]);
-          if (error) console.error('Error inserting shared card:', error);
+            ], { onConflict: 'url' });
+          if (error) console.error('Error upserting shared card:', error);
         } catch (e) {
-          console.error('Insert shared card exception:', e);
+          console.error('Upsert shared card exception:', e);
         }
 
         await sendTelegramMessage(chatId, card);
