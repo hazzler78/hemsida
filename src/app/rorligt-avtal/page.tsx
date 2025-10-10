@@ -202,7 +202,7 @@ export default function RorligtAvtalPage() {
               href="https://www.cheapenergy.se/elchef-rorligt/"
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => {
+              onClick={() => {
                 handleProviderClick('Cheap Energy', 'https://www.cheapenergy.se/elchef-rorligt/');
               }}
             >
@@ -221,7 +221,7 @@ export default function RorligtAvtalPage() {
               href="https://www.svekraft.com/elchef-rorligt/"
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => {
+              onClick={() => {
                 handleProviderClick('Svekraft', 'https://www.svekraft.com/elchef-rorligt/');
               }}
             >

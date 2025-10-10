@@ -206,7 +206,7 @@ export default function FastprisAvtalPage() {
               href="https://www.svealandselbolag.se/elchef-fastpris/"
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => {
+              onClick={() => {
                 handleProviderClick('Svealands Elbolag', 'https://www.svealandselbolag.se/elchef-fastpris/');
               }}
             >
@@ -225,7 +225,7 @@ export default function FastprisAvtalPage() {
               href="https://www.cheapenergy.se/elchef-fastpris/"
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => {
+              onClick={() => {
                 handleProviderClick('Cheap Energy', 'https://www.cheapenergy.se/elchef-fastpris/');
               }}
             >
@@ -244,7 +244,7 @@ export default function FastprisAvtalPage() {
               href="https://www.stockholmselbolag.se/elavtal-elchef-fastpris/"
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => {
+              onClick={() => {
                 handleProviderClick('Stockholms Elbolag', 'https://www.stockholmselbolag.se/elavtal-elchef-fastpris/');
               }}
             >
@@ -263,7 +263,7 @@ export default function FastprisAvtalPage() {
               href="https://www.svekraft.com/elchef-fastpris/"
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => {
+              onClick={() => {
                 handleProviderClick('Svekraft', 'https://www.svekraft.com/elchef-fastpris/');
               }}
             >
