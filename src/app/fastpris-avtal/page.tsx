@@ -3,7 +3,6 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import SalesysForm, { SalesysFormInstance, SalesysFormField } from '@/components/SalesysForm';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -19,7 +18,7 @@ const PageContainer = styled.div`
 `;
 
 const Content = styled.div`
-  max-width: 800px;
+  max-width: 1200px;
   width: 100%;
   text-align: center;
 `;
@@ -48,51 +47,95 @@ const Subtitle = styled.p`
   }
 `;
 
-const SupplierInfo = styled.div`
+const ProvidersGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+`;
+
+const ProviderCard = styled.div`
+  position: relative;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 20px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
+  padding: 2rem;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   text-align: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: visible;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+  }
 `;
 
-const SupplierLogo = styled.img`
+const ProviderLogo = styled.img`
   height: 60px;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   object-fit: contain;
 `;
 
-const SupplierText = styled.p`
-  color: #333;
-  font-size: 1rem;
-  margin: 0;
-  font-weight: 500;
+const ProviderName = styled.h3`
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1rem;
 `;
 
-const FormContainer = styled.div`
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 20px;
-  padding: 1rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+const ProviderDescription = styled.p`
+  color: #374151;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+`;
+
+const ProviderButton = styled.a`
+  display: inline-block;
+  background: linear-gradient(135deg, var(--secondary), var(--primary));
+  color: white;
+  padding: 0.875rem 2rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   
-  @media (min-width: 768px) {
-    padding: 2rem;
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   }
   
-  /* Dölj fortsätt-knappen i fastpris-formuläret */
-  button[type="submit"], 
-  input[type="submit"],
-  .submit-button,
-  .continue-button {
-    display: none !important;
+  &:active {
+    transform: scale(0.98);
   }
+`;
+
+const HighlightBadge = styled.div`
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  transform: rotate(-3deg);
+  z-index: 10;
 `;
 
 export default function FastprisAvtalPage() {
@@ -112,131 +155,122 @@ export default function FastprisAvtalPage() {
       }
     } catch { /* no-op */ }
   }, []);
-  function handleFormReady(formInstance?: SalesysFormInstance) {
+
+  const handleProviderClick = (providerName: string, url: string) => {
     try {
-      const container = document.getElementById('fastpris-avtal-container');
-      if (!container) return;
-      const findPnInput = () => {
-        const attrSelector = 'input[placeholder*="personnummer" i], input[name*="personnummer" i], input[id*="personnummer" i], input[aria-label*="personnummer" i]';
-        const inp = container.querySelector<HTMLInputElement>(attrSelector);
-        if (inp) return inp;
-        const labels = Array.from(container.querySelectorAll('label')) as HTMLLabelElement[];
-        for (const lbl of labels) {
-          if ((lbl.textContent || '').toLowerCase().includes('personnummer')) {
-            const forId = lbl.getAttribute('for');
-            if (forId) {
-              const candidate = container.querySelector<HTMLInputElement>(`#${CSS.escape(forId)}`);
-              if (candidate) return candidate;
-            }
-          }
+      // Track affiliate link click
+      const sessionId = typeof window !== 'undefined' ? (window.localStorage.getItem('invoice_session_id') || '') : '';
+      fetch('/api/events/affiliate-click', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider: providerName,
+          contractType: 'fastpris',
+          url,
+          sessionId
+        }),
+        keepalive: true,
+      }).catch(() => {});
+
+      // TikTok event
+      const ttq: any = (window as any).ttq;
+      const cookiebot: any = (window as any).cookiebot || (window as any).Cookiebot || (window as any).CookieControl;
+      if (ttq && (!cookiebot || cookiebot?.consent?.marketing)) {
+        ttq.track('ClickButton', {
+          content_name: `affiliate_${providerName}`,
+          content_type: 'affiliate_link'
+        });
+        if ((window as any).__ttq_capi) {
+          (window as any).__ttq_capi('ClickButton', { content_name: `affiliate_${providerName}`, content_type: 'affiliate_link' });
         }
-        const inputs = Array.from(container.querySelectorAll('input')) as HTMLInputElement[];
-        for (const candidate of inputs) {
-          const parentText = (candidate.parentElement?.textContent || '').toLowerCase();
-          if (parentText.includes('personnummer')) return candidate;
-        }
-        return null;
-      };
-      const pnInput = findPnInput();
-      if (!pnInput && formInstance && typeof formInstance.getFields === 'function') {
-        let fired = false;
-        const startedAt = Date.now();
-        const intervalId = window.setInterval(() => {
-          if (fired) return;
-          try {
-            const fields = formInstance.getFields?.() as SalesysFormField[] | undefined;
-            if (Array.isArray(fields)) {
-              const pnField = fields.find((f: SalesysFormField) => {
-                const key = `${f?.name || ''} ${f?.label || ''}`.toLowerCase();
-                return key.includes('personnummer');
-              });
-              const raw = pnField?.value || '';
-              const digits = String(raw).replace(/\D/g, '');
-              if (digits.length >= 10) {
-                const masked = digits.length >= 4 ? `${'*'.repeat(Math.max(0, digits.length - 4))}${digits.slice(-4)}` : '*'.repeat(digits.length);
-                fetch('/api/events/form-field', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    form: 'fastpris-avtal',
-                    field: 'personnummer',
-                    action: 'filled',
-                    valueMasked: masked,
-                  }),
-                  keepalive: true,
-                }).catch(() => {});
-                fired = true;
-                window.clearInterval(intervalId);
-              }
-            }
-          } catch {}
-          if (Date.now() - startedAt > 2 * 60 * 1000) {
-            window.clearInterval(intervalId);
-          }
-        }, 500);
-        return;
       }
-      if (!pnInput) return;
+    } catch { /* no-op */ }
+  };
 
-      const fireOnce = () => {
-        try {
-          const digits = (pnInput.value || '').replace(/\D/g, '');
-          if (digits.length >= 10) {
-            const masked = digits.length >= 4 ? `${'*'.repeat(Math.max(0, digits.length - 4))}${digits.slice(-4)}` : '*'.repeat(digits.length);
-            fetch('/api/events/form-field', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                form: 'fastpris-avtal',
-                field: 'personnummer',
-                action: 'filled',
-                valueMasked: masked,
-              }),
-              keepalive: true,
-            }).catch(() => {});
-            pnInput.removeEventListener('blur', fireOnce);
-            pnInput.removeEventListener('change', fireOnce);
-            pnInput.removeEventListener('input', onInput);
-          }
-        } catch {}
-      };
-
-      const onInput = () => {
-        const digits = (pnInput.value || '').replace(/\D/g, '');
-        if (digits.length >= 10) fireOnce();
-      };
-
-      pnInput.addEventListener('blur', fireOnce);
-      pnInput.addEventListener('change', fireOnce);
-      pnInput.addEventListener('input', onInput);
-      onInput();
-    } catch {}
-  }
   return (
     <PageContainer>
       <Content>
-        <Title>Fastprisavtal</Title>
-        <Subtitle>Se dina personliga priser och påbörja bytet till fastpris</Subtitle>
-        
-        <SupplierInfo>
-          <SupplierLogo src="/svealand-logo.png" alt="Svealands Elbolag" />
-          <SupplierText>Se dina personliga priser från Svealands Elbolag</SupplierText>
-        </SupplierInfo>
+        <Title>Välj din leverantör för fastpris</Title>
+        <Subtitle>Vi har valt ut de bästa leverantörerna för fastprisavtal. Välj den som passar dig!</Subtitle>
 
-        <FormContainer>
-          <SalesysForm
-            containerId="fastpris-avtal-container"
-            formId="68b1ea117c19431581b6723a"
-            options={{ 
-              width: "100%", 
-              test: process.env.NODE_ENV === 'development' 
-            }}
-            defaultFields={[
-              { fieldId: "66e9457420ef2d3b8c66f500", value: "2000" }
-            ]}
-            onReady={handleFormReady}
-          />
-        </FormContainer>
+        <ProvidersGrid>
+          {/* Svealands Elbolag */}
+          <ProviderCard>
+            <ProviderLogo src="/svealand-logo.png" alt="Svealands Elbolag" />
+            <HighlightBadge>Rekommenderat</HighlightBadge>
+            <ProviderName>Svealands Elbolag</ProviderName>
+            <ProviderDescription>
+              Fastpris med stabil prissättning. Ett pålitligt val för dig som vill ha kontroll över elkostnaderna.
+            </ProviderDescription>
+            <ProviderButton 
+              href="https://www.svealandselbolag.se/elchef-fastpris/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => {
+                handleProviderClick('Svealands Elbolag', 'https://www.svealandselbolag.se/elchef-fastpris/');
+              }}
+            >
+              Välj Svealands Elbolag
+            </ProviderButton>
+          </ProviderCard>
+
+          {/* Cheap Energy */}
+          <ProviderCard>
+            <ProviderLogo src="/cheap-logo.png" alt="Cheap Energy" />
+            <ProviderName>Cheap Energy</ProviderName>
+            <ProviderDescription>
+              Konkurrenskraftiga fastpriser med prisgaranti. Trygghet och förutsägbarhet för din elförbrukning.
+            </ProviderDescription>
+            <ProviderButton 
+              href="https://www.cheapenergy.se/elchef-fastpris/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => {
+                handleProviderClick('Cheap Energy', 'https://www.cheapenergy.se/elchef-fastpris/');
+              }}
+            >
+              Välj Cheap Energy
+            </ProviderButton>
+          </ProviderCard>
+
+          {/* Stockholms Elbolag */}
+          <ProviderCard>
+            <ProviderLogo src="/stockholms-elbolag-logo.png" alt="Stockholms Elbolag" />
+            <ProviderName>Stockholms Elbolag</ProviderName>
+            <ProviderDescription>
+              Fast elpris med tydliga villkor. Perfekt för dig som vill ha förutsägbara elkostnader.
+            </ProviderDescription>
+            <ProviderButton 
+              href="https://www.stockholmselbolag.se/elavtal-elchef-fastpris/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => {
+                handleProviderClick('Stockholms Elbolag', 'https://www.stockholmselbolag.se/elavtal-elchef-fastpris/');
+              }}
+            >
+              Välj Stockholms Elbolag
+            </ProviderButton>
+          </ProviderCard>
+
+          {/* Svekraft */}
+          <ProviderCard>
+            <ProviderLogo src="/svekraft-logo.png" alt="Svekraft" />
+            <ProviderName>Svekraft</ProviderName>
+            <ProviderDescription>
+              Stabila fastpriser för din trygghet. Låsta priser som ger dig kontroll över din elbudget.
+            </ProviderDescription>
+            <ProviderButton 
+              href="https://www.svekraft.com/elchef-fastpris/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => {
+                handleProviderClick('Svekraft', 'https://www.svekraft.com/elchef-fastpris/');
+              }}
+            >
+              Välj Svekraft
+            </ProviderButton>
+          </ProviderCard>
+        </ProvidersGrid>
       </Content>
     </PageContainer>
   );
