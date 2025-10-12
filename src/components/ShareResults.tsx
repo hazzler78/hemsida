@@ -102,10 +102,15 @@ export default function ShareResults({ analysisResult, savingsAmount, logId, onS
         ? `https://elchef.se/delad-kalkyl?id=${logId}`
         : 'https://elchef.se/fakturaanalys';
       
-      navigator.clipboard.writeText(text);
-      // Använd den enkla sharer.php metoden (fungerar utan App Domains)
-      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&display=popup`, '_blank', 'width=600,height=400');
-      alert('Texten har kopierats! Klistra in den i Facebook-inlägget (Ctrl+V)');
+      try {
+        navigator.clipboard.writeText(text);
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&display=popup`, '_blank', 'width=600,height=400');
+        setTimeout(() => {
+          alert(`✅ Analysen har kopierats till urklipp!\n\n📋 Klistra in texten i Facebook-inlägget:\n• Tryck Ctrl+V (eller Cmd+V på Mac)\n• Eller högerklicka och välj "Klistra in"\n\n🔗 Länken till din analys är redan med i texten!`);
+        }, 500);
+      } catch (error) {
+        alert(`✅ Analysen har kopierats!\n\n📋 Klistra in texten i Facebook-inlägget (Ctrl+V)\n\n🔗 Länken är redan inkluderad i texten!`);
+      }
     } else {
       // Öppna direkt utan popup-kontroll
       window.open(url, '_blank', 'width=600,height=400,scrollbars=yes,resizable=yes');
@@ -189,20 +194,37 @@ export default function ShareResults({ analysisResult, savingsAmount, logId, onS
               background="rgba(24, 119, 242, 0.8)"
               disableScrollEffect
               disableHoverEffect
-              onClick={() => {
+              onClick={async () => {
                 const text = generateShareText('facebook');
                 const shareUrl = logId 
                   ? `https://elchef.se/delad-kalkyl?id=${logId}`
-                  : 'https://elchef.se/jamfor-elpriser';
+                  : 'https://elchef.se/fakturaanalys';
                 
-                // Kopiera texten automatiskt
-                navigator.clipboard.writeText(text);
-                
-                // Använd den enkla sharer.php metoden (fungerar utan App Domains)
-                window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&display=popup`, '_blank', 'width=600,height=400');
-                
-                // Visa meddelande
-                alert('Texten har kopierats! Klistra in den i Facebook-inlägget (Ctrl+V)');
+                try {
+                  // Kopiera texten automatiskt
+                  await navigator.clipboard.writeText(text);
+                  
+                  // Öppna Facebook och visa tydlig instruktion
+                  const facebookWindow = window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&display=popup`, '_blank', 'width=600,height=400');
+                  
+                  // Visa förbättrat meddelande med exakt instruktion
+                  setTimeout(() => {
+                    alert(`✅ Analysen har kopierats till urklipp!\n\n📋 Klistra in texten i Facebook-inlägget:\n• Tryck Ctrl+V (eller Cmd+V på Mac)\n• Eller högerklicka och välj "Klistra in"\n\n🔗 Länken till din analys är redan med i texten!`);
+                  }, 500);
+                  
+                } catch (error) {
+                  // Fallback om clipboard inte fungerar
+                  const fallbackText = `${text}\n\n🔗 Länk: ${shareUrl}`;
+                  const textArea = document.createElement('textarea');
+                  textArea.value = fallbackText;
+                  document.body.appendChild(textArea);
+                  textArea.select();
+                  document.execCommand('copy');
+                  document.body.removeChild(textArea);
+                  
+                  window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&display=popup`, '_blank', 'width=600,height=400');
+                  alert(`✅ Analysen har kopierats!\n\n📋 Klistra in texten i Facebook-inlägget (Ctrl+V)\n\n🔗 Länken är redan inkluderad i texten!`);
+                }
               }}
             >
               <FaFacebook style={{ marginRight: '0.5rem' }} />
