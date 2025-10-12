@@ -839,69 +839,33 @@ export default function Fakturaanalys() {
               }}>
                 Sluta slänga pengar i sjön! Välj ditt nya elavtal nu och börja spara från dag ett.
               </h4>
-              <div style={{ 
-                display: 'flex', 
-                gap: '1rem', 
-                flexWrap: 'wrap', 
-                justifyContent: 'center' 
-              }}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: 200 }}>
-                  <GlassButton 
-                    variant="primary" 
-                    size="lg" 
-                    background="linear-gradient(135deg, var(--primary), var(--secondary))" 
-                    disableScrollEffect={true} 
-                    disableHoverEffect={true}
-                    onClick={() => {
-                      trackContractClick('rorligt');
-                      window.location.href = withDefaultCtaUtm('/rorligt-avtal', 'fakturaanalys', 'cta-rorligt');
-                    }}
-                    aria-label="Rörligt avtal - 0 kr i avgifter första året – utan bindningstid"
-                  >
-                    Rörligt avtal
-                  </GlassButton>
-                  <div style={{ 
-                    fontSize: '0.9rem', 
-                    color: 'var(--foreground)', 
-                    background: 'rgba(255,255,255,0.95)', 
-                    border: '1px solid rgba(0,0,0,0.06)', 
-                    padding: '0.35rem 0.6rem', 
-                    borderRadius: 9999, 
-                    textAlign: 'center',
-                    backdropFilter: 'blur(8px)',
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.08)'
-                  }}>
-                    0 kr i avgifter första året – utan bindningstid
-                  </div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: 200 }}>
-                  <GlassButton 
-                    variant="secondary" 
-                    size="lg" 
-                    background="linear-gradient(135deg, var(--secondary), var(--primary))" 
-                    disableScrollEffect={true} 
-                    disableHoverEffect={true}
-                    onClick={() => {
-                      trackContractClick('fastpris');
-                      window.location.href = withDefaultCtaUtm('/fastpris-avtal', 'fakturaanalys', 'cta-fastpris');
-                    }}
-                    aria-label="Fastpris - Fastpris med prisgaranti"
-                  >
-                    Fastpris
-                  </GlassButton>
-                  <div style={{ 
-                    fontSize: '0.9rem', 
-                    color: 'var(--foreground)', 
-                    background: 'rgba(255,255,255,0.95)', 
-                    border: '1px solid rgba(0,0,0,0.06)', 
-                    padding: '0.35rem 0.6rem', 
-                    borderRadius: 9999, 
-                    textAlign: 'center',
-                    backdropFilter: 'blur(8px)',
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.08)'
-                  }}>
-                    Fastpris med prisgaranti
-                  </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: 200 }}>
+                <GlassButton 
+                  variant="primary" 
+                  size="lg" 
+                  background="linear-gradient(135deg, var(--primary), var(--secondary))" 
+                  disableScrollEffect={true} 
+                  disableHoverEffect={true}
+                  onClick={() => {
+                    trackContractClick('rorligt');
+                    window.location.href = withDefaultCtaUtm('/rorligt-avtal', 'fakturaanalys', 'cta-rorligt');
+                  }}
+                  aria-label="Rörligt avtal - 0 kr i avgifter första året – utan bindningstid"
+                >
+                  Rörligt avtal
+                </GlassButton>
+                <div style={{ 
+                  fontSize: '0.9rem', 
+                  color: 'var(--foreground)', 
+                  background: 'rgba(255,255,255,0.95)', 
+                  border: '1px solid rgba(0,0,0,0.06)', 
+                  padding: '0.35rem 0.6rem', 
+                  borderRadius: 9999, 
+                  textAlign: 'center',
+                  backdropFilter: 'blur(8px)',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)'
+                }}>
+                  0 kr i avgifter första året – utan bindningstid
                 </div>
               </div>
               <GlassButton 
