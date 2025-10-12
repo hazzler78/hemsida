@@ -837,7 +837,7 @@ export default function Fakturaanalys() {
                 marginBottom: '0.5rem',
                 textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
               }}>
-                Just nu rekommenderar vi ett av dessa elavtal, beroende på om du vill ha rörligt avtal eller fastprisavtal.
+                Sluta slänga pengar i sjön! Välj ditt nya elavtal nu och börja spara från dag ett.
               </h4>
               <div style={{ 
                 display: 'flex', 
