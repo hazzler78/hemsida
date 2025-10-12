@@ -135,6 +135,7 @@ const HighlightBadge = styled.div`
 `;
 
 export default function RorligtAvtalPage() {
+
   React.useEffect(() => {
     try {
       const ttq: any = (window as any).ttq;
@@ -198,14 +199,14 @@ export default function RorligtAvtalPage() {
             <ProviderDescription>
               0 kr i månadsavgift – 0 öre i påslag i 12 månader. Du betalar endast för den el du använder. Ingen bindningstid.
             </ProviderDescription>
-            <ProviderButton 
-              href="https://www.cheapenergy.se/elchef-rorligt/"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => {
-                handleProviderClick('Cheap Energy', 'https://www.cheapenergy.se/elchef-rorligt/');
-              }}
-            >
+              <ProviderButton 
+                href="https://www.cheapenergy.se/teckna-elavtal-cheap-dev-2/"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => {
+                  handleProviderClick('Cheap Energy', 'https://www.cheapenergy.se/teckna-elavtal-cheap-dev-2/');
+                }}
+              >
               Välj Cheap Energy
             </ProviderButton>
           </ProviderCard>
