@@ -108,7 +108,7 @@ export default function ShareResults({ analysisResult, savingsAmount, logId, onS
         setTimeout(() => {
           alert(`✅ Analysen har kopierats till urklipp!\n\n📋 Klistra in texten i Facebook-inlägget:\n• Tryck Ctrl+V (eller Cmd+V på Mac)\n• Eller högerklicka och välj "Klistra in"\n\n🔗 Länken till din analys är redan med i texten!`);
         }, 500);
-      } catch (error) {
+      } catch {
         alert(`✅ Analysen har kopierats!\n\n📋 Klistra in texten i Facebook-inlägget (Ctrl+V)\n\n🔗 Länken är redan inkluderad i texten!`);
       }
     } else {
@@ -205,14 +205,14 @@ export default function ShareResults({ analysisResult, savingsAmount, logId, onS
                   await navigator.clipboard.writeText(text);
                   
                   // Öppna Facebook och visa tydlig instruktion
-                  const facebookWindow = window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&display=popup`, '_blank', 'width=600,height=400');
+                  window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&display=popup`, '_blank', 'width=600,height=400');
                   
                   // Visa förbättrat meddelande med exakt instruktion
                   setTimeout(() => {
                     alert(`✅ Analysen har kopierats till urklipp!\n\n📋 Klistra in texten i Facebook-inlägget:\n• Tryck Ctrl+V (eller Cmd+V på Mac)\n• Eller högerklicka och välj "Klistra in"\n\n🔗 Länken till din analys är redan med i texten!`);
                   }, 500);
                   
-                } catch (error) {
+                } catch {
                   // Fallback om clipboard inte fungerar
                   const fallbackText = `${text}\n\n🔗 Länk: ${shareUrl}`;
                   const textArea = document.createElement('textarea');
