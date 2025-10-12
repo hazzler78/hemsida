@@ -200,7 +200,7 @@ export default function FastprisAvtalPage() {
             <HighlightBadge>Rekommenderat</HighlightBadge>
             <ProviderName>Svealands Elbolag</ProviderName>
             <ProviderDescription>
-              Fastpris med prisgaranti – hittar du billigare ger vi dig 1 öre lägre. Ett pålitligt val för dig som vill ha kontroll över elkostnaderna.
+              Om du hittar ett billigare fastprisavtal på elmarknaden matchas priset – och du får dessutom 1 öre/kWh i extra rabatt. Ett pålitligt val för dig som vill ha kontroll över elkostnaderna.
             </ProviderDescription>
             <ProviderButton 
               href="https://www.svealandselbolag.se/elchef-fastpris/"
