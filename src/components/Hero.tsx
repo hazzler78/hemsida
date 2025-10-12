@@ -352,7 +352,7 @@ export default function Hero() {
                </div>
             </ButtonRow>
             <USPList>
-              <li>✔️ Vi lyfter bara fram elavtal som är värda att överväga.</li>
+              <li>✔️ Vi lyfter fram elavtal som är värda att överväga.</li>
               <li>✔️ Din gamla avtal sägs upp automatiskt.</li>
               <li>✔️ Full valfrihet – välj mellan rörligt elpris eller fastpris med avtalad period.</li>
             </USPList>
