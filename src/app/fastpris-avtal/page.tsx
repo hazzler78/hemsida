@@ -200,7 +200,7 @@ export default function FastprisAvtalPage() {
             <HighlightBadge>Rekommenderat</HighlightBadge>
             <ProviderName>Svealands Elbolag</ProviderName>
             <ProviderDescription>
-              Fastpris med stabil prissättning. Ett pålitligt val för dig som vill ha kontroll över elkostnaderna.
+              Fastpris med prisgaranti – hittar du billigare ger vi dig 1 öre lägre. Ett pålitligt val för dig som vill ha kontroll över elkostnaderna.
             </ProviderDescription>
             <ProviderButton 
               href="https://www.svealandselbolag.se/elchef-fastpris/"
@@ -219,7 +219,7 @@ export default function FastprisAvtalPage() {
             <ProviderLogo src="/cheap-logo.png" alt="Cheap Energy" />
             <ProviderName>Cheap Energy</ProviderName>
             <ProviderDescription>
-              Konkurrenskraftiga fastpriser med prisgaranti. Trygghet och förutsägbarhet för din elförbrukning.
+              Konkurrenskraftiga fastpriser. Trygghet och förutsägbarhet för din elförbrukning.
             </ProviderDescription>
             <ProviderButton 
               href="https://www.cheapenergy.se/elchef-fastpris/"
