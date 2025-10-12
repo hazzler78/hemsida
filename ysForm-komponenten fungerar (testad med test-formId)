@@ -1,0 +1,71 @@
+[33md31af38[m Förbättra Svealand prisgaranti-text med tydligare formulering
+[33mc0c68b7[m Uppdatera fastpris-text: Ta bort prisgaranti från Cheap Energy, lägg till prisgaranti för Svealand
+[33mc06434a[m Förbättra byt-elavtal sidan med tydlig jämförelse och användarinformation
+[33mada00b0[m CRITICAL: Fix BottomNav performance issues causing webpage freezing
+[33mc079b5f[m Fix GrokChat freezing issues by removing expensive DOM operations
+[33m4a06fc9[m Fix webpage freezing issues with performance optimizations
+[33mb4bb732[m Fix performance issues causing webpage freezing
+[33mf542f4e[m Fix infinite re-render issue in GrokChat
+[33m845f108[m Uppdatera text över fastprisformulär
+[33m511acf2[m Uppdatera text över fastprisformulär
+[33m3f66806[m ux(forms): fix newsletter/contact checkbox layout on mobile; add shimmer/glow effect to GlassButton
+[33m3ff46de[m fix: lazily create Supabase client in admin/form-analytics to avoid build-time URL parsing
+[33m3a62c18[m SalesysForm: add inline init failure UI and enable test mode on partner/test-form; switch to working formId for local testing
+[33me2fb798[m Merge preview-form: add /partner/test-form and robust Salesys form init
+[33m92140f1[m feat(partner): add /partner/test-form page rendering SalesysForm for preview
+[33m45b097a[m docs: add preview note to trigger Vercel preview for preview-form
+[33m09740e5[m Complete markdown cleanup in GPT-OCR system prompts
+[33m42d8e16[m Clean up AI invoice analysis formatting - remove markdown clutter
+[33m3aa297f[m fix: make extraction prompts more flexible for all invoice formats, not just recent Fortum invoices
+[33mcc5c949[m fix: update regex patterns to handle bold formatting in Påslag detection
+[33m8d66908[m fix: correct regex pattern for Elavtal årsavgift detection in JSON format
+[33m4792243[m forms: lint fix and improved personnummer detection ready for prod
+[33mc7152ab[m forms: improve personnummer detection (labels/aria/parent text) and check immediately
+[33m09d1cfa[m forms: robust personnummer detection via Salesys formInstance polling; reveal supplier after fill on rorligt
+[33md442fd1[m events: add form-field endpoint + track masked personnummer fill on fastpris/rorligt
+[33m05a91a6[m Förbättrad felhantering och debugging för formulärstatistik
+[33mf7a526e[m Remove temporary Cheap Energy affiliate link and notice from Rorligt Avtal page
+[33m36c7340[m Remove temporary affiliate link from Fastpris page - form is now working
+[33m28e6a5d[m Fix ESLint errors in form-analytics page - remove unused useMemo import and fix useCallback dependencies
+[33m3040eda[m Add Cheap Energy affiliate link to Rorligt Avtal page while form is being fixed
+[33md49804e[m Add Svealand affiliate link to Fastpris page while form is being fixed
+[33m0459b2a[m Rörligt: move campaign box under Cheap logo
+[33m9f33c11[m Rörligt: add campaign promo section above form
+[33mfc32cb9[m Add supplier info and logos (Cheap rorligt, Svealand fastpris); copy tweaks
+[33m355809f[m Lägger till omfattande formulärstatistik - ny admin-sida för att spåra alla formulärinlämningar med detaljerad analytics
+[33m284a06a[m Döljer fortsätt-knappen i fastpris-formuläret
+[33m06b6236[m Förbättrad mobilanpassning för formulärsidorna - mindre padding och font-storlekar på små skärmar
+[33m1200f97[m Implementerat nya formulärsidor för rörligt och fastpris avtal - Kunder stannar kvar på sidan istället för att skickas till externa länkar
+[33m9836ed0[m Fix TS types in SalesysForm and include onReady in deps
+[33mff55053[m Revert Salesys form color overrides and remove wrapperClassName usage on byt-elavtal
+[33ma91014f[m Move recommendation buttons above contact form and update heading copy on compare page
+[33mae9171e[m Lagt till debug-information för UPDATE_SECRET_KEY och fixat hardcoded test-nyckel
+[33m0ec267c[m admin: add inline edit form for reminders (name, email, phone, type, start date, notes) with recalculated reminder_date
+[33m1ed20d7[m Telegram: support notes after '12m' (e.g., '12m cheap'); store in reminder notes; update operator instructions
+[33m13928e3[m Reminders: precise month arithmetic and local YYYY-MM-DD for reminder_date and today matching; admin form aligned
+[33mf9dd378[m feat(partner): partner page with influencer/company tabs; ref+campaign tracking; contact/chat forms send ref/campaign; affiliate+partner apply APIs with Telegram alerts; footer link to /partner; campaign code info
+[33m5aa2c81[m Update Rörligt avtal link to Cheap Energy
+[33m8d0f380[m Förbättrat felmeddelanden - lagt till information om att prova igen när AI misslyckas
+[33m8cb2f5e[m Förbättrat kontaktformulärets layout - mer padding och bättre spacing för mindre trångt utseende
+[33m13d0ab0[m Update campaign banner: change to Elchef200 with 200kr discount and replace emoji with favicon energy icon
+[33mcfe2543[m Fix font consistency and text visibility: Add Inter font-family to all form inputs and placeholders, fix white text on white background in newsletter form
+[33mf6ee537[m Update ContactForm and contact page: Use global CSS variables and add ContactForm to /kontakt page
+[33m469e42c[m Restore glassmorphism effects to contact form
+[33ma46bf43[m Fix contact form styling - restore original colors and fonts
+[33m2e0509a[m Uppdaterat 'Viktig information' till positivare ton - AI visar estimat, kontaktformulär tillagt för personlig hjälp
+[33mfb558e0[m Tagit bort alla emojis från AI-prompten - renare format utan dubbletter
+[33mc3a0eba[m Förbättrad AI Elbespararen - bättre identifiering av extra avgifter, renare presentation utan matematiska formler, och förbättrad slutsats-funktion
+[33m896543d[m Update company information: Normann Salg → VKNG LTD, org.nr 927 985 780 → HE477501
+[33m8aec14d[m Uppdatera AI Elbespararen med förbättrad momsberäkning och tydligare presentationsformat
+[33m6b3c6e2[m Glassmorphism: chat contact form now matches main site design (blur, glass, gradients, spacing)
+[33mfb68434[m Ta bort Cheap Energy-posten från Media och säkerställ glassmorphism överallt
+[33ma3f982c[m Lägg till nyhet: Cheap Energy ny huvudsponsor till Svenska innebandylandslaget på Media-sidan
+[33mcaad1ee[m Fix: Ta bort oanvänd kod, rätta typer och linterfel i ContactForm och jamfor-elpriser
+[33m8e0a234[m Gör telefonnummer obligatoriskt och validerar svenska nummer i kontaktformuläret
+[33m9ac7480[m Improve contact form logic: add submission tracking and conversation ending
+[33me81e0ec[m Add debug logging for contact form trigger detection
+[33m779264c[m Fix ESLint errors in ChatContactForm component
+[33m4d60d5d[m Add contact form integration to AI chatbot with Telegram notifications
+[33m71a160e[m Add contact form with Telegram bot and Mailerlite integration
+[33mae52b07[m Feat: Ersätt Grodan-bild med video på startsidan - 16:9 format med klickbar ljudkontroll
+[33m8255b2c[m Add complete price display with all 10 contract types from Cheap Energy
