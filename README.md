@@ -1,6 +1,6 @@
 # Elchef.se
 
-Elchef är en svensk tjänst för att jämföra och byta elavtal – enkelt, tryggt och kostnadsfritt. Hitta marknadens bästa elavtal för just dina behov och byt direkt online.
+Elchef är en svensk tjänst för att jämföra och byta elavtal – enkelt och tryggt. Hitta marknadens bästa elavtal för just dina behov och byt direkt online.
 
 ## Funktioner
 - Jämför elpriser i realtid baserat på postnummer

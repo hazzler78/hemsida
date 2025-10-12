@@ -149,7 +149,7 @@ export default function Hero() {
   }, [variant]);
 
   const heroTitle = variant === 'A' ? 'Elchef gör det enkelt att välja rätt elavtal!' : 'Välj rätt elavtal – utan krångel';
-  const heroSub = variant === 'A' ? 'Vi lyfter fram avtal värda att överväga och sköter bytet åt dig.' : 'Snabbt, gratis och tryggt. Vi hjälper dig hela vägen.';
+  const heroSub = variant === 'A' ? 'Vi lyfter fram avtal värda att överväga och sköter bytet åt dig.' : 'Snabbt och tryggt. Vi hjälper dig hela vägen.';
 
   const trackHeroClick = useCallback((target: 'rorligt' | 'fastpris', href: string) => {
     try {
@@ -353,7 +353,7 @@ export default function Hero() {
             </ButtonRow>
             <USPList>
               <li>✔️ Vi lyfter bara fram elavtal som är värda att överväga.</li>
-              <li>✔️ Gratis byte – din gamla avtal sägs upp automatiskt.</li>
+              <li>✔️ Din gamla avtal sägs upp automatiskt.</li>
               <li>✔️ Full valfrihet – välj mellan rörligt elpris eller fastpris med avtalad period.</li>
             </USPList>
           </TextContent>

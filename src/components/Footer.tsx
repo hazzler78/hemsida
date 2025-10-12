@@ -95,7 +95,7 @@ export default function Footer() {
             <h3>Om Elchef</h3>
             <p style={{ color: 'var(--gray-300)', marginBottom: '1rem' }}>
               Vi hjälper dig hitta och byta till marknadens bästa elavtal. 
-              Enkelt, tryggt och helt kostnadsfritt.
+              Enkelt och tryggt.
             </p>
             <ContactInfo>
               <p>

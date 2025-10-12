@@ -218,7 +218,7 @@ export default function RobinHoodElectricity() {
               </CustomListItem>
               <CustomListItem>
                 <CheckIcon />
-                <div><strong>Kostnadsfritt att byta</strong> – vi sköter allt åt dig.</div>
+                <div><strong>Vi sköter allt åt dig</strong> – smidigt och enkelt.</div>
               </CustomListItem>
               <CustomListItem>
                 <CheckIcon />

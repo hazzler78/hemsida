@@ -227,7 +227,7 @@ export default function BytElavtal() {
           <InfoTitle>Vad händer härnäst?</InfoTitle>
           <InfoText>
             När du klickar på ett av alternativen nedan kommer du till ett enkelt formulär där du fyller i dina uppgifter. 
-            Vi hjälper dig sedan att byta avtal till det bästa priset på marknaden - helt kostnadsfritt för dig.
+            Vi hjälper dig sedan att byta avtal till det bästa priset på marknaden.
           </InfoText>
         </InfoSection>
 
