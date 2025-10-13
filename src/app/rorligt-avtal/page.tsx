@@ -199,14 +199,14 @@ export default function RorligtAvtalPage() {
             <ProviderDescription>
               0 kr i månadsavgift – 0 öre i påslag i 12 månader. Du betalar endast för den el du använder. Ingen bindningstid.
             </ProviderDescription>
-              <ProviderButton 
-                href="https://www.cheapenergy.se/teckna-elavtal-cheap-dev-2/"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => {
-                  handleProviderClick('Cheap Energy', 'https://www.cheapenergy.se/teckna-elavtal-cheap-dev-2/');
-                }}
-              >
+            <ProviderButton 
+              href="https://www.cheapenergy.se/teckna-elavtal-cheap-elchef/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                handleProviderClick('Cheap Energy', 'https://www.cheapenergy.se/teckna-elavtal-cheap-elchef/');
+              }}
+            >
               Välj Cheap Energy
             </ProviderButton>
           </ProviderCard>
