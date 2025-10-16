@@ -184,7 +184,7 @@ export default function WeeklyNews() {
         <Container>
           <BackButton href="/media">
             <BackIcon />
-            Tillbaka till Media
+            Tillbaka till Elchef i media
           </BackButton>
           
           <Title>Veckans nyheter från elmarknaden</Title>

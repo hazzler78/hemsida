@@ -186,7 +186,7 @@ export default function RobinHoodElectricity() {
         <Container>
           <BackButton href="/media">
             <BackIcon />
-            Tillbaka till Media
+            Tillbaka till Elchef i media
           </BackButton>
           
           <Title>Elens Robin Hood vill ha billigare el åt folket</Title>

@@ -223,7 +223,7 @@ export default function WeatherElectricityPrices() {
         <Container>
           <BackButton href="/media">
             <BackIcon />
-            Tillbaka till Media
+            Tillbaka till Elchef i media
           </BackButton>
           
           <Title>Så påverkar vädret elpriset – förklarat på ett enkelt sätt</Title>

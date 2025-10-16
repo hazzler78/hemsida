@@ -110,7 +110,7 @@ function BottomNavContent() {
         {pathname === '/fakturaanalys' && <ActiveIndicator />}
       </NavItem>
       <NavItem href={withDefaultCtaUtm('/media', 'bottomnav', 'media')} className={pathname === '/media' ? 'active' : ''}>
-        Media
+        Elchef i media
         {pathname === '/media' && <ActiveIndicator />}
       </NavItem>
       <NavItem href={withDefaultCtaUtm('/foretag', 'bottomnav', 'b2b')} className={pathname === '/foretag' ? 'active' : ''}>
