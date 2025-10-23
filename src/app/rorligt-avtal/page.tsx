@@ -55,6 +55,10 @@ const ProvidersGrid = styled.div`
   @media (min-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
   }
+  
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
 `;
 
 const ProviderCard = styled.div`
@@ -227,6 +231,63 @@ export default function RorligtAvtalPage() {
               }}
             >
               Välj Svekraft
+            </ProviderButton>
+          </ProviderCard>
+
+          {/* Tibber */}
+          <ProviderCard>
+            <ProviderLogo src="/tibber.png" alt="Tibber" />
+            <ProviderName>Tibber</ProviderName>
+            <ProviderDescription>
+              49 kr i månadsavgift – 8,6 öre i påslag. Du betalar endast för den el du använder. Ingen bindningstid.
+            </ProviderDescription>
+            <ProviderButton 
+              href="https://go.adt242.com/t/t?a=1590956516&as=2012933659&t=2&tk=1"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                handleProviderClick('Tibber', 'https://go.adt242.com/t/t?a=1590956516&as=2012933659&t=2&tk=1');
+              }}
+            >
+              Välj Tibber
+            </ProviderButton>
+          </ProviderCard>
+
+          {/* Telinet Energi */}
+          <ProviderCard>
+            <ProviderLogo src="/telinet.png" alt="Telinet Energi" />
+            <ProviderName>Telinet Energi</ProviderName>
+            <ProviderDescription>
+              59 kr i månadsavgift – 13,33 öre i påslag. Du betalar endast för den el du använder. Ingen bindningstid.
+            </ProviderDescription>
+            <ProviderButton 
+              href="https://at.telinet.se/t/t?a=1870484942&as=2012933659&t=2&tk=1"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                handleProviderClick('Telinet Energi', 'https://at.telinet.se/t/t?a=1870484942&as=2012933659&t=2&tk=1');
+              }}
+            >
+              Välj Telinet Energi
+            </ProviderButton>
+          </ProviderCard>
+
+          {/* Fortum */}
+          <ProviderCard>
+            <ProviderLogo src="/fortum.png" alt="Fortum" />
+            <ProviderName>Fortum</ProviderName>
+            <ProviderDescription>
+              69 kr i månadsavgift – 12,38 öre i påslag. Du betalar endast för den el du använder. Ingen bindningstid.
+            </ProviderDescription>
+            <ProviderButton 
+              href="https://ion.fortum.com/t/t?a=1312475339&as=2012933659&t=2&tk=1"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                handleProviderClick('Fortum', 'https://ion.fortum.com/t/t?a=1312475339&as=2012933659&t=2&tk=1');
+              }}
+            >
+              Välj Fortum
             </ProviderButton>
           </ProviderCard>
         </ProvidersGrid>
