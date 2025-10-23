@@ -99,11 +99,11 @@ const ProviderCard = styled.div`
   overflow: visible;
   display: flex;
   flex-direction: column;
-  min-height: 300px;
+  height: 280px;
   
   @media (min-width: 480px) {
     padding: 2rem;
-    min-height: 320px;
+    height: 320px;
   }
   
   &:hover {
@@ -135,9 +135,9 @@ const ProviderName = styled.h3`
 
 const ProviderDescription = styled.p`
   color: #374151;
-  font-size: 0.85rem;
-  margin-bottom: 1.5rem;
-  line-height: 1.5;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  line-height: 1.4;
   flex-grow: 1;
   display: flex;
   align-items: center;
@@ -145,12 +145,13 @@ const ProviderDescription = styled.p`
   text-align: center;
   
   @media (min-width: 480px) {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
   }
   
   @media (min-width: 768px) {
-    font-size: 0.95rem;
-    line-height: 1.6;
+    font-size: 1rem;
+    line-height: 1.5;
   }
 `;
 
