@@ -173,10 +173,10 @@ export default function Hero() {
         if (ttq && (!cookiebot || cookiebot?.consent?.marketing)) {
           ttq.track('ClickButton', {
             content_name: target,
-            content_type: 'button'
+            content_type: 'product'
           });
           if ((window as any).__ttq_capi) {
-            (window as any).__ttq_capi('ClickButton', { content_name: target, content_type: 'button' });
+            (window as any).__ttq_capi('ClickButton', { content_name: target, content_type: 'product' });
           }
         }
       } catch { /* no-op */ }

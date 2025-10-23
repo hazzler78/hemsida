@@ -249,10 +249,10 @@ export default function RorligtAvtalPage() {
       if (ttq && (!cookiebot || cookiebot?.consent?.marketing)) {
         ttq.track('ClickButton', {
           content_name: `affiliate_${providerName}`,
-          content_type: 'affiliate_link'
+          content_type: 'product'
         });
         if ((window as any).__ttq_capi) {
-          (window as any).__ttq_capi('ClickButton', { content_name: `affiliate_${providerName}`, content_type: 'affiliate_link' });
+          (window as any).__ttq_capi('ClickButton', { content_name: `affiliate_${providerName}`, content_type: 'product' });
         }
       }
     } catch { /* no-op */ }
