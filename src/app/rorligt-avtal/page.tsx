@@ -271,7 +271,7 @@ export default function RorligtAvtalPage() {
             <HighlightBadge>Rekommenderat</HighlightBadge>
             <ProviderName>Cheap Energy</ProviderName>
             <ProviderDescription>
-              0 kr i månadsavgift – 0 öre i påslag i 12 månader. Du betalar endast för den el du använder. Ingen bindningstid.
+              0 kr i månadsavgift, 0 öre i påslag i 12 månader. Ingen bindningstid.
             </ProviderDescription>
             <ProviderButton 
               href="https://www.cheapenergy.se/teckna-elavtal-cheap-elchef/"
@@ -290,7 +290,7 @@ export default function RorligtAvtalPage() {
             <ProviderLogo src="/svekraft-logo.png" alt="Svekraft" />
             <ProviderName>Svekraft</ProviderName>
             <ProviderDescription>
-              0 kr i månadsavgift i 12 månader – 7,99 öre i påslag. Du betalar endast för den el du använder. Ingen bindningstid.
+              0 kr i månadsavgift i 12 månader, 7,99 öre i påslag. Ingen bindningstid.
             </ProviderDescription>
             <ProviderButton 
               href="https://www.svekraft.com/elchef-rorligt/"
@@ -309,7 +309,7 @@ export default function RorligtAvtalPage() {
             <ProviderLogo src="/tibber.png" alt="Tibber" />
             <ProviderName>Tibber</ProviderName>
             <ProviderDescription>
-              49 kr i månadsavgift – 8,6 öre i påslag. Du betalar endast för den el du använder. Ingen bindningstid.
+              49 kr i månadsavgift, 8,6 öre i påslag. Ingen bindningstid.
             </ProviderDescription>
             <ProviderButton 
               href="https://go.adt242.com/t/t?a=1590956516&as=2012933659&t=2&tk=1"
@@ -328,7 +328,7 @@ export default function RorligtAvtalPage() {
             <ProviderLogo src="/telinet.png" alt="Telinet Energi" />
             <ProviderName>Telinet Energi</ProviderName>
             <ProviderDescription>
-              59 kr i månadsavgift – 13,33 öre i påslag. Du betalar endast för den el du använder. Ingen bindningstid.
+              59 kr i månadsavgift, 13,33 öre i påslag. Ingen bindningstid.
             </ProviderDescription>
             <ProviderButton 
               href="https://at.telinet.se/t/t?a=1870484942&as=2012933659&t=2&tk=1"
@@ -347,7 +347,7 @@ export default function RorligtAvtalPage() {
             <ProviderLogo src="/fortum.png" alt="Fortum" />
             <ProviderName>Fortum</ProviderName>
             <ProviderDescription>
-              69 kr i månadsavgift – 12,38 öre i påslag. Du betalar endast för den el du använder. Ingen bindningstid.
+              69 kr i månadsavgift, 12,38 öre i påslag. Ingen bindningstid.
             </ProviderDescription>
             <ProviderButton 
               href="https://ion.fortum.com/t/t?a=1312475339&as=2012933659&t=2&tk=1"
