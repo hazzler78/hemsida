@@ -18,7 +18,7 @@ const PageContainer = styled.div`
 `;
 
 const Content = styled.div`
-  max-width: 1000px;
+  max-width: 1200px;
   width: 100%;
   text-align: center;
 `;
@@ -56,8 +56,12 @@ const ProvidersGrid = styled.div`
     grid-template-columns: repeat(2, 1fr);
   }
   
-  @media (min-width: 1200px) {
-    grid-template-columns: repeat(4, 1fr);
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  @media (min-width: 1400px) {
+    grid-template-columns: repeat(5, 1fr);
   }
 `;
 
