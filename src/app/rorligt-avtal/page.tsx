@@ -24,26 +24,46 @@ const Content = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: white;
   margin-bottom: 1rem;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  line-height: 1.2;
+  
+  @media (min-width: 480px) {
+    font-size: 1.8rem;
+  }
   
   @media (min-width: 768px) {
+    font-size: 2.2rem;
+  }
+  
+  @media (min-width: 1024px) {
     font-size: 2.5rem;
   }
 `;
 
 const Subtitle = styled.p`
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: 2rem;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  line-height: 1.4;
+  padding: 0 1rem;
+  
+  @media (min-width: 480px) {
+    font-size: 1rem;
+    padding: 0;
+  }
   
   @media (min-width: 768px) {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     margin-bottom: 3rem;
+  }
+  
+  @media (min-width: 1024px) {
+    font-size: 1.2rem;
   }
 `;
 
@@ -71,7 +91,7 @@ const ProviderCard = styled.div`
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 20px;
-  padding: 2rem;
+  padding: 1.5rem;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   text-align: center;
@@ -79,7 +99,12 @@ const ProviderCard = styled.div`
   overflow: visible;
   display: flex;
   flex-direction: column;
-  min-height: 320px;
+  min-height: 300px;
+  
+  @media (min-width: 480px) {
+    padding: 2rem;
+    min-height: 320px;
+  }
   
   &:hover {
     transform: translateY(-4px);
@@ -94,37 +119,60 @@ const ProviderLogo = styled.img`
 `;
 
 const ProviderName = styled.h3`
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: #111827;
   margin-bottom: 1rem;
+  
+  @media (min-width: 480px) {
+    font-size: 1.2rem;
+  }
+  
+  @media (min-width: 768px) {
+    font-size: 1.3rem;
+  }
 `;
 
 const ProviderDescription = styled.p`
   color: #374151;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   margin-bottom: 1.5rem;
-  line-height: 1.6;
+  line-height: 1.5;
   flex-grow: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
+  
+  @media (min-width: 480px) {
+    font-size: 0.9rem;
+  }
+  
+  @media (min-width: 768px) {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
 `;
 
 const ProviderButton = styled.a`
   display: inline-block;
   background: linear-gradient(135deg, var(--primary), var(--secondary));
   color: white;
-  padding: 0.875rem 2rem;
+  padding: 0.75rem 1.5rem;
   border-radius: 12px;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.9rem;
   text-decoration: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   margin-top: auto;
   align-self: center;
+  
+  @media (min-width: 480px) {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+  }
   
   &:hover {
     transform: scale(1.05);
