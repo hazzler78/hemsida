@@ -14,7 +14,7 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 // Funktion för att hämta aktuella elpriser
 async function getCurrentPrices(): Promise<CheapEnergyPrices | null> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost:3000'}/api/prices`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost:3001'}/api/prices`, {
       next: { revalidate: 3600 }, // Cache for 1 hour
     });
     
