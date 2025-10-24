@@ -69,15 +69,15 @@ async function getDynamicKnowledge(userQuestion: string) {
       .eq('active', true)
       .order('name', { ascending: true });
 
-    // Hitta relevant kunskap baserat på användarens fråga
-    const relevantKnowledge = knowledgeData?.filter(item => 
-      item.keywords.some((keyword: string) => 
-        userQuestion.toLowerCase().includes(keyword.toLowerCase())
-      )
-    ) || [];
+    // Hämta ALL kunskap istället för bara relevant
+    // const relevantKnowledge = knowledgeData?.filter(item => 
+    //   item.keywords.some((keyword: string) => 
+    //     userQuestion.toLowerCase().includes(keyword.toLowerCase())
+    //   )
+    // ) || [];
 
     return {
-      knowledge: relevantKnowledge,
+      knowledge: knowledgeData || [], // All kunskap
       campaigns: campaignData || [],
       providers: providerData || []
     };
@@ -277,9 +277,9 @@ export async function POST(req: NextRequest) {
     let enhancedSystemPrompt = SYSTEM_PROMPT;
     
     if (dynamicKnowledge) {
-      // Lägg till relevant kunskap
+      // Lägg till all kunskap från admin
       if (dynamicKnowledge.knowledge.length > 0) {
-        enhancedSystemPrompt += '\n\n## RELEVANT KUNSKAP BASERAT PÅ DIN FRÅGA\n';
+        enhancedSystemPrompt += '\n\n## AKTUELL KUNSKAPSBAS (från admin)\n';
         dynamicKnowledge.knowledge.forEach(item => {
           enhancedSystemPrompt += `**${item.question}**\n${item.answer}\n\n`;
         });
