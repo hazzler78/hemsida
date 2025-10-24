@@ -256,7 +256,7 @@ export async function POST(req: NextRequest) {
     }
     
     // Hämta användarens senaste meddelande för att hitta relevant kunskap
-    const userMessage = messages[messages.length - 1]?.content || '';
+    // const userMessage = messages[messages.length - 1]?.content || ''; // Temporärt inaktiverat
     
     // Hämta dynamisk kunskap från Supabase
     const dynamicKnowledge = await getDynamicKnowledge();
