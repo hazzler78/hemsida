@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { 
   generateKnowledgeSummary 
 } from '@/lib/knowledgeBase';
-import { CheapEnergyPrices } from '@/lib/types';
+// import { CheapEnergyPrices } from '@/lib/types'; // Temporärt inaktiverat
 
 const XAI_API_KEY = process.env.XAI_API_KEY;
 const XAI_API_URL = 'https://api.x.ai/v1/chat/completions';
@@ -262,7 +262,7 @@ export async function POST(req: NextRequest) {
     const dynamicKnowledge = await getDynamicKnowledge(userMessage);
     
     // Temporärt inaktiverat prisfunktionen - API fungerar men orsakar 500-fel i AI
-    const currentPrices = null;
+    // const currentPrices = null; // Temporärt inaktiverat
     
     // Debug: logga vad som hämtades
     if (dynamicKnowledge) {
