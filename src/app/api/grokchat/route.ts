@@ -11,32 +11,32 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// Funktion för att hämta aktuella elpriser
-async function getCurrentPrices(): Promise<CheapEnergyPrices | null> {
-  try {
-    // Hämta direkt från Stockholms Elbolag
-    console.log('🔍 getCurrentPrices: Hämtar direkt från Stockholms Elbolag...');
-    
-    const response = await fetch('https://www.stockholmselbolag.se/Site_Priser_SthlmsEL_de2.json', {
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'Elchef-Price-Checker/1.0'
-      }
-    });
-    
-    if (!response.ok) {
-      console.error('Failed to fetch prices:', response.status);
-      return null;
-    }
-    
-    const prices = await response.json();
-    console.log('✅ getCurrentPrices: Hämtade priser:', prices.spot_prices);
-    return prices;
-  } catch (error) {
-    console.error('Error fetching current prices:', error);
-    return null;
-  }
-}
+// Funktion för att hämta aktuella elpriser (temporärt inaktiverad)
+// async function getCurrentPrices(): Promise<CheapEnergyPrices | null> {
+//   try {
+//     // Hämta direkt från Stockholms Elbolag
+//     console.log('🔍 getCurrentPrices: Hämtar direkt från Stockholms Elbolag...');
+//     
+//     const response = await fetch('https://www.stockholmselbolag.se/Site_Priser_SthlmsEL_de2.json', {
+//       headers: {
+//         'Accept': 'application/json',
+//         'User-Agent': 'Elchef-Price-Checker/1.0'
+//       }
+//     });
+//     
+//     if (!response.ok) {
+//       console.error('Failed to fetch prices:', response.status);
+//       return null;
+//     }
+//     
+//     const prices = await response.json();
+//     console.log('✅ getCurrentPrices: Hämtade priser:', prices.spot_prices);
+//     return prices;
+//   } catch (error) {
+//     console.error('Error fetching current prices:', error);
+//     return null;
+//   }
+// }
 
 // Funktion för att hämta dynamisk kunskap från Supabase
 async function getDynamicKnowledge(userQuestion: string) {
@@ -304,26 +304,26 @@ export async function POST(req: NextRequest) {
       }
     }
     
-    // Lägg till aktuella priser om de finns
-    if (currentPrices) {
-      enhancedSystemPrompt += '\n\n## AKTUELLA ELPRISER (uppdaterade från leverantör)\n';
-      enhancedSystemPrompt += `**Rörliga priser (spot) per kWh:**\n`;
-      enhancedSystemPrompt += `• SE1 (Norra Sverige): ${currentPrices.spot_prices.se1?.toFixed(2) || 'N/A'} öre/kWh\n`;
-      enhancedSystemPrompt += `• SE2 (Norra Mellansverige): ${currentPrices.spot_prices.se2?.toFixed(2) || 'N/A'} öre/kWh\n`;
-      enhancedSystemPrompt += `• SE3 (Södra Mellansverige): ${currentPrices.spot_prices.se3?.toFixed(2) || 'N/A'} öre/kWh\n`;
-      enhancedSystemPrompt += `• SE4 (Södra Sverige): ${currentPrices.spot_prices.se4?.toFixed(2) || 'N/A'} öre/kWh\n\n`;
-      
-      enhancedSystemPrompt += `**Våra rörliga avtal:**\n`;
-      enhancedSystemPrompt += `• 0 kr månadsavgift första året\n`;
-      enhancedSystemPrompt += `• 0 öre påslag på spotpriset\n`;
-      enhancedSystemPrompt += `• Ingen bindningstid\n\n`;
-      
-      enhancedSystemPrompt += `**Fastprisavtal (6 månader):**\n`;
-      enhancedSystemPrompt += `• SE1: ${currentPrices.variable_fixed_prices.se1?.['6_months']?.toFixed(2) || 'N/A'} öre/kWh\n`;
-      enhancedSystemPrompt += `• SE2: ${currentPrices.variable_fixed_prices.se2?.['6_months']?.toFixed(2) || 'N/A'} öre/kWh\n`;
-      enhancedSystemPrompt += `• SE3: ${currentPrices.variable_fixed_prices.se3?.['6_months']?.toFixed(2) || 'N/A'} öre/kWh\n`;
-      enhancedSystemPrompt += `• SE4: ${currentPrices.variable_fixed_prices.se4?.['6_months']?.toFixed(2) || 'N/A'} öre/kWh\n\n`;
-    }
+    // Temporärt inaktiverat prisfunktionen
+    // if (currentPrices) {
+    //   enhancedSystemPrompt += '\n\n## AKTUELLA ELPRISER (uppdaterade från leverantör)\n';
+    //   enhancedSystemPrompt += `**Rörliga priser (spot) per kWh:**\n`;
+    //   enhancedSystemPrompt += `• SE1 (Norra Sverige): ${currentPrices.spot_prices.se1?.toFixed(2) || 'N/A'} öre/kWh\n`;
+    //   enhancedSystemPrompt += `• SE2 (Norra Mellansverige): ${currentPrices.spot_prices.se2?.toFixed(2) || 'N/A'} öre/kWh\n`;
+    //   enhancedSystemPrompt += `• SE3 (Södra Mellansverige): ${currentPrices.spot_prices.se3?.toFixed(2) || 'N/A'} öre/kWh\n`;
+    //   enhancedSystemPrompt += `• SE4 (Södra Sverige): ${currentPrices.spot_prices.se4?.toFixed(2) || 'N/A'} öre/kWh\n\n`;
+    //   
+    //   enhancedSystemPrompt += `**Våra rörliga avtal:**\n`;
+    //   enhancedSystemPrompt += `• 0 kr månadsavgift första året\n`;
+    //   enhancedSystemPrompt += `• 0 öre påslag på spotpriset\n`;
+    //   enhancedSystemPrompt += `• Ingen bindningstid\n\n`;
+    //   
+    //   enhancedSystemPrompt += `**Fastprisavtal (6 månader):**\n`;
+    //   enhancedSystemPrompt += `• SE1: ${currentPrices.variable_fixed_prices.se1?.['6_months']?.toFixed(2) || 'N/A'} öre/kWh\n`;
+    //   enhancedSystemPrompt += `• SE2: ${currentPrices.variable_fixed_prices.se2?.['6_months']?.toFixed(2) || 'N/A'} öre/kWh\n`;
+    //   enhancedSystemPrompt += `• SE3: ${currentPrices.variable_fixed_prices.se3?.['6_months']?.toFixed(2) || 'N/A'} öre/kWh\n`;
+    //   enhancedSystemPrompt += `• SE4: ${currentPrices.variable_fixed_prices.se4?.['6_months']?.toFixed(2) || 'N/A'} öre/kWh\n\n`;
+    // }
     
     // Om ingen dynamisk kunskap finns, använd statisk fallback
     if (!dynamicKnowledge) {
