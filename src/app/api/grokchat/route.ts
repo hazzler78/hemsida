@@ -254,7 +254,7 @@ export async function POST(req: NextRequest) {
     const dynamicKnowledge = await getDynamicKnowledge(userMessage);
     
     // Hämta aktuella priser om användaren frågar om rörliga elpriser
-    const priceKeywords = ['rörligt', 'rörliga', 'elpris', 'elpriser', 'pris', 'priser', 'spot', 'spotpris', 'aktuellt', 'nuvarande'];
+    const priceKeywords = ['rörligt', 'rörliga', 'elpris', 'elpriser', 'pris', 'priser', 'spot', 'spotpris', 'aktuellt', 'nuvarande', 'kostar', 'kostnad', 'kostnader'];
     const shouldFetchPrices = priceKeywords.some(keyword => 
       userMessage.toLowerCase().includes(keyword.toLowerCase())
     );
