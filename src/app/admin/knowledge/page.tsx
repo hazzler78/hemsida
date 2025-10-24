@@ -451,18 +451,21 @@ export default function AdminKnowledge() {
                 padding: 16,
                 background: item.active ? "white" : "#f9fafb"
               }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div style={{ flex: 1 }}>
+                <div>
+                  <div style={{ marginBottom: "12px" }}>
                     <h3 style={{ margin: "0 0 8px 0", color: item.active ? "#374151" : "#9ca3af" }}>
                       {item.question}
                     </h3>
+                    <p style={{ margin: "0 0 4px 0", color: "#6b7280", fontSize: "14px" }}>
+                      Kategori: {item.category}
+                    </p>
                     <p style={{ margin: "0 0 8px 0", color: "#6b7280", fontSize: "14px" }}>
-                      Kategori: {item.category} • Uppdaterad: {new Date(item.lastUpdated).toLocaleDateString('sv-SE')}
+                      Uppdaterad: {new Date(item.lastUpdated).toLocaleDateString('sv-SE')}
                     </p>
                     <p style={{ margin: "0 0 8px 0", color: item.active ? "#374151" : "#9ca3af" }}>
                       {item.answer}
                     </p>
-                    <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+                    <div style={{ display: "flex", gap: "4px", flexWrap: "wrap", marginBottom: "12px" }}>
                       {item.keywords.map((keyword, idx) => (
                         <span key={idx} style={{ 
                           background: "#e5e7eb", 
@@ -476,17 +479,18 @@ export default function AdminKnowledge() {
                       ))}
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: "8px", marginLeft: "16px" }}>
+                  <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
                     <button 
                       onClick={() => setEditingKnowledge(item)}
                       style={{ 
-                        padding: "4px 8px", 
+                        padding: "6px 12px", 
                         background: "var(--primary)", 
                         color: "white", 
                         border: "none", 
                         borderRadius: 4,
                         cursor: "pointer",
-                        fontSize: "12px"
+                        fontSize: "12px",
+                        fontWeight: "500"
                       }}
                     >
                       Redigera
@@ -494,13 +498,14 @@ export default function AdminKnowledge() {
                     <button 
                       onClick={() => deleteKnowledgeItem(item.id!)}
                       style={{ 
-                        padding: "4px 8px", 
+                        padding: "6px 12px", 
                         background: "#dc2626", 
                         color: "white", 
                         border: "none", 
                         borderRadius: 4,
                         cursor: "pointer",
-                        fontSize: "12px"
+                        fontSize: "12px",
+                        fontWeight: "500"
                       }}
                     >
                       Radera
@@ -555,8 +560,8 @@ export default function AdminKnowledge() {
                 padding: 16,
                 background: campaign.active ? "white" : "#f9fafb"
               }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div style={{ flex: 1 }}>
+                <div>
+                  <div style={{ marginBottom: "12px" }}>
                     <h3 style={{ margin: "0 0 8px 0", color: campaign.active ? "#374151" : "#9ca3af" }}>
                       {campaign.title}
                     </h3>
@@ -567,17 +572,18 @@ export default function AdminKnowledge() {
                       Gäller: {new Date(campaign.validFrom).toLocaleDateString('sv-SE')} - {new Date(campaign.validTo).toLocaleDateString('sv-SE')}
                     </p>
                   </div>
-                  <div style={{ display: "flex", gap: "8px", marginLeft: "16px" }}>
+                  <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
                     <button 
                       onClick={() => setEditingCampaign(campaign)}
                       style={{ 
-                        padding: "4px 8px", 
+                        padding: "6px 12px", 
                         background: "var(--primary)", 
                         color: "white", 
                         border: "none", 
                         borderRadius: 4,
                         cursor: "pointer",
-                        fontSize: "12px"
+                        fontSize: "12px",
+                        fontWeight: "500"
                       }}
                     >
                       Redigera
@@ -585,13 +591,14 @@ export default function AdminKnowledge() {
                     <button 
                       onClick={() => deleteCampaign(campaign.id!)}
                       style={{ 
-                        padding: "4px 8px", 
+                        padding: "6px 12px", 
                         background: "#dc2626", 
                         color: "white", 
                         border: "none", 
                         borderRadius: 4,
                         cursor: "pointer",
-                        fontSize: "12px"
+                        fontSize: "12px",
+                        fontWeight: "500"
                       }}
                     >
                       Radera
@@ -646,15 +653,24 @@ export default function AdminKnowledge() {
                 padding: 16,
                 background: provider.active ? "white" : "#f9fafb"
               }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div style={{ flex: 1 }}>
+                <div>
+                  <div style={{ marginBottom: "12px" }}>
                     <h3 style={{ margin: "0 0 8px 0", color: provider.active ? "#374151" : "#9ca3af" }}>
                       {provider.name}
                     </h3>
-                    <p style={{ margin: "0 0 8px 0", color: "#6b7280", fontSize: "14px" }}>
-                      Typ: {provider.type} • URL: {provider.url}
+                    <p style={{ margin: "0 0 4px 0", color: "#6b7280", fontSize: "14px" }}>
+                      Typ: {provider.type}
                     </p>
-                    <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+                    <p style={{ 
+                      margin: "0 0 8px 0", 
+                      color: "#6b7280", 
+                      fontSize: "14px",
+                      wordBreak: "break-all",
+                      maxWidth: "100%"
+                    }}>
+                      URL: {provider.url}
+                    </p>
+                    <div style={{ display: "flex", gap: "4px", flexWrap: "wrap", marginBottom: "12px" }}>
                       {provider.features.map((feature, idx) => (
                         <span key={idx} style={{ 
                           background: "#e5e7eb", 
@@ -668,17 +684,18 @@ export default function AdminKnowledge() {
                       ))}
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: "8px", marginLeft: "16px" }}>
+                  <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
                     <button 
                       onClick={() => setEditingProvider(provider)}
                       style={{ 
-                        padding: "4px 8px", 
+                        padding: "6px 12px", 
                         background: "var(--primary)", 
                         color: "white", 
                         border: "none", 
                         borderRadius: 4,
                         cursor: "pointer",
-                        fontSize: "12px"
+                        fontSize: "12px",
+                        fontWeight: "500"
                       }}
                     >
                       Redigera
@@ -686,13 +703,14 @@ export default function AdminKnowledge() {
                     <button 
                       onClick={() => deleteProvider(provider.id!)}
                       style={{ 
-                        padding: "4px 8px", 
+                        padding: "6px 12px", 
                         background: "#dc2626", 
                         color: "white", 
                         border: "none", 
                         borderRadius: 4,
                         cursor: "pointer",
-                        fontSize: "12px"
+                        fontSize: "12px",
+                        fontWeight: "500"
                       }}
                     >
                       Radera
