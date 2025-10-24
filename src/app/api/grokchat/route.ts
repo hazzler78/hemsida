@@ -39,7 +39,7 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 // }
 
 // Funktion för att hämta dynamisk kunskap från Supabase
-async function getDynamicKnowledge(userQuestion: string) {
+async function getDynamicKnowledge() {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     return null;
   }
@@ -259,7 +259,7 @@ export async function POST(req: NextRequest) {
     const userMessage = messages[messages.length - 1]?.content || '';
     
     // Hämta dynamisk kunskap från Supabase
-    const dynamicKnowledge = await getDynamicKnowledge(userMessage);
+    const dynamicKnowledge = await getDynamicKnowledge();
     
     // Temporärt inaktiverat prisfunktionen - API fungerar men orsakar 500-fel i AI
     // const currentPrices = null; // Temporärt inaktiverat
