@@ -14,15 +14,11 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 // Funktion för att hämta aktuella elpriser
 async function getCurrentPrices(): Promise<CheapEnergyPrices | null> {
   try {
-    // Hämta direkt från källan istället för via vår egen API
-    console.log('🔍 getCurrentPrices: Hämtar direkt från Stockholms Elbolag...');
+    // Använd vår egen API endpoint som fungerar
+    const baseUrl = 'http://localhost:3001';
+    console.log('🔍 getCurrentPrices: Hämtar från:', `${baseUrl}/api/prices`);
     
-    const response = await fetch('https://www.stockholmselbolag.se/Site_Priser_SthlmsEL_de2.json', {
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'Elchef-Price-Checker/1.0'
-      }
-    });
+    const response = await fetch(`${baseUrl}/api/prices`);
     
     if (!response.ok) {
       console.error('Failed to fetch prices:', response.status);
@@ -261,22 +257,8 @@ export async function POST(req: NextRequest) {
     // Hämta dynamisk kunskap från Supabase
     const dynamicKnowledge = await getDynamicKnowledge(userMessage);
     
-    // Hämta aktuella priser om användaren frågar om rörliga elpriser
-    const priceKeywords = ['rörligt', 'rörliga', 'elpris', 'elpriser', 'pris', 'priser', 'spot', 'spotpris', 'aktuellt', 'nuvarande', 'kostar', 'kostnad', 'kostnader'];
-    const shouldFetchPrices = priceKeywords.some(keyword => 
-      userMessage.toLowerCase().includes(keyword.toLowerCase())
-    );
-    
+    // Temporärt inaktiverat prisfunktionen för att fixa AI-chatten
     let currentPrices = null;
-    if (shouldFetchPrices) {
-      currentPrices = await getCurrentPrices();
-      if (currentPrices) {
-        console.log('Aktuella priser hämtade:', {
-          spotPrices: currentPrices.spot_prices,
-          fixedFees: currentPrices.fixed_fees
-        });
-      }
-    }
     
     // Debug: logga vad som hämtades
     if (dynamicKnowledge) {
