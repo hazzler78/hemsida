@@ -46,7 +46,7 @@ function renderMarkdown(text: string) {
   const lines = html.split('\n');
   let inList = false;
   let listType = '';
-  let result = [];
+  const result = [];
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
