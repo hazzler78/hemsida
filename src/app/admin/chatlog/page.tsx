@@ -2,6 +2,81 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
+// Markdown rendering function (copied from GrokChat.tsx)
+function renderMarkdown(text: string) {
+  if (!text) return '';
+  
+  let html = text
+    // Escape HTML to prevent XSS
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+  
+  // Headers (h1-h6)
+  html = html.replace(/^### (.*$)/gim, '<h3 style="font-size: 16px; font-weight: 600; margin: 8px 0 4px 0; color: #374151;">$1</h3>');
+  html = html.replace(/^## (.*$)/gim, '<h2 style="font-size: 18px; font-weight: 600; margin: 12px 0 6px 0; color: #374151;">$1</h2>');
+  html = html.replace(/^# (.*$)/gim, '<h1 style="font-size: 20px; font-weight: 600; margin: 16px 0 8px 0; color: #374151;">$1</h1>');
+  
+  // Bold and italic (handle nested cases)
+  html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>'); // ***bold italic***
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 600;">$1</strong>'); // **bold**
+  html = html.replace(/\*(.*?)\*/g, '<em style="font-style: italic;">$1</em>'); // *italic*
+  
+  // Inline code
+  html = html.replace(/`([^`]+)`/g, '<code style="background: rgba(0,0,0,0.1); padding: 2px 4px; border-radius: 3px; font-family: monospace; font-size: 13px;">$1</code>');
+  
+  // Code blocks (```code```)
+  html = html.replace(/```([\s\S]*?)```/g, '<pre style="background: rgba(0,0,0,0.05); padding: 12px; border-radius: 6px; overflow-x: auto; margin: 8px 0; font-size: 13px;"><code style="font-family: monospace; white-space: pre;">$1</code></pre>');
+  
+  // Links [text](url)
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: underline;">$1</a>');
+  
+  // Blockquotes
+  html = html.replace(/^> (.*$)/gim, '<blockquote style="border-left: 4px solid #e5e7eb; padding-left: 16px; margin: 8px 0; color: #6b7280; font-style: italic;">$1</blockquote>');
+  
+  // Numbered lists
+  html = html.replace(/^\d+\. (.*$)/gim, '<li style="margin: 4px 0;">$1</li>');
+  
+  // Bullet lists (improved regex)
+  html = html.replace(/^[\s]*[-*+] (.*$)/gim, '<li style="margin: 4px 0;">$1</li>');
+  
+  // Wrap lists in ul/ol tags
+  const lines = html.split('\n');
+  let inList = false;
+  let listType = '';
+  let result = [];
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const isNumberedList = /^\d+\. /.test(line);
+    const isBulletList = /^[\s]*[-*+] /.test(line);
+    
+    if (isNumberedList || isBulletList) {
+      if (!inList) {
+        inList = true;
+        listType = isNumberedList ? 'ol' : 'ul';
+        result.push(`<${listType} style="margin: 8px 0; padding-left: 20px;">`);
+      }
+      result.push(line);
+    } else {
+      if (inList) {
+        result.push(`</${listType}>`);
+        inList = false;
+        listType = '';
+      }
+      result.push(line);
+    }
+  }
+  
+  if (inList) {
+    result.push(`</${listType}>`);
+  }
+  
+  return result.join('\n');
+}
+
 const ADMIN_PASSWORD = "grodan2025";
 
 type ChatMessage = {
@@ -579,11 +654,38 @@ export default function AdminChatlog() {
                       <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
                         {log.messages?.map((msg, idx) => (
                           <li key={idx} style={{ margin: "8px 0" }}>
-                            <span style={{ fontWeight: 600 }}>{msg.role === "user" ? "Du" : "Grodan"}:</span> {msg.content}
+                            <div style={{ marginBottom: "4px" }}>
+                              <span style={{ fontWeight: 600, fontSize: "14px" }}>{msg.role === "user" ? "Du" : "Grodan"}:</span>
+                            </div>
+                            <div 
+                              style={{ 
+                                fontSize: "14px", 
+                                lineHeight: "1.5",
+                                padding: "8px 12px",
+                                background: msg.role === "user" ? "#f0f9ff" : "#f8fafc",
+                                borderRadius: "6px",
+                                border: "1px solid #e2e8f0"
+                              }}
+                              dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
+                            />
                           </li>
                         ))}
                       </ul>
-                      <b>AI-svar:</b> {log.ai_response}
+                      <div style={{ marginTop: "12px" }}>
+                        <b style={{ fontSize: "14px" }}>AI-svar:</b>
+                        <div 
+                          style={{ 
+                            marginTop: "4px",
+                            fontSize: "14px", 
+                            lineHeight: "1.5",
+                            padding: "8px 12px",
+                            background: "#f0f9ff",
+                            borderRadius: "6px",
+                            border: "1px solid #e2e8f0"
+                          }}
+                          dangerouslySetInnerHTML={{ __html: renderMarkdown(log.ai_response) }}
+                        />
+                      </div>
                       <div style={{ fontSize: 12, color: "#64748b", marginTop: 8 }}>Tokens: {log.total_tokens}</div>
                     </td>
                   </tr>
@@ -688,9 +790,10 @@ export default function AdminChatlog() {
                                 (meddelande {logIndex + 1})
                               </span>
                             </div>
-                            <div style={{ fontSize: 14, lineHeight: 1.5 }}>
-                              {msg.content}
-                            </div>
+                            <div 
+                              style={{ fontSize: 14, lineHeight: 1.5 }}
+                              dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
+                            />
                           </div>
                         ))
                       )}
@@ -718,11 +821,38 @@ export default function AdminChatlog() {
                           <ul style={{ margin: "8px 0", padding: 0, listStyle: "none" }}>
                             {log.messages?.map((msg, idx) => (
                               <li key={idx} style={{ margin: "4px 0" }}>
-                                <span style={{ fontWeight: 600 }}>{msg.role === "user" ? "Användare" : "Grodan"}:</span> {msg.content}
+                                <div style={{ marginBottom: "4px" }}>
+                                  <span style={{ fontWeight: 600, fontSize: "13px" }}>{msg.role === "user" ? "Användare" : "Grodan"}:</span>
+                                </div>
+                                <div 
+                                  style={{ 
+                                    fontSize: "13px", 
+                                    lineHeight: "1.4",
+                                    padding: "6px 8px",
+                                    background: msg.role === "user" ? "#f0f9ff" : "#f8fafc",
+                                    borderRadius: "4px",
+                                    border: "1px solid #e2e8f0"
+                                  }}
+                                  dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
+                                />
                               </li>
                             ))}
                           </ul>
-                          <b>AI-svar:</b> {log.ai_response}
+                          <div style={{ marginTop: "8px" }}>
+                            <b style={{ fontSize: "13px" }}>AI-svar:</b>
+                            <div 
+                              style={{ 
+                                marginTop: "4px",
+                                fontSize: "13px", 
+                                lineHeight: "1.4",
+                                padding: "6px 8px",
+                                background: "#f0f9ff",
+                                borderRadius: "4px",
+                                border: "1px solid #e2e8f0"
+                              }}
+                              dangerouslySetInnerHTML={{ __html: renderMarkdown(log.ai_response) }}
+                            />
+                          </div>
                         </div>
                       </div>
                     ))}
