@@ -3,12 +3,32 @@ import { createClient } from '@supabase/supabase-js';
 import { 
   generateKnowledgeSummary 
 } from '@/lib/knowledgeBase';
+import { CheapEnergyPrices } from '@/lib/types';
 
 const XAI_API_KEY = process.env.XAI_API_KEY;
 const XAI_API_URL = 'https://api.x.ai/v1/chat/completions';
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+// Funktion för att hämta aktuella elpriser
+async function getCurrentPrices(): Promise<CheapEnergyPrices | null> {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost:3000'}/api/prices`, {
+      next: { revalidate: 3600 }, // Cache for 1 hour
+    });
+    
+    if (!response.ok) {
+      console.error('Failed to fetch prices:', response.status);
+      return null;
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching current prices:', error);
+    return null;
+  }
+}
 
 // Funktion för att hämta dynamisk kunskap från Supabase
 async function getDynamicKnowledge(userQuestion: string) {
@@ -233,6 +253,23 @@ export async function POST(req: NextRequest) {
     // Hämta dynamisk kunskap från Supabase
     const dynamicKnowledge = await getDynamicKnowledge(userMessage);
     
+    // Hämta aktuella priser om användaren frågar om rörliga elpriser
+    const priceKeywords = ['rörligt', 'rörliga', 'elpris', 'elpriser', 'pris', 'priser', 'spot', 'spotpris', 'aktuellt', 'nuvarande'];
+    const shouldFetchPrices = priceKeywords.some(keyword => 
+      userMessage.toLowerCase().includes(keyword.toLowerCase())
+    );
+    
+    let currentPrices = null;
+    if (shouldFetchPrices) {
+      currentPrices = await getCurrentPrices();
+      if (currentPrices) {
+        console.log('Aktuella priser hämtade:', {
+          spotPrices: currentPrices.spot_prices,
+          fixedFees: currentPrices.fixed_fees
+        });
+      }
+    }
+    
     // Debug: logga vad som hämtades
     if (dynamicKnowledge) {
       console.log('Dynamisk kunskap hämtad:', {
@@ -271,6 +308,27 @@ export async function POST(req: NextRequest) {
         });
         enhancedSystemPrompt += '\n';
       }
+    }
+    
+    // Lägg till aktuella priser om de finns
+    if (currentPrices) {
+      enhancedSystemPrompt += '\n\n## AKTUELLA ELPRISER (uppdaterade från leverantör)\n';
+      enhancedSystemPrompt += `**Rörliga priser (spot) per kWh:**\n`;
+      enhancedSystemPrompt += `• SE1 (Norra Sverige): ${currentPrices.spot_prices.se1?.toFixed(2) || 'N/A'} öre/kWh\n`;
+      enhancedSystemPrompt += `• SE2 (Norra Mellansverige): ${currentPrices.spot_prices.se2?.toFixed(2) || 'N/A'} öre/kWh\n`;
+      enhancedSystemPrompt += `• SE3 (Södra Mellansverige): ${currentPrices.spot_prices.se3?.toFixed(2) || 'N/A'} öre/kWh\n`;
+      enhancedSystemPrompt += `• SE4 (Södra Sverige): ${currentPrices.spot_prices.se4?.toFixed(2) || 'N/A'} öre/kWh\n\n`;
+      
+      enhancedSystemPrompt += `**Våra rörliga avtal:**\n`;
+      enhancedSystemPrompt += `• 0 kr månadsavgift första året\n`;
+      enhancedSystemPrompt += `• 0 öre påslag på spotpriset\n`;
+      enhancedSystemPrompt += `• Ingen bindningstid\n\n`;
+      
+      enhancedSystemPrompt += `**Fastprisavtal (6 månader):**\n`;
+      enhancedSystemPrompt += `• SE1: ${currentPrices.variable_fixed_prices.se1?.['6_months']?.toFixed(2) || 'N/A'} öre/kWh\n`;
+      enhancedSystemPrompt += `• SE2: ${currentPrices.variable_fixed_prices.se2?.['6_months']?.toFixed(2) || 'N/A'} öre/kWh\n`;
+      enhancedSystemPrompt += `• SE3: ${currentPrices.variable_fixed_prices.se3?.['6_months']?.toFixed(2) || 'N/A'} öre/kWh\n`;
+      enhancedSystemPrompt += `• SE4: ${currentPrices.variable_fixed_prices.se4?.['6_months']?.toFixed(2) || 'N/A'} öre/kWh\n\n`;
     }
     
     // Om ingen dynamisk kunskap finns, använd statisk fallback
