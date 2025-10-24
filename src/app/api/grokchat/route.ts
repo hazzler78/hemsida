@@ -14,13 +14,10 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 // Funktion för att hämta aktuella elpriser
 async function getCurrentPrices(): Promise<CheapEnergyPrices | null> {
   try {
-    // Hämta direkt från Cheap Energy istället för via API
-    const response = await fetch('https://www.stockholmselbolag.se/Site_Priser_SthlmsEL_de2.json', {
+    // Använd vår egen API endpoint som fungerar
+    const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost:3001';
+    const response = await fetch(`${baseUrl}/api/prices`, {
       next: { revalidate: 3600 }, // Cache for 1 hour
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'Elchef-Price-Checker/1.0'
-      }
     });
     
     if (!response.ok) {
