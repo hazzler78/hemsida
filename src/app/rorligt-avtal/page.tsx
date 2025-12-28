@@ -3,6 +3,25 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import { createClient } from '@supabase/supabase-js';
+
+const getSupabase = () =>
+  createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
+  );
+
+interface PageProvider {
+  id: number;
+  name: string;
+  type: 'rorligt' | 'fastpris';
+  logo_url: string;
+  description: string;
+  url: string;
+  is_recommended: boolean;
+  display_order: number;
+  active: boolean;
+}
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -209,6 +228,37 @@ const HighlightBadge = styled.div`
 `;
 
 export default function RorligtAvtalPage() {
+  const [providers, setProviders] = React.useState<PageProvider[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchProviders = async () => {
+      try {
+        const supabase = getSupabase();
+        const { data, error } = await supabase
+          .from('page_providers')
+          .select('*')
+          .eq('type', 'rorligt')
+          .eq('active', true)
+          .order('display_order', { ascending: true });
+        
+        if (error) {
+          console.error('Error fetching providers:', error);
+          // Fallback till tom array om det finns fel
+          setProviders([]);
+        } else if (data) {
+          setProviders(data);
+        }
+      } catch (error) {
+        console.error('Error fetching providers:', error);
+        setProviders([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProviders();
+  }, []);
 
   React.useEffect(() => {
     try {
@@ -264,103 +314,39 @@ export default function RorligtAvtalPage() {
         <Title>Välj din leverantör för rörligt avtal</Title>
         <Subtitle>Vi har valt ut de bästa leverantörerna för rörliga elavtal. Välj den som passar dig!</Subtitle>
 
-        <ProvidersGrid>
-          {/* Cheap Energy */}
-          <ProviderCard>
-            <ProviderLogo src="/cheap-logo.png" alt="Cheap Energy" />
-            <HighlightBadge>Rekommenderat</HighlightBadge>
-            <ProviderName>Cheap Energy</ProviderName>
-            <ProviderDescription>
-              0 kr i månadsavgift, 0 öre i påslag i 12 månader. Ingen bindningstid.
-            </ProviderDescription>
-            <ProviderButton 
-              href="https://www.cheapenergy.se/teckna-elavtal-cheap-elchef/"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => {
-                handleProviderClick('Cheap Energy', 'https://www.cheapenergy.se/teckna-elavtal-cheap-elchef/');
-              }}
-            >
-              Välj Cheap Energy
-            </ProviderButton>
-          </ProviderCard>
-
-          {/* Svekraft */}
-          <ProviderCard>
-            <ProviderLogo src="/svekraft-logo.png" alt="Svekraft" />
-            <ProviderName>Svekraft</ProviderName>
-            <ProviderDescription>
-              0 kr i månadsavgift i 12 månader, 7,99 öre i påslag. Ingen bindningstid.
-            </ProviderDescription>
-            <ProviderButton 
-              href="https://www.svekraft.com/elchef-rorligt/"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => {
-                handleProviderClick('Svekraft', 'https://www.svekraft.com/elchef-rorligt/');
-              }}
-            >
-              Välj Svekraft
-            </ProviderButton>
-          </ProviderCard>
-
-          {/* Tibber */}
-          <ProviderCard>
-            <ProviderLogo src="/tibber.png" alt="Tibber" />
-            <ProviderName>Tibber</ProviderName>
-            <ProviderDescription>
-              49 kr i månadsavgift, 8,6 öre i påslag. Ingen bindningstid.
-            </ProviderDescription>
-            <ProviderButton 
-              href="https://go.adt242.com/t/t?a=1590956516&as=2012933659&t=2&tk=1"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => {
-                handleProviderClick('Tibber', 'https://go.adt242.com/t/t?a=1590956516&as=2012933659&t=2&tk=1');
-              }}
-            >
-              Välj Tibber
-            </ProviderButton>
-          </ProviderCard>
-
-          {/* Telinet Energi */}
-          <ProviderCard>
-            <ProviderLogo src="/telinet.png" alt="Telinet Energi" />
-            <ProviderName>Telinet Energi</ProviderName>
-            <ProviderDescription>
-              59 kr i månadsavgift, 13,33 öre i påslag. Ingen bindningstid.
-            </ProviderDescription>
-            <ProviderButton 
-              href="https://at.telinet.se/t/t?a=1870484942&as=2012933659&t=2&tk=1"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => {
-                handleProviderClick('Telinet Energi', 'https://at.telinet.se/t/t?a=1870484942&as=2012933659&t=2&tk=1');
-              }}
-            >
-              Välj Telinet Energi
-            </ProviderButton>
-          </ProviderCard>
-
-          {/* Fortum */}
-          <ProviderCard>
-            <ProviderLogo src="/fortum.png" alt="Fortum" />
-            <ProviderName>Fortum</ProviderName>
-            <ProviderDescription>
-              69 kr i månadsavgift, 12,38 öre i påslag. Ingen bindningstid.
-            </ProviderDescription>
-            <ProviderButton 
-              href="https://ion.fortum.com/t/t?a=1312475339&as=2012933659&t=2&tk=1"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => {
-                handleProviderClick('Fortum', 'https://ion.fortum.com/t/t?a=1312475339&as=2012933659&t=2&tk=1');
-              }}
-            >
-              Välj Fortum
-            </ProviderButton>
-          </ProviderCard>
-        </ProvidersGrid>
+        {loading ? (
+          <div style={{ textAlign: 'center', color: 'white', padding: '2rem' }}>
+            Laddar leverantörer...
+          </div>
+        ) : (
+          <ProvidersGrid>
+            {providers.map((provider) => (
+              <ProviderCard key={provider.id}>
+                <ProviderLogo src={provider.logo_url} alt={provider.name} />
+                {provider.is_recommended && <HighlightBadge>Rekommenderat</HighlightBadge>}
+                <ProviderName>{provider.name}</ProviderName>
+                <ProviderDescription>
+                  {provider.description}
+                </ProviderDescription>
+                <ProviderButton 
+                  href={provider.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => {
+                    handleProviderClick(provider.name, provider.url);
+                  }}
+                >
+                  Välj {provider.name}
+                </ProviderButton>
+              </ProviderCard>
+            ))}
+            {providers.length === 0 && (
+              <div style={{ textAlign: 'center', color: 'white', padding: '2rem', gridColumn: '1 / -1' }}>
+                Inga leverantörer tillgängliga för tillfället.
+              </div>
+            )}
+          </ProvidersGrid>
+        )}
       </Content>
     </PageContainer>
   );

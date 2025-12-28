@@ -3,6 +3,25 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import { createClient } from '@supabase/supabase-js';
+
+const getSupabase = () =>
+  createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
+  );
+
+interface PageProvider {
+  id: number;
+  name: string;
+  type: 'rorligt' | 'fastpris';
+  logo_url: string;
+  description: string;
+  url: string;
+  is_recommended: boolean;
+  display_order: number;
+  active: boolean;
+}
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -139,6 +158,38 @@ const HighlightBadge = styled.div`
 `;
 
 export default function FastprisAvtalPage() {
+  const [providers, setProviders] = React.useState<PageProvider[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchProviders = async () => {
+      try {
+        const supabase = getSupabase();
+        const { data, error } = await supabase
+          .from('page_providers')
+          .select('*')
+          .eq('type', 'fastpris')
+          .eq('active', true)
+          .order('display_order', { ascending: true });
+        
+        if (error) {
+          console.error('Error fetching providers:', error);
+          // Fallback till tom array om det finns fel
+          setProviders([]);
+        } else if (data) {
+          setProviders(data);
+        }
+      } catch (error) {
+        console.error('Error fetching providers:', error);
+        setProviders([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProviders();
+  }, []);
+
   React.useEffect(() => {
     try {
       const ttq: any = (window as any).ttq;
@@ -193,84 +244,39 @@ export default function FastprisAvtalPage() {
         <Title>Välj din leverantör för fastpris</Title>
         <Subtitle>Vi har valt ut de bästa leverantörerna för fastprisavtal. Välj den som passar dig!</Subtitle>
 
-        <ProvidersGrid>
-          {/* Svealands Elbolag */}
-          <ProviderCard>
-            <ProviderLogo src="/svealand-logo.png" alt="Svealands Elbolag" />
-            <HighlightBadge>Rekommenderat</HighlightBadge>
-            <ProviderName>Svealands Elbolag</ProviderName>
-            <ProviderDescription>
-              Om du hittar ett billigare fastprisavtal på elmarknaden matchas priset – och du får dessutom 1 öre/kWh i extra rabatt. Ett pålitligt val för dig som vill ha kontroll över elkostnaderna.
-            </ProviderDescription>
-            <ProviderButton 
-              href="https://www.svealandselbolag.se/elchef-fastpris/"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => {
-                handleProviderClick('Svealands Elbolag', 'https://www.svealandselbolag.se/elchef-fastpris/');
-              }}
-            >
-              Välj Svealands Elbolag
-            </ProviderButton>
-          </ProviderCard>
-
-          {/* Cheap Energy */}
-          <ProviderCard>
-            <ProviderLogo src="/cheap-logo.png" alt="Cheap Energy" />
-            <ProviderName>Cheap Energy</ProviderName>
-            <ProviderDescription>
-              Konkurrenskraftiga fastpriser. Trygghet och förutsägbarhet för din elförbrukning.
-            </ProviderDescription>
-            <ProviderButton 
-              href="https://www.cheapenergy.se/elchef-fastpris/"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => {
-                handleProviderClick('Cheap Energy', 'https://www.cheapenergy.se/elchef-fastpris/');
-              }}
-            >
-              Välj Cheap Energy
-            </ProviderButton>
-          </ProviderCard>
-
-          {/* Stockholms Elbolag */}
-          <ProviderCard>
-            <ProviderLogo src="/stockholms-elbolag-logo.png" alt="Stockholms Elbolag" />
-            <ProviderName>Stockholms Elbolag</ProviderName>
-            <ProviderDescription>
-              Fast elpris med tydliga villkor. Perfekt för dig som vill ha förutsägbara elkostnader.
-            </ProviderDescription>
-            <ProviderButton 
-              href="https://www.stockholmselbolag.se/elavtal-elchef-fastpris/"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => {
-                handleProviderClick('Stockholms Elbolag', 'https://www.stockholmselbolag.se/elavtal-elchef-fastpris/');
-              }}
-            >
-              Välj Stockholms Elbolag
-            </ProviderButton>
-          </ProviderCard>
-
-          {/* Svekraft */}
-          <ProviderCard>
-            <ProviderLogo src="/svekraft-logo.png" alt="Svekraft" />
-            <ProviderName>Svekraft</ProviderName>
-            <ProviderDescription>
-              Stabila fastpriser för din trygghet. Låsta priser som ger dig kontroll över din elbudget.
-            </ProviderDescription>
-            <ProviderButton 
-              href="https://www.svekraft.com/elchef-fastpris/"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => {
-                handleProviderClick('Svekraft', 'https://www.svekraft.com/elchef-fastpris/');
-              }}
-            >
-              Välj Svekraft
-            </ProviderButton>
-          </ProviderCard>
-        </ProvidersGrid>
+        {loading ? (
+          <div style={{ textAlign: 'center', color: 'white', padding: '2rem' }}>
+            Laddar leverantörer...
+          </div>
+        ) : (
+          <ProvidersGrid>
+            {providers.map((provider) => (
+              <ProviderCard key={provider.id}>
+                <ProviderLogo src={provider.logo_url} alt={provider.name} />
+                {provider.is_recommended && <HighlightBadge>Rekommenderat</HighlightBadge>}
+                <ProviderName>{provider.name}</ProviderName>
+                <ProviderDescription>
+                  {provider.description}
+                </ProviderDescription>
+                <ProviderButton 
+                  href={provider.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => {
+                    handleProviderClick(provider.name, provider.url);
+                  }}
+                >
+                  Välj {provider.name}
+                </ProviderButton>
+              </ProviderCard>
+            ))}
+            {providers.length === 0 && (
+              <div style={{ textAlign: 'center', color: 'white', padding: '2rem', gridColumn: '1 / -1' }}>
+                Inga leverantörer tillgängliga för tillfället.
+              </div>
+            )}
+          </ProvidersGrid>
+        )}
       </Content>
     </PageContainer>
   );

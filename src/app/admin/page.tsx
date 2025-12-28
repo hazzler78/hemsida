@@ -74,6 +74,13 @@ const adminSections = [
     href: "/admin/shared-cards",
     icon: "🔗",
     color: "bg-teal-500"
+  },
+  {
+    title: "Leverantörer",
+    description: "Hantera leverantörer på /rorligt-avtal och /fastpris-avtal sidorna",
+    href: "/admin/providers",
+    icon: "⚡",
+    color: "bg-yellow-500"
   }
 ];
 
