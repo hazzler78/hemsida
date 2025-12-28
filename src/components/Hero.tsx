@@ -106,6 +106,7 @@ export default function Hero() {
   const [variant, setVariant] = useState<'A' | 'B'>('A');
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [videoError, setVideoError] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     try {
@@ -125,6 +126,10 @@ export default function Hero() {
       }
       setVariant(newVariant);
     } catch {}
+  }, []);
+
+  useEffect(() => {
+    setIsMounted(true);
   }, []);
 
   useEffect(() => {
@@ -149,8 +154,8 @@ export default function Hero() {
     } catch {}
   }, [variant]);
 
-  const heroTitle = variant === 'A' ? 'Elchef gör det enkelt att välja rätt elavtal!' : 'Välj rätt elavtal – utan krångel';
-  const heroSub = variant === 'A' ? 'Vi lyfter fram avtal värda att överväga och sköter bytet åt dig.' : 'Snabbt och tryggt. Vi hjälper dig hela vägen.';
+  const heroTitle: string = variant === 'A' ? 'Elchef gör det enkelt att välja rätt elavtal!' : 'Välj rätt elavtal – utan krångel';
+  const heroSub: string = variant === 'A' ? 'Vi lyfter fram avtal värda att överväga och sköter bytet åt dig.' : 'Snabbt och tryggt. Vi hjälper dig hela vägen.';
 
   const trackHeroClick = useCallback((target: 'rorligt' | 'fastpris', href: string) => {
     try {
@@ -225,8 +230,8 @@ export default function Hero() {
       <div className="container">
         <HeroContent>
           <TextContent>
-            <h1>{heroTitle}</h1>
-            <p>{heroSub}</p>
+            <h1>{String(heroTitle)}</h1>
+            <p>{String(heroSub)}</p>
                          <ButtonRow>
                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: 200 }}>
                                    <div style={{
@@ -385,7 +390,7 @@ export default function Hero() {
               <source src="/grodan-presentation.mp4" type="video/mp4" />
               Din webbläsare stöder inte video-elementet.
             </video>
-            {videoError && (
+            {isMounted && videoError && typeof videoError === 'string' && (
               <div style={{ 
                 position: 'absolute', 
                 top: '50%', 
@@ -397,7 +402,7 @@ export default function Hero() {
                 background: 'rgba(0,0,0,0.7)',
                 borderRadius: '8px'
               }}>
-                {videoError}
+                {String(videoError)}
               </div>
             )}
           </VideoWrapper>
