@@ -73,10 +73,12 @@ const ProvidersGrid = styled.div`
   
   @media (min-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
   }
   
   @media (min-width: 1024px) {
     grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
   }
 `;
 
@@ -92,6 +94,13 @@ const ProviderCard = styled.div`
   text-align: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: visible;
+  display: flex;
+  flex-direction: column;
+  min-height: 280px;
+  
+  @media (min-width: 1024px) {
+    min-height: 300px;
+  }
   
   &:hover {
     transform: translateY(-4px);
@@ -117,6 +126,15 @@ const ProviderDescription = styled.p`
   font-size: 0.95rem;
   margin-bottom: 1.5rem;
   line-height: 1.6;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  @media (min-width: 1024px) {
+    font-size: 1rem;
+    line-height: 1.7;
+  }
 `;
 
 const ProviderButton = styled.a`
@@ -131,6 +149,8 @@ const ProviderButton = styled.a`
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-top: auto;
+  align-self: center;
   
   &:hover {
     transform: scale(1.05);

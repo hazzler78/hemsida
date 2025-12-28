@@ -93,14 +93,17 @@ const ProvidersGrid = styled.div`
   
   @media (min-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
   }
   
   @media (min-width: 1024px) {
     grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
   }
   
   @media (min-width: 1400px) {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
   }
 `;
 
@@ -118,11 +121,15 @@ const ProviderCard = styled.div`
   overflow: visible;
   display: flex;
   flex-direction: column;
-  height: 260px;
+  min-height: 260px;
   
   @media (min-width: 480px) {
     padding: 2rem;
-    height: 300px;
+    min-height: 300px;
+  }
+  
+  @media (min-width: 1024px) {
+    min-height: 320px;
   }
   
   &:hover {
@@ -163,7 +170,7 @@ const ProviderDescription = styled.p`
   color: #374151;
   font-size: 0.85rem;
   margin-bottom: 1rem;
-  line-height: 1.3;
+  line-height: 1.4;
   flex-grow: 1;
   display: flex;
   align-items: center;
@@ -172,13 +179,18 @@ const ProviderDescription = styled.p`
   
   @media (min-width: 480px) {
     font-size: 0.9rem;
-    line-height: 1.4;
+    line-height: 1.5;
     margin-bottom: 1.5rem;
   }
   
   @media (min-width: 768px) {
     font-size: 0.95rem;
-    line-height: 1.5;
+    line-height: 1.6;
+  }
+  
+  @media (min-width: 1024px) {
+    font-size: 1rem;
+    line-height: 1.6;
   }
 `;
 
