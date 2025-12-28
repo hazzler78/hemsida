@@ -105,6 +105,7 @@ const USPList = styled.ul`
 export default function Hero() {
   const [variant, setVariant] = useState<'A' | 'B'>('A');
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [videoError, setVideoError] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -370,7 +371,12 @@ export default function Hero() {
                   if (videoRef.current) {
                     videoRef.current.play().catch(() => {/* ignore */});
                   }
+                  setVideoError(null);
                 } catch {} 
+              }}
+              onError={(e) => {
+                console.error('Video loading error:', e);
+                setVideoError('Video kunde inte laddas');
               }}
               onClick={handleVideoClick}
               style={{ cursor: 'pointer' }}
@@ -379,6 +385,21 @@ export default function Hero() {
               <source src="/grodan-presentation.mp4" type="video/mp4" />
               Din webbläsare stöder inte video-elementet.
             </video>
+            {videoError && (
+              <div style={{ 
+                position: 'absolute', 
+                top: '50%', 
+                left: '50%', 
+                transform: 'translate(-50%, -50%)',
+                color: 'white',
+                textAlign: 'center',
+                padding: '1rem',
+                background: 'rgba(0,0,0,0.7)',
+                borderRadius: '8px'
+              }}>
+                {videoError}
+              </div>
+            )}
           </VideoWrapper>
         </HeroContent>
       </div>
