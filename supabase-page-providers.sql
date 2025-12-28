@@ -61,8 +61,7 @@ SELECT * FROM (VALUES
   ('Svekraft', 'rorligt', '/svekraft-logo.png', '0 kr i månadsavgift i 12 månader, 7,99 öre i påslag. Ingen bindningstid.', 'https://www.svekraft.com/elchef-rorligt/', false, 2, true),
   ('Tibber', 'rorligt', '/tibber.png', '49 kr i månadsavgift, 8,6 öre i påslag. Ingen bindningstid.', 'https://go.adt242.com/t/t?a=1590956516&as=2012933659&t=2&tk=1', false, 3, true),
   ('Telinet Energi', 'rorligt', '/telinet.png', '59 kr i månadsavgift, 13,33 öre i påslag. Ingen bindningstid.', 'https://at.telinet.se/t/t?a=1870484942&as=2012933659&t=2&tk=1', false, 4, true),
-  ('Fortum', 'rorligt', '/fortum.png', '69 kr i månadsavgift, 12,38 öre i påslag. Ingen bindningstid.', 'https://ion.fortum.com/t/t?a=1312475339&as=2012933659&t=2&tk=1', false, 5, true),
-  ('Skellefteå Kraft', 'rorligt', '/skelleftea.png', 'Konkurrenskraftiga rörliga elpriser. Uppdatera beskrivning och URL via admin-sidan.', 'https://www.skellefteakraft.se/', false, 6, true)
+  ('Fortum', 'rorligt', '/fortum.png', '69 kr i månadsavgift, 12,38 öre i påslag. Ingen bindningstid.', 'https://ion.fortum.com/t/t?a=1312475339&as=2012933659&t=2&tk=1', false, 5, true)
 ) AS v(name, type, logo_url, description, url, is_recommended, display_order, active)
 WHERE NOT EXISTS (
   SELECT 1 FROM page_providers 
