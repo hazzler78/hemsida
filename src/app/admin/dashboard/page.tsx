@@ -515,6 +515,34 @@ export default function AdminDashboard() {
 
       {!loading && stats && (
         <>
+          {/* Warning if conversion rate is suspiciously low */}
+          {stats.pageViews > 100 && stats.contractClicks / stats.pageViews < 0.01 && (
+            <div style={{ 
+              background: '#fef2f2', 
+              border: '1px solid #fecaca', 
+              color: '#dc2626', 
+              padding: 16, 
+              borderRadius: 8,
+              marginBottom: 24
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <strong>⚠️ Låg konverteringsgrad upptäckt:</strong>
+                  <div style={{ marginTop: 8, fontSize: '0.875rem' }}>
+                    Du har {stats.pageViews.toLocaleString('sv-SE')} besök men endast {stats.contractClicks} kontraktsklick 
+                    ({((stats.contractClicks / stats.pageViews) * 100).toFixed(2)}%). 
+                    Detta kan vara normalt om många besökare är på sidor utan kontraktsknappar (t.ex. startsidan).
+                  </div>
+                  <div style={{ marginTop: 8, fontSize: '0.875rem' }}>
+                    <Link href="/admin/data-verification" style={{ color: '#dc2626', textDecoration: 'underline' }}>
+                      Verifiera data här →
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Hero Metrics */}
           <div style={{ 
             display: 'grid', 
@@ -1012,6 +1040,7 @@ export default function AdminDashboard() {
               <QuickLink href="/admin/hero-analytics" icon="🎯" label="Hero A/B" />
               <QuickLink href="/admin/banner-clicks" icon="🎨" label="Banner A/B" />
               <QuickLink href="/admin/chatlog" icon="💬" label="Chattloggar" />
+              <QuickLink href="/admin/data-verification" icon="🔍" label="Dataverifiering" />
             </div>
           </div>
         </>
