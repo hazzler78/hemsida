@@ -18,7 +18,7 @@ interface ContractClickStats {
 }
 
 interface RecentData {
-  pageViews: Array<{ path: string; created_at: string; session_id: string }>;
+  pageViews: Array<{ path: string; created_at: string; session_id: string; is_bot?: boolean; is_preview?: boolean; user_agent?: string }>;
   contractClicks: Array<{ source: string; contract_type: string; created_at: string; session_id: string }>;
 }
 
@@ -33,6 +33,9 @@ export default function DataVerification() {
   const [dateRange, setDateRange] = useState<'24h' | '7d' | '30d'>('24h');
   const [totalPageViews, setTotalPageViews] = useState(0);
   const [totalContractClicks, setTotalContractClicks] = useState(0);
+  const [botViews, setBotViews] = useState(0);
+  const [previewViews, setPreviewViews] = useState(0);
+  const [realViews, setRealViews] = useState(0);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -66,7 +69,7 @@ export default function DataVerification() {
       // 1. Get page views by path
       const { data: pageViewsData, error: pvError } = await supabase
         .from('page_views')
-        .select('path, created_at, session_id')
+        .select('path, created_at, session_id, is_bot, is_preview, user_agent')
         .gte('created_at', fromISO)
         .order('created_at', { ascending: false });
 
@@ -84,6 +87,14 @@ export default function DataVerification() {
 
       const totalPV = pageViewsData?.length || 0;
       setTotalPageViews(totalPV);
+
+      // Räkna botar och preview-deployments
+      const bots = pageViewsData?.filter(pv => pv.is_bot === true).length || 0;
+      const previews = pageViewsData?.filter(pv => pv.is_preview === true).length || 0;
+      const real = totalPV - bots - previews;
+      setBotViews(bots);
+      setPreviewViews(previews);
+      setRealViews(real);
 
       const pvStats: PageViewStats[] = Array.from(pathMap.entries())
         .map(([path, count]) => ({
@@ -287,7 +298,7 @@ export default function DataVerification() {
           {/* Summary Cards */}
           <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
             gap: 16,
             marginBottom: 32
           }}>
@@ -304,13 +315,58 @@ export default function DataVerification() {
               </div>
             </div>
             <div style={{ 
+              background: '#f0fdf4',
+              borderRadius: 12,
+              padding: 20,
+              border: '1px solid #86efac',
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+            }}>
+              <div style={{ fontSize: '0.875rem', color: '#166534', marginBottom: 8 }}>Riktiga Besök</div>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981' }}>
+                {realViews.toLocaleString('sv-SE')}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#166534', marginTop: 4 }}>
+                {totalPageViews > 0 ? ((realViews / totalPageViews) * 100).toFixed(1) : 0}% av totalt
+              </div>
+            </div>
+            <div style={{ 
+              background: '#fef2f2',
+              borderRadius: 12,
+              padding: 20,
+              border: '1px solid #fecaca',
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+            }}>
+              <div style={{ fontSize: '0.875rem', color: '#991b1b', marginBottom: 8 }}>Botar</div>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ef4444' }}>
+                {botViews.toLocaleString('sv-SE')}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#991b1b', marginTop: 4 }}>
+                {totalPageViews > 0 ? ((botViews / totalPageViews) * 100).toFixed(1) : 0}% av totalt
+              </div>
+            </div>
+            <div style={{ 
+              background: '#fffbeb',
+              borderRadius: 12,
+              padding: 20,
+              border: '1px solid #fde68a',
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+            }}>
+              <div style={{ fontSize: '0.875rem', color: '#92400e', marginBottom: 8 }}>Preview/Test</div>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
+                {previewViews.toLocaleString('sv-SE')}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#92400e', marginTop: 4 }}>
+                {totalPageViews > 0 ? ((previewViews / totalPageViews) * 100).toFixed(1) : 0}% av totalt
+              </div>
+            </div>
+            <div style={{ 
               background: 'white',
               borderRadius: 12,
               padding: 20,
               border: '1px solid #e5e7eb',
               boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
             }}>
-              <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: 8 }}>Totalt Kontraktsklick</div>
+              <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: 8 }}>Kontraktsklick</div>
               <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981' }}>
                 {totalContractClicks.toLocaleString('sv-SE')}
               </div>
@@ -322,9 +378,12 @@ export default function DataVerification() {
               border: '1px solid #e5e7eb',
               boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
             }}>
-              <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: 8 }}>Konverteringsgrad (Total)</div>
-              <div style={{ fontSize: '2rem', fontWeight: 'bold', color: totalContractClicks / totalPageViews < 0.01 ? '#ef4444' : '#10b981' }}>
-                {totalPageViews > 0 ? ((totalContractClicks / totalPageViews) * 100).toFixed(2) : 0}%
+              <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: 8 }}>Konverteringsgrad</div>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', color: realViews > 0 && totalContractClicks / realViews < 0.01 ? '#ef4444' : '#10b981' }}>
+                {realViews > 0 ? ((totalContractClicks / realViews) * 100).toFixed(2) : 0}%
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: 4 }}>
+                (av riktiga besök)
               </div>
             </div>
           </div>
@@ -499,16 +558,26 @@ export default function DataVerification() {
                     {recentData.pageViews.map((pv, index) => (
                       <div key={index} style={{ 
                         padding: 12,
-                        background: '#f9fafb',
+                        background: pv.is_bot ? '#fef2f2' : pv.is_preview ? '#fffbeb' : '#f9fafb',
                         borderRadius: 6,
-                        fontSize: '0.875rem'
+                        fontSize: '0.875rem',
+                        border: pv.is_bot ? '1px solid #fecaca' : pv.is_preview ? '1px solid #fde68a' : 'none'
                       }}>
-                        <div style={{ fontWeight: 600, color: '#1f2937', marginBottom: 4 }}>
-                          {pv.path || '(ingen path)'}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
+                          <div style={{ fontWeight: 600, color: '#1f2937' }}>
+                            {pv.path || '(ingen path)'}
+                          </div>
+                          {pv.is_bot && <span style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: 600 }}>BOT</span>}
+                          {pv.is_preview && <span style={{ fontSize: '0.7rem', color: '#f59e0b', fontWeight: 600 }}>PREVIEW</span>}
                         </div>
-                        <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: 2 }}>
                           {new Date(pv.created_at).toLocaleString('sv-SE')} • Session: {pv.session_id?.substring(0, 8) || 'N/A'}
                         </div>
+                        {pv.user_agent && (
+                          <div style={{ fontSize: '0.7rem', color: '#9ca3af', marginTop: 4, fontStyle: 'italic' }}>
+                            {pv.user_agent.length > 60 ? pv.user_agent.substring(0, 60) + '...' : pv.user_agent}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

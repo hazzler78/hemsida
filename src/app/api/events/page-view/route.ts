@@ -1,6 +1,54 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+// Lista över kända botar och crawlers
+const BOT_USER_AGENTS = [
+  'googlebot',
+  'bingbot',
+  'slurp', // Yahoo
+  'duckduckbot',
+  'baiduspider',
+  'yandexbot',
+  'sogou',
+  'exabot',
+  'facebot',
+  'ia_archiver',
+  'gptbot',
+  'perplexitybot',
+  'anthropic-ai',
+  'claude-web',
+  'chatgpt-user',
+  'facebookexternalhit',
+  'twitterbot',
+  'linkedinbot',
+  'whatsapp',
+  'telegrambot',
+  'discordbot',
+  'slackbot',
+  'applebot',
+  'petalbot',
+  'ahrefsbot',
+  'semrushbot',
+  'mj12bot',
+  'dotbot',
+  'megaindex',
+  'blexbot',
+  'crawler',
+  'spider',
+  'scraper'
+];
+
+function isBot(userAgent: string): boolean {
+  if (!userAgent) return false;
+  const ua = userAgent.toLowerCase();
+  return BOT_USER_AGENTS.some(bot => ua.includes(bot));
+}
+
+function isPreviewDeployment(referer: string): boolean {
+  if (!referer) return false;
+  return referer.includes('preview') || referer.includes('localhost') || referer.includes('127.0.0.1');
+}
+
 export async function POST(req: NextRequest) {
   try {
     const SUPABASE_URL = process.env.SUPABASE_URL as string;
@@ -17,6 +65,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}));
     const { path, sessionId, utmSource, utmMedium, utmCampaign } = body || {};
 
+    // Identifiera om det är en bot eller preview-deployment
+    const bot = isBot(ua);
+    const isPreview = isPreviewDeployment(referer);
+
     const { error } = await supabase.from('page_views').insert({
       path: typeof path === 'string' ? path : null,
       session_id: typeof sessionId === 'string' ? sessionId : null,
@@ -24,11 +76,13 @@ export async function POST(req: NextRequest) {
       utm_medium: typeof utmMedium === 'string' ? utmMedium : null,
       utm_campaign: typeof utmCampaign === 'string' ? utmCampaign : null,
       user_agent: ua,
-      referer
+      referer,
+      is_bot: bot,
+      is_preview: isPreview
     });
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, is_bot: bot, is_preview: isPreview });
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : 'Okänt fel';
     return NextResponse.json({ error: message }, { status: 500 });
