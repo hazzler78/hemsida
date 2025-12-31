@@ -46,6 +46,7 @@ export default function DataVerification() {
   useEffect(() => {
     if (!authed) return;
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authed, dateRange]);
 
   const fetchData = async () => {

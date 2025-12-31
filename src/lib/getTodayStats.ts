@@ -30,6 +30,10 @@ export async function getTodayStats() {
     .select('path')
     .gte('created_at', todayISO);
 
+  if (pathError) {
+    console.error('Error fetching today views by path:', pathError);
+  }
+
   const pathCounts: Record<string, number> = {};
   viewsByPathData?.forEach(pv => {
     const path = pv.path || '(ingen path)';
