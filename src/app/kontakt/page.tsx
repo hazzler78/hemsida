@@ -89,7 +89,7 @@ export default function Kontakt() {
             <PhoneNumber>
               Ring oss direkt: <PhoneLink href="tel:0736862360">073-686 23 60</PhoneLink>
             </PhoneNumber>
-            <OpeningHours>09:00-13:00 Vardagar</OpeningHours>
+            <OpeningHours>09:00-18:00 Vardagar</OpeningHours>
           </Phone>
         </ContactInfo>
         
