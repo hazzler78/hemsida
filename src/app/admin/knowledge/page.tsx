@@ -32,6 +32,18 @@ type DbKnowledgeRow = {
   active: boolean;
 };
 
+// Typ för databasrad från ai_campaigns (kan vara snake_case eller camelCase)
+type DbCampaignRow = {
+  id?: number;
+  title: string;
+  description: string;
+  validFrom?: string;
+  validTo?: string;
+  valid_from?: string;
+  valid_to?: string;
+  active: boolean;
+};
+
 interface CampaignInfo {
   id?: number;
   title: string;
@@ -122,12 +134,12 @@ export default function AdminKnowledge() {
         console.log('Sample campaign data:', campaignData[0]);
         
         // Map snake_case to camelCase for UI consistency
-        const mapped: CampaignInfo[] = campaignData.map((c: any) => ({
+        const mapped: CampaignInfo[] = campaignData.map((c: DbCampaignRow) => ({
           id: c.id,
           title: c.title,
           description: c.description,
-          validFrom: c.valid_from || c.validFrom,
-          validTo: c.valid_to || c.validTo,
+          validFrom: c.valid_from || c.validFrom || '',
+          validTo: c.valid_to || c.validTo || '',
           active: c.active,
         }));
         setCampaigns(mapped);
@@ -210,7 +222,17 @@ export default function AdminKnowledge() {
       const supabase = getSupabase();
       
       // Try snake_case first (Supabase/PostgreSQL convention)
-      let dbCampaign: any = {
+      type DbCampaignPayload = {
+        title: string;
+        description: string;
+        active: boolean;
+        valid_from?: string;
+        valid_to?: string;
+        validFrom?: string;
+        validTo?: string;
+      };
+      
+      let dbCampaign: DbCampaignPayload = {
         title: campaign.title,
         description: campaign.description,
         active: campaign.active,
@@ -233,7 +255,7 @@ export default function AdminKnowledge() {
             active: campaign.active,
             validFrom: campaign.validFrom,
             validTo: campaign.validTo,
-          };
+          } as DbCampaignPayload;
           const retry = await supabase
             .from('ai_campaigns')
             .update(dbCampaign)
