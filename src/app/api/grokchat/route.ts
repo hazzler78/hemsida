@@ -59,8 +59,8 @@ async function getDynamicKnowledge() {
       .from('ai_campaigns')
       .select('*')
       .eq('active', true)
-      .gte('validTo', new Date().toISOString().split('T')[0])
-      .order('validTo', { ascending: true });
+      .gte('valid_to', new Date().toISOString().split('T')[0])
+      .order('valid_to', { ascending: true });
 
     // Hämta aktiva leverantörer
     const { data: providerData } = await supabase
