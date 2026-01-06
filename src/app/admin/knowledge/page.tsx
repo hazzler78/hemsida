@@ -248,7 +248,8 @@ export default function AdminKnowledge() {
           .eq('id', campaign.id);
         
         // If snake_case fails, try camelCase (in case column was created with quotes)
-        if (error && error.message.includes('valid_from')) {
+        if (error && (error.message.includes('valid_from') || error.message.includes('validFrom'))) {
+          console.log('Trying camelCase fallback:', error.message);
           dbCampaign = {
             title: campaign.title,
             description: campaign.description,
@@ -263,7 +264,14 @@ export default function AdminKnowledge() {
           error = retry.error;
         }
         
-        if (error) throw error;
+        if (error) {
+          console.error('Campaign update error:', error);
+          // Provide helpful error message
+          if (error.message.includes('validFrom') || error.message.includes('valid_from')) {
+            throw new Error('Kolumnnamn hittades inte. Kör migration: supabase-fix-campaign-columns.sql i Supabase SQL Editor för att fixa kolumnnamnen.');
+          }
+          throw error;
+        }
       } else {
         // Create new
         let { error } = await supabase
@@ -271,21 +279,29 @@ export default function AdminKnowledge() {
           .insert([dbCampaign]);
         
         // If snake_case fails, try camelCase
-        if (error && error.message.includes('valid_from')) {
+        if (error && (error.message.includes('valid_from') || error.message.includes('validFrom'))) {
+          console.log('Trying camelCase fallback:', error.message);
           dbCampaign = {
             title: campaign.title,
             description: campaign.description,
             active: campaign.active,
             validFrom: campaign.validFrom,
             validTo: campaign.validTo,
-          };
+          } as DbCampaignPayload;
           const retry = await supabase
             .from('ai_campaigns')
             .insert([dbCampaign]);
           error = retry.error;
         }
         
-        if (error) throw error;
+        if (error) {
+          console.error('Campaign insert error:', error);
+          // Provide helpful error message
+          if (error.message.includes('validFrom') || error.message.includes('valid_from')) {
+            throw new Error('Kolumnnamn hittades inte. Kör migration: supabase-fix-campaign-columns.sql i Supabase SQL Editor för att fixa kolumnnamnen.');
+          }
+          throw error;
+        }
       }
       
       setSuccess('Kampanj sparad!');
