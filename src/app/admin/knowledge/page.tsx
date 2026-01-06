@@ -105,13 +105,32 @@ export default function AdminKnowledge() {
       }
 
       // Fetch campaigns
-      const { data: campaignData } = await supabase
+      const { data: campaignData, error: campaignError } = await supabase
         .from('ai_campaigns')
         .select('*')
         .order('title', { ascending: true });
       
-      if (campaignData) {
-        setCampaigns(campaignData);
+      if (campaignError) {
+        console.error('Error fetching campaigns:', campaignError);
+        setError('Kunde inte hämta kampanjer: ' + campaignError.message);
+        return;
+      }
+      
+      if (campaignData && campaignData.length > 0) {
+        // Log column names for debugging
+        console.log('Campaign columns found:', Object.keys(campaignData[0]));
+        console.log('Sample campaign data:', campaignData[0]);
+        
+        // Map snake_case to camelCase for UI consistency
+        const mapped: CampaignInfo[] = campaignData.map((c: any) => ({
+          id: c.id,
+          title: c.title,
+          description: c.description,
+          validFrom: c.valid_from || c.validFrom,
+          validTo: c.valid_to || c.validTo,
+          active: c.active,
+        }));
+        setCampaigns(mapped);
       }
 
       // Fetch providers
@@ -188,21 +207,61 @@ export default function AdminKnowledge() {
 
   const saveCampaign = async (campaign: CampaignInfo) => {
     try {
+      const supabase = getSupabase();
+      
+      // Try snake_case first (Supabase/PostgreSQL convention)
+      let dbCampaign: any = {
+        title: campaign.title,
+        description: campaign.description,
+        active: campaign.active,
+        valid_from: campaign.validFrom,
+        valid_to: campaign.validTo,
+      };
+      
       if (campaign.id) {
         // Update existing
-        const supabase = getSupabase();
-        const { error } = await supabase
+        let { error } = await supabase
           .from('ai_campaigns')
-          .update(campaign)
+          .update(dbCampaign)
           .eq('id', campaign.id);
+        
+        // If snake_case fails, try camelCase (in case column was created with quotes)
+        if (error && error.message.includes('valid_from')) {
+          dbCampaign = {
+            title: campaign.title,
+            description: campaign.description,
+            active: campaign.active,
+            validFrom: campaign.validFrom,
+            validTo: campaign.validTo,
+          };
+          const retry = await supabase
+            .from('ai_campaigns')
+            .update(dbCampaign)
+            .eq('id', campaign.id);
+          error = retry.error;
+        }
         
         if (error) throw error;
       } else {
         // Create new
-        const supabase = getSupabase();
-        const { error } = await supabase
+        let { error } = await supabase
           .from('ai_campaigns')
-          .insert([campaign]);
+          .insert([dbCampaign]);
+        
+        // If snake_case fails, try camelCase
+        if (error && error.message.includes('valid_from')) {
+          dbCampaign = {
+            title: campaign.title,
+            description: campaign.description,
+            active: campaign.active,
+            validFrom: campaign.validFrom,
+            validTo: campaign.validTo,
+          };
+          const retry = await supabase
+            .from('ai_campaigns')
+            .insert([dbCampaign]);
+          error = retry.error;
+        }
         
         if (error) throw error;
       }
