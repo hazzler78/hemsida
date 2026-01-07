@@ -64,6 +64,49 @@ const RecommendationIcon = () => (
   </svg>
 );
 
+const ButtonWrapper = ({ children }: { children: React.ReactNode }) => {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (wrapperRef.current) {
+      const button = wrapperRef.current.querySelector('button') as HTMLElement;
+      if (button) {
+        button.style.boxShadow = '0 8px 24px rgba(16, 185, 129, 0.3), var(--glass-shadow-light)';
+      }
+    }
+  }, []);
+
+  return (
+    <div
+      ref={wrapperRef}
+      style={{
+        cursor: 'pointer',
+        position: 'relative',
+        zIndex: 10,
+        transition: 'all 0.3s ease',
+      }}
+      onMouseEnter={(e) => {
+        const button = e.currentTarget.querySelector('button') as HTMLElement;
+        if (button) {
+          button.style.transform = 'translateY(-2px) scale(1.02)';
+          button.style.boxShadow = '0 12px 32px rgba(16, 185, 129, 0.4), var(--glass-shadow-medium)';
+          button.style.background = 'linear-gradient(135deg, #059669, #047857)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        const button = e.currentTarget.querySelector('button') as HTMLElement;
+        if (button) {
+          button.style.transform = 'translateY(0) scale(1)';
+          button.style.boxShadow = '0 8px 24px rgba(16, 185, 129, 0.3), var(--glass-shadow-light)';
+          button.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+        }
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
 export default function JamforElpriser() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -885,30 +928,7 @@ export default function JamforElpriser() {
                 justifyContent: 'center' 
               }}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: 200 }}>
-                  <div
-                    style={{
-                      cursor: 'pointer',
-                      position: 'relative',
-                      zIndex: 10,
-                      transition: 'all 0.3s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      const button = e.currentTarget.querySelector('button') as HTMLElement;
-                      if (button) {
-                        button.style.transform = 'translateY(-2px) scale(1.02)';
-                        button.style.boxShadow = '0 12px 32px rgba(16, 185, 129, 0.4), var(--glass-shadow-medium)';
-                        button.style.background = 'linear-gradient(135deg, #059669, #047857)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      const button = e.currentTarget.querySelector('button') as HTMLElement;
-                      if (button) {
-                        button.style.transform = 'translateY(0) scale(1)';
-                        button.style.boxShadow = '0 8px 24px rgba(16, 185, 129, 0.3), var(--glass-shadow-light)';
-                        button.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-                      }
-                    }}
-                  >
+                  <ButtonWrapper>
                     <GlassButton 
                       variant="primary" 
                       size="lg" 
@@ -920,14 +940,10 @@ export default function JamforElpriser() {
                         window.location.href = withDefaultCtaUtm('/rorligt-avtal', 'jamfor', 'cta-rorligt');
                       }}
                       aria-label="Rörligt avtal - 0 kr i avgifter första året – utan bindningstid"
-                      style={{
-                        background: 'linear-gradient(135deg, #10b981, #059669)',
-                        boxShadow: '0 8px 24px rgba(16, 185, 129, 0.3), var(--glass-shadow-light)',
-                      }}
                     >
                       Rörligt avtal
                     </GlassButton>
-                  </div>
+                  </ButtonWrapper>
                   <div style={{ 
                     fontSize: '0.9rem', 
                     color: 'var(--foreground)', 
@@ -943,30 +959,7 @@ export default function JamforElpriser() {
                   </div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: 200 }}>
-                  <div
-                    style={{
-                      cursor: 'pointer',
-                      position: 'relative',
-                      zIndex: 10,
-                      transition: 'all 0.3s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      const button = e.currentTarget.querySelector('button') as HTMLElement;
-                      if (button) {
-                        button.style.transform = 'translateY(-2px) scale(1.02)';
-                        button.style.boxShadow = '0 12px 32px rgba(16, 185, 129, 0.4), var(--glass-shadow-medium)';
-                        button.style.background = 'linear-gradient(135deg, #059669, #047857)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      const button = e.currentTarget.querySelector('button') as HTMLElement;
-                      if (button) {
-                        button.style.transform = 'translateY(0) scale(1)';
-                        button.style.boxShadow = '0 8px 24px rgba(16, 185, 129, 0.3), var(--glass-shadow-light)';
-                        button.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-                      }
-                    }}
-                  >
+                  <ButtonWrapper>
                     <GlassButton 
                       variant="secondary" 
                       size="lg" 
@@ -978,14 +971,10 @@ export default function JamforElpriser() {
                         window.location.href = withDefaultCtaUtm('/fastpris-avtal', 'jamfor', 'cta-fastpris');
                       }}
                       aria-label="Fastpris - Fastpris med prisgaranti"
-                      style={{
-                        background: 'linear-gradient(135deg, #10b981, #059669)',
-                        boxShadow: '0 8px 24px rgba(16, 185, 129, 0.3), var(--glass-shadow-light)',
-                      }}
                     >
                       Fastpris
                     </GlassButton>
-                  </div>
+                  </ButtonWrapper>
                   <div style={{ 
                     fontSize: '0.9rem', 
                     color: 'var(--foreground)', 
