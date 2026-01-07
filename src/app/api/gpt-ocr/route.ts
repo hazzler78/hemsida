@@ -56,9 +56,17 @@ VIKTIGT - FLEXIBILITET:
 EXTRAKTIONSREGEL:
 Extrahera ALLA kostnader från fakturan och returnera dem som en JSON-array. Varje kostnad ska ha:
 - "name": exakt text från fakturan (t.ex. "Fast månadsavgift", "Elavtal årsavgift")
-- "amount": belopp i kr från "Totalt"-kolumnen (t.ex. 31.20, 44.84) - INTE från "öre/kWh" eller "kr/mån"
+- "amount": belopp i kr från "Totalt"-kolumnen - INTE från "öre/kWh" eller "kr/mån"
 - "section": vilken sektion den tillhör ("Elnät" eller "Elhandel")
 - "description": kort beskrivning av vad kostnaden är
+
+KRITISKT FÖR DECIMALTEcken:
+- Svenska fakturor använder KOMMA som decimaltecken (t.ex. "44,84 kr", "13,80 kr")
+- JSON kräver PUNKT som decimaltecken (t.ex. 44.84, 13.80)
+- DU MÅSTE konvertera komma till punkt när du skriver amount-värdet i JSON
+- Exempel: Om fakturan visar "44,84 kr" → skriv "amount": 44.84 i JSON
+- Exempel: Om fakturan visar "13,80 kr" → skriv "amount": 13.80 i JSON
+- Exempel: Om fakturan visar "31,20 kr" → skriv "amount": 31.20 i JSON
 
 KRITISKT FÖR BELOPP:
 - Läs ALLTID från den sista kolumnen som innehåller slutbeloppet i kr
@@ -121,15 +129,19 @@ JSON-FORMAT KRITISKT:
 
 SLUTLIG PÅMINNELSE:
 - Läs belopp från "Totalt"-kolumnen, INTE från "öre/kWh" eller "kr/mån"
-- För "Månadsavgift": läs från "Totalt"-kolumnen (t.ex. 55,20 kr), inte från "kr/mån"-kolumnen
-- För "Påslag": läs från "Totalt"-kolumnen (t.ex. 13,80 kr), inte från "öre/kWh"-kolumnen
+- För "Månadsavgift": läs från "Totalt"-kolumnen (t.ex. fakturan visar "55,20 kr"), konvertera till JSON: "amount": 55.20
+- För "Påslag": läs från "Totalt"-kolumnen (t.ex. fakturan visar "13,80 kr"), konvertera till JSON: "amount": 13.80
+- För "Elavtal årsavgift": läs från "Totalt"-kolumnen (t.ex. fakturan visar "44,84 kr"), konvertera till JSON: "amount": 44.84
+- KOMMA på fakturan → PUNKT i JSON - detta är KRITISKT för korrekt parsing
 
 KRITISKT EXEMPEL FÖR FORTUM-FAKTUROR:
 På Fortum-fakturor ser du ofta:
 - "Påslag: 690 kWh at 2,00 öre/kWh, totaling 13,80 kr"
 - Läs ALLTID "13,80 kr" (slutbeloppet), INTE "2,00 öre/kWh" (enhetspriset)
+- Konvertera till JSON: "amount": 13.80 (komma → punkt)
 - Samma gäller för "Månadsavgift: 1 Mån at 55,20 kr/mån, totaling 55,20 kr"
 - Läs ALLTID "55,20 kr" (slutbeloppet), INTE "55,20 kr/mån" (enhetspriset)
+- Konvertera till JSON: "amount": 55.20 (komma → punkt)
 
 VIKTIGT - FÖR ALLA LEVERANTÖRER:
 - Leta efter ordet "totaling" eller "totalt" följt av beloppet i kr
@@ -354,6 +366,10 @@ Svara på svenska och var hjälpsam och pedagogisk.`;
           if (cleanJson.startsWith('```')) {
             cleanJson = cleanJson.replace(/^```\s*/, '').replace(/\s*```$/, '');
           }
+          
+          // Normalize decimal separators: convert Swedish comma format to JSON period format
+          // Match "amount": followed by a number with comma, replace comma with period
+          cleanJson = cleanJson.replace(/"amount"\s*:\s*(\d+),(\d+)/g, '"amount": $1.$2');
           
           console.log('Cleaned JSON:', cleanJson.substring(0, 200));
           JSON.parse(cleanJson); // Validate JSON structure

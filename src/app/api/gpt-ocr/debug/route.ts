@@ -40,9 +40,16 @@ export async function POST(req: NextRequest) {
 **EXTRAKTIONSREGEL:**
 Extrahera ALLA kostnader från fakturan och returnera dem som en JSON-array. Varje kostnad ska ha:
 - "name": exakt text från fakturan (t.ex. "Fast månadsavgift", "Elavtal årsavgift")
-- "amount": belopp i kr (t.ex. 31.20, 44.84)
+- "amount": belopp i kr från "Totalt"-kolumnen - INTE från "öre/kWh" eller "kr/mån"
 - "section": vilken sektion den tillhör ("Elnät" eller "Elhandel")
 - "description": kort beskrivning av vad kostnaden är
+
+**KRITISKT FÖR DECIMALTEcken:**
+- Svenska fakturor använder KOMMA som decimaltecken (t.ex. "44,84 kr", "13,80 kr")
+- JSON kräver PUNKT som decimaltecken (t.ex. 44.84, 13.80)
+- DU MÅSTE konvertera komma till punkt när du skriver amount-värdet i JSON
+- Exempel: Om fakturan visar "44,84 kr" → skriv "amount": 44.84 i JSON
+- Exempel: Om fakturan visar "13,80 kr" → skriv "amount": 13.80 i JSON
 
 **EXEMPEL JSON:**
 [
@@ -125,7 +132,19 @@ Svara ENDAST med JSON-arrayen, inget annat.`;
       
       // Try to parse the JSON
       try {
-        const parsedData = JSON.parse(extractedJson);
+        // Clean the JSON response - remove any markdown formatting
+        let cleanJson = extractedJson.trim();
+        if (cleanJson.startsWith('```json')) {
+          cleanJson = cleanJson.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+        }
+        if (cleanJson.startsWith('```')) {
+          cleanJson = cleanJson.replace(/^```\s*/, '').replace(/\s*```$/, '');
+        }
+        
+        // Normalize decimal separators: convert Swedish comma format to JSON period format
+        cleanJson = cleanJson.replace(/"amount"\s*:\s*(\d+),(\d+)/g, '"amount": $1.$2');
+        
+        const parsedData = JSON.parse(cleanJson);
         debugInfo.parsedData = parsedData;
         
         // Check if Elavtal årsavgift is in the data
