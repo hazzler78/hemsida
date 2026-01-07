@@ -74,7 +74,6 @@ export default function Fakturaanalys() {
   const [logId, setLogId] = useState<number | null>(null);
   const sessionIdRef = useRef<string>('');
   const [consentToStore, setConsentToStore] = useState(false);
-  const [analysisConfirmed, setAnalysisConfirmed] = useState(false);
 
   useEffect(() => {
     try {
@@ -218,24 +217,12 @@ export default function Fakturaanalys() {
     }
   }
 
-  async function sendFeedback(isCorrect: boolean, notes?: string) {
-    try {
-      if (!logId) return;
-      await fetch('/api/invoice-ocr/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ logId, isCorrect, correctionNotes: notes || '' })
-      });
-      alert(isCorrect ? 'Tack! Vi har registrerat att analysen stämde.' : 'Tack! Din feedback är registrerad.');
-    } catch {}
-  }
 
   function handleUploadNew() {
     setFile(null);
     setGptResult(null);
     setError('');
     setShowFullAnalysis(false);
-    setAnalysisConfirmed(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
   }
 
@@ -797,29 +784,6 @@ export default function Fakturaanalys() {
               }}>
                 AI:n visar ett estimat baserat på din faktura. För mer exakt analys och personlig hjälp, kontakta oss så hjälper vi dig hitta det bästa elavtalet för din situation.
               </p>
-              {logId && (
-                <label style={{ 
-                  marginTop: '1rem', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '0.5rem', 
-                  color: 'rgba(255, 255, 255, 0.95)'
-                }}>
-                  <input
-                    type="checkbox"
-                    checked={analysisConfirmed}
-                    onChange={(e) => {
-                      const checked = e.target.checked;
-                      setAnalysisConfirmed(checked);
-                      if (checked) {
-                        sendFeedback(true);
-                      }
-                    }}
-                    style={{ width: 18, height: 18 }}
-                  />
-                  <span style={{ userSelect: 'none' }}>Analysen stämmer</span>
-                </label>
-              )}
             </div>
 
             <div className="analysis-fade-in" style={{ 
@@ -840,20 +804,49 @@ export default function Fakturaanalys() {
                 Sluta slänga pengar i sjön! Välj ditt nya elavtal nu och börja spara från dag ett.
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: 200 }}>
-                <GlassButton 
-                  variant="primary" 
-                  size="lg" 
-                  background="linear-gradient(135deg, var(--primary), var(--secondary))" 
-                  disableScrollEffect={true} 
-                  disableHoverEffect={true}
-                  onClick={() => {
-                    trackContractClick('rorligt');
-                    window.location.href = withDefaultCtaUtm('/rorligt-avtal', 'fakturaanalys', 'cta-rorligt');
+                <div
+                  style={{
+                    cursor: 'pointer',
+                    position: 'relative',
+                    zIndex: 10,
+                    transition: 'all 0.3s ease',
                   }}
-                  aria-label="Rörligt avtal - 0 kr i avgifter första året – utan bindningstid"
+                  onMouseEnter={(e) => {
+                    const button = e.currentTarget.querySelector('button') as HTMLElement;
+                    if (button) {
+                      button.style.transform = 'translateY(-2px) scale(1.02)';
+                      button.style.boxShadow = '0 12px 32px rgba(16, 185, 129, 0.4), var(--glass-shadow-medium)';
+                      button.style.background = 'linear-gradient(135deg, #059669, #047857)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    const button = e.currentTarget.querySelector('button') as HTMLElement;
+                    if (button) {
+                      button.style.transform = 'translateY(0) scale(1)';
+                      button.style.boxShadow = '0 8px 24px rgba(16, 185, 129, 0.3), var(--glass-shadow-light)';
+                      button.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                    }
+                  }}
                 >
-                  Rörligt avtal
-                </GlassButton>
+                  <GlassButton 
+                    variant="primary" 
+                    size="lg" 
+                    background="linear-gradient(135deg, #10b981, #059669)" 
+                    disableScrollEffect={true} 
+                    disableHoverEffect={true}
+                    onClick={() => {
+                      trackContractClick('rorligt');
+                      window.location.href = withDefaultCtaUtm('/rorligt-avtal', 'fakturaanalys', 'cta-rorligt');
+                    }}
+                    aria-label="Rörligt avtal - 0 kr i avgifter första året – utan bindningstid"
+                    style={{
+                      background: 'linear-gradient(135deg, #10b981, #059669)',
+                      boxShadow: '0 8px 24px rgba(16, 185, 129, 0.3), var(--glass-shadow-light)',
+                    }}
+                  >
+                    Rörligt avtal
+                  </GlassButton>
+                </div>
                 <div style={{ 
                   fontSize: '0.9rem', 
                   color: 'var(--foreground)', 
