@@ -665,12 +665,68 @@ export default function JamforElpriser() {
                       </h4>
                     );
                   },
-                  li: (props) => <li style={{
-                    marginBottom: '0.5rem', 
-                    lineHeight: 1.5,
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
-                  }} {...props} />,
+                  li: (props) => {
+                    const content = props.children?.toString() || '';
+                    // Check if this is a contract option and convert to link
+                    if (content.includes('Rörligt avtal:')) {
+                      const parts = content.split('Rörligt avtal:');
+                      const description = parts[1] || '';
+                      return (
+                        <li style={{
+                          marginBottom: '0.5rem', 
+                          lineHeight: 1.5,
+                          color: 'rgba(255, 255, 255, 0.9)',
+                          textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
+                        }}>
+                          <a 
+                            href={withDefaultCtaUtm('/rorligt-avtal', 'jamfor', 'cta-rorligt')}
+                            onClick={() => trackContractClick('rorligt')}
+                            style={{
+                              color: '#10b981',
+                              fontWeight: 600,
+                              textDecoration: 'underline',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Rörligt avtal:
+                          </a>
+                          {description}
+                        </li>
+                      );
+                    }
+                    if (content.includes('Fastpris med prisgaranti:') || content.includes('Fastprisavtal:')) {
+                      const parts = content.split(/Fastpris(?: med prisgaranti|avtal):/);
+                      const description = parts[1] || '';
+                      return (
+                        <li style={{
+                          marginBottom: '0.5rem', 
+                          lineHeight: 1.5,
+                          color: 'rgba(255, 255, 255, 0.9)',
+                          textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
+                        }}>
+                          <a 
+                            href={withDefaultCtaUtm('/fastpris-avtal', 'jamfor', 'cta-fastpris')}
+                            onClick={() => trackContractClick('fastpris')}
+                            style={{
+                              color: '#10b981',
+                              fontWeight: 600,
+                              textDecoration: 'underline',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {content.includes('Fastprisavtal:') ? 'Fastprisavtal:' : 'Fastpris med prisgaranti:'}
+                          </a>
+                          {description}
+                        </li>
+                      );
+                    }
+                    return <li style={{
+                      marginBottom: '0.5rem', 
+                      lineHeight: 1.5,
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
+                    }} {...props} />;
+                  },
                   strong: (props) => <strong style={{
                     color: 'white', 
                     fontWeight: 600,
@@ -837,12 +893,68 @@ export default function JamforElpriser() {
                         </h4>
                       );
                     },
-                    li: (props) => <li style={{
-                      marginBottom: '0.25rem', 
-                      lineHeight: 1.4,
-                      color: 'rgba(255, 255, 255, 0.9)',
-                      textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
-                    }} {...props} />,
+                    li: (props) => {
+                      const content = props.children?.toString() || '';
+                      // Check if this is a contract option and convert to link
+                      if (content.includes('Rörligt avtal:')) {
+                        const parts = content.split('Rörligt avtal:');
+                        const description = parts[1] || '';
+                        return (
+                          <li style={{
+                            marginBottom: '0.25rem', 
+                            lineHeight: 1.4,
+                            color: 'rgba(255, 255, 255, 0.9)',
+                            textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
+                          }}>
+                            <a 
+                              href={withDefaultCtaUtm('/rorligt-avtal', 'jamfor', 'cta-rorligt')}
+                              onClick={() => trackContractClick('rorligt')}
+                              style={{
+                                color: '#10b981',
+                                fontWeight: 600,
+                                textDecoration: 'underline',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Rörligt avtal:
+                            </a>
+                            {description}
+                          </li>
+                        );
+                      }
+                      if (content.includes('Fastpris med prisgaranti:') || content.includes('Fastprisavtal:')) {
+                        const parts = content.split(/Fastpris(?: med prisgaranti|avtal):/);
+                        const description = parts[1] || '';
+                        return (
+                          <li style={{
+                            marginBottom: '0.25rem', 
+                            lineHeight: 1.4,
+                            color: 'rgba(255, 255, 255, 0.9)',
+                            textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
+                          }}>
+                            <a 
+                              href={withDefaultCtaUtm('/fastpris-avtal', 'jamfor', 'cta-fastpris')}
+                              onClick={() => trackContractClick('fastpris')}
+                              style={{
+                                color: '#10b981',
+                                fontWeight: 600,
+                                textDecoration: 'underline',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              {content.includes('Fastprisavtal:') ? 'Fastprisavtal:' : 'Fastpris med prisgaranti:'}
+                            </a>
+                            {description}
+                          </li>
+                        );
+                      }
+                      return <li style={{
+                        marginBottom: '0.25rem', 
+                        lineHeight: 1.4,
+                        color: 'rgba(255, 255, 255, 0.9)',
+                        textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
+                      }} {...props} />;
+                    },
                     strong: (props) => <strong style={{
                       color: 'white', 
                       fontWeight: 600,
