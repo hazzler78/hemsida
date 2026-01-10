@@ -177,6 +177,54 @@ const HighlightBadge = styled.div`
   z-index: 10;
 `;
 
+// Fallback leverantörer när databasen inte är tillgänglig
+const FALLBACK_PROVIDERS: PageProvider[] = [
+  {
+    id: 1,
+    name: 'Svealands Elbolag',
+    type: 'fastpris',
+    logo_url: '/svealand-logo.png',
+    description: 'Om du hittar ett billigare fastprisavtal på elmarknaden matchas priset – och du får dessutom 1 öre/kWh i extra rabatt. Ett pålitligt val för dig som vill ha kontroll över elkostnaderna.',
+    url: 'https://www.svealandselbolag.se/elchef-fastpris/',
+    is_recommended: true,
+    display_order: 1,
+    active: true,
+  },
+  {
+    id: 2,
+    name: 'Cheap Energy',
+    type: 'fastpris',
+    logo_url: '/cheap-logo.png',
+    description: 'Konkurrenskraftiga fastpriser. Trygghet och förutsägbarhet för din elförbrukning.',
+    url: 'https://www.cheapenergy.se/elchef-fastpris/',
+    is_recommended: false,
+    display_order: 2,
+    active: true,
+  },
+  {
+    id: 3,
+    name: 'Stockholms Elbolag',
+    type: 'fastpris',
+    logo_url: '/stockholms-elbolag-logo.png',
+    description: 'Fast elpris med tydliga villkor. Perfekt för dig som vill ha förutsägbara elkostnader.',
+    url: 'https://www.stockholmselbolag.se/elavtal-elchef-fastpris/',
+    is_recommended: false,
+    display_order: 3,
+    active: true,
+  },
+  {
+    id: 4,
+    name: 'Svekraft',
+    type: 'fastpris',
+    logo_url: '/svekraft-logo.png',
+    description: 'Stabila fastpriser för din trygghet. Låsta priser som ger dig kontroll över din elbudget.',
+    url: 'https://www.svekraft.com/elchef-fastpris/',
+    is_recommended: false,
+    display_order: 4,
+    active: true,
+  },
+];
+
 export default function FastprisAvtalPage() {
   const [providers, setProviders] = React.useState<PageProvider[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -194,14 +242,22 @@ export default function FastprisAvtalPage() {
         
         if (error) {
           console.error('Error fetching providers:', error);
-          // Fallback till tom array om det finns fel
-          setProviders([]);
-        } else if (data) {
+          console.error('Error details:', JSON.stringify(error, null, 2));
+          // Fallback till hårdkodade leverantörer när databasen inte är tillgänglig
+          console.log('Using fallback providers due to database error');
+          setProviders(FALLBACK_PROVIDERS);
+        } else if (data && data.length > 0) {
+          console.log('Fetched providers:', data);
           setProviders(data);
+        } else {
+          console.warn('No data returned from Supabase, using fallback providers');
+          setProviders(FALLBACK_PROVIDERS);
         }
       } catch (error) {
         console.error('Error fetching providers:', error);
-        setProviders([]);
+        // Fallback till hårdkodade leverantörer vid fel
+        console.log('Using fallback providers due to exception');
+        setProviders(FALLBACK_PROVIDERS);
       } finally {
         setLoading(false);
       }

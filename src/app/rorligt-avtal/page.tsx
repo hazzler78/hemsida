@@ -239,6 +239,65 @@ const HighlightBadge = styled.div`
   z-index: 10;
 `;
 
+// Fallback leverantörer när databasen inte är tillgänglig
+const FALLBACK_PROVIDERS: PageProvider[] = [
+  {
+    id: 1,
+    name: 'Cheap Energy',
+    type: 'rorligt',
+    logo_url: '/cheap-logo.png',
+    description: '0 kr i månadsavgift, 0 öre i påslag i 12 månader. Ingen bindningstid.',
+    url: 'https://www.cheapenergy.se/teckna-elavtal-cheap-elchef/',
+    is_recommended: true,
+    display_order: 1,
+    active: true,
+  },
+  {
+    id: 2,
+    name: 'Svekraft',
+    type: 'rorligt',
+    logo_url: '/svekraft-logo.png',
+    description: '0 kr i månadsavgift i 12 månader, 7,99 öre i påslag. Ingen bindningstid.',
+    url: 'https://www.svekraft.com/elchef-rorligt/',
+    is_recommended: false,
+    display_order: 2,
+    active: true,
+  },
+  {
+    id: 3,
+    name: 'Tibber',
+    type: 'rorligt',
+    logo_url: '/tibber.png',
+    description: '49 kr i månadsavgift, 8,6 öre i påslag. Ingen bindningstid.',
+    url: 'https://go.adt242.com/t/t?a=1590956516&as=2012933659&t=2&tk=1',
+    is_recommended: false,
+    display_order: 3,
+    active: true,
+  },
+  {
+    id: 4,
+    name: 'Telinet Energi',
+    type: 'rorligt',
+    logo_url: '/telinet.png',
+    description: '59 kr i månadsavgift, 13,33 öre i påslag. Ingen bindningstid.',
+    url: 'https://at.telinet.se/t/t?a=1870484942&as=2012933659&t=2&tk=1',
+    is_recommended: false,
+    display_order: 4,
+    active: true,
+  },
+  {
+    id: 5,
+    name: 'Fortum',
+    type: 'rorligt',
+    logo_url: '/fortum.png',
+    description: '69 kr i månadsavgift, 12,38 öre i påslag. Ingen bindningstid.',
+    url: 'https://ion.fortum.com/t/t?a=1312475339&as=2012933659&t=2&tk=1',
+    is_recommended: false,
+    display_order: 5,
+    active: true,
+  },
+];
+
 export default function RorligtAvtalPage() {
   const [providers, setProviders] = React.useState<PageProvider[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -256,14 +315,22 @@ export default function RorligtAvtalPage() {
         
         if (error) {
           console.error('Error fetching providers:', error);
-          // Fallback till tom array om det finns fel
-          setProviders([]);
-        } else if (data) {
+          console.error('Error details:', JSON.stringify(error, null, 2));
+          // Fallback till hårdkodade leverantörer när databasen inte är tillgänglig
+          console.log('Using fallback providers due to database error');
+          setProviders(FALLBACK_PROVIDERS);
+        } else if (data && data.length > 0) {
+          console.log('Fetched providers:', data);
           setProviders(data);
+        } else {
+          console.warn('No data returned from Supabase, using fallback providers');
+          setProviders(FALLBACK_PROVIDERS);
         }
       } catch (error) {
         console.error('Error fetching providers:', error);
-        setProviders([]);
+        // Fallback till hårdkodade leverantörer vid fel
+        console.log('Using fallback providers due to exception');
+        setProviders(FALLBACK_PROVIDERS);
       } finally {
         setLoading(false);
       }
