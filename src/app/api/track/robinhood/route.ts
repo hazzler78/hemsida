@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // Type definition for Cloudflare D1 database
+// D1Database is available in Cloudflare runtime but not in TypeScript types during build
+interface D1Database {
+  prepare(query: string): D1PreparedStatement;
+}
+
+interface D1PreparedStatement {
+  bind(...values: unknown[]): D1PreparedStatement;
+  first(): Promise<unknown>;
+  all(): Promise<{ results: unknown[] }>;
+  run(): Promise<{ meta: { last_row_id: number } }>;
+}
+
 interface Env {
   DB?: D1Database;
 }
@@ -9,7 +21,6 @@ export async function POST(req: NextRequest) {
   try {
     // Get D1 database from environment (available in Cloudflare Pages)
     // In Cloudflare Pages with @cloudflare/next-on-pages, D1 is available via process.env.DB
-    // @ts-expect-error - D1Database is available in Cloudflare runtime
     const db: D1Database | undefined = (process.env as unknown as Env)?.DB;
     
     if (!db) {
