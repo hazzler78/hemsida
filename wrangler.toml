@@ -12,4 +12,9 @@ compatibility_flags = ["nodejs_compat"]
 
 # Note: Pages config does not support account_id, triggers, or build/observability blocks
 
+# D1 Database configuration for tracking robinhood clicks
+[[d1_databases]]
+binding = "DB"
+database_name = "elchef-tracking"
+database_id = "d126bbf9-5645-45de-a423-2ae12e6e8d60"
 
