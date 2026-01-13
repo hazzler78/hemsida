@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   try {
     // Get D1 database from environment (available in Cloudflare Pages)
     // In Cloudflare Pages with @cloudflare/next-on-pages, D1 is available via process.env.DB
-    // @ts-ignore - D1Database is available in Cloudflare runtime
+    // @ts-expect-error - D1Database is available in Cloudflare runtime
     const db: D1Database | undefined = (process.env as unknown as Env)?.DB;
     
     if (!db) {

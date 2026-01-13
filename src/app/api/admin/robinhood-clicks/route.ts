@@ -1,14 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 // Type definition for Cloudflare D1 database
 interface Env {
   DB?: D1Database;
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     // Get D1 database from environment
-    // @ts-ignore - D1Database is available in Cloudflare runtime
+    // @ts-expect-error - D1Database is available in Cloudflare runtime
     const db: D1Database | undefined = (process.env as unknown as Env)?.DB;
     
     if (!db) {
@@ -27,7 +27,6 @@ export async function GET(req: NextRequest) {
     const clicks = clicksResult.results || [];
 
     // Calculate statistics
-    const now = Math.floor(Date.now() / 1000);
     const todayStart = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000);
     const weekStart = todayStart - (7 * 24 * 60 * 60);
 
