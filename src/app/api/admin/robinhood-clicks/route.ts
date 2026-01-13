@@ -49,10 +49,13 @@ export async function GET() {
        FROM robinhood_clicks`
     ).bind(todayStart, weekStart).first();
 
+    // Type assertion for D1 query result
+    const statsData = statsResult as { total?: number; today?: number; this_week?: number } | null;
+
     const stats = {
-      total: statsResult?.total || 0,
-      today: statsResult?.today || 0,
-      thisWeek: statsResult?.this_week || 0,
+      total: statsData?.total || 0,
+      today: statsData?.today || 0,
+      thisWeek: statsData?.this_week || 0,
     };
 
     return NextResponse.json({ 
