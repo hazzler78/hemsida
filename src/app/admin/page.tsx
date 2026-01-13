@@ -81,6 +81,13 @@ const adminSections = [
     href: "/admin/providers",
     icon: "⚡",
     color: "bg-yellow-500"
+  },
+  {
+    title: "Robinhood Klick",
+    description: "Spåra klick på /robinhood-länken som redirectar till startsidan",
+    href: "/admin/robinhood-clicks",
+    icon: "🎯",
+    color: "bg-red-500"
   }
 ];
 
