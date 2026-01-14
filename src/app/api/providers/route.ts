@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
     query += ' ORDER BY display_order ASC';
 
     const result = await db.prepare(query).bind(...params).all();
-    const providers = (result.results || []).map((row: {
+    type D1ProviderRow = {
       id: number;
       name: string;
       type: string;
@@ -82,7 +82,8 @@ export async function GET(request: NextRequest) {
       active: number;
       created_at: number;
       updated_at: number;
-    }) => ({
+    };
+    const providers = ((result.results || []) as D1ProviderRow[]).map((row) => ({
       id: row.id,
       name: row.name,
       type: row.type,
