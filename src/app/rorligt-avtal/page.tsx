@@ -232,6 +232,39 @@ const HighlightBadge = styled.div`
   z-index: 10;
 `;
 
+// Mapping av leverantörsnamn till logotyper
+const LOGO_MAPPING: Record<string, string> = {
+  'Cheap Energy': '/cheap-logo.png',
+  'Svekraft': '/svekraft-logo.png',
+  'Tibber': '/tibber.png',
+  'Telinet Energi': '/telinet.png',
+  'Fortum': '/fortum.png',
+  'Eon': '/eon.png',
+  'E.ON': '/eon.png',
+  'Greenely': '/greenely.png',
+  'Skellefteå Kraft': '/skelleftea.png',
+  'Skellefteå': '/skelleftea.png',
+};
+
+// Funktion för att hitta logo_url baserat på leverantörsnamn
+function getLogoUrl(providerName: string, existingLogoUrl?: string): string {
+  if (existingLogoUrl && existingLogoUrl.trim() !== '') {
+    return existingLogoUrl;
+  }
+  // Matcha exakt namn först
+  if (LOGO_MAPPING[providerName]) {
+    return LOGO_MAPPING[providerName];
+  }
+  // Matcha case-insensitive
+  const normalizedName = Object.keys(LOGO_MAPPING).find(
+    key => key.toLowerCase() === providerName.toLowerCase()
+  );
+  if (normalizedName) {
+    return LOGO_MAPPING[normalizedName];
+  }
+  return '';
+}
+
 // Fallback leverantörer när databasen inte är tillgänglig
 const FALLBACK_PROVIDERS: PageProvider[] = [
   {
@@ -308,14 +341,18 @@ export default function RorligtAvtalPage() {
         
         if (result.providers && result.providers.length > 0) {
           console.log('Fetched providers from D1:', result.providers);
-          // Merge with fallback data to ensure logo_url is always present
+          // Merge with fallback data and logo mapping to ensure logo_url is always present
           const mergedProviders = result.providers.map((provider: PageProvider) => {
             const fallbackProvider = FALLBACK_PROVIDERS.find(fb => fb.name === provider.name);
+            const logoUrl = getLogoUrl(
+              provider.name,
+              provider.logo_url && provider.logo_url.trim() !== '' 
+                ? provider.logo_url 
+                : fallbackProvider?.logo_url
+            );
             return {
               ...provider,
-              logo_url: provider.logo_url && provider.logo_url.trim() !== '' 
-                ? provider.logo_url 
-                : (fallbackProvider?.logo_url || '')
+              logo_url: logoUrl
             };
           });
           setProviders(mergedProviders);
