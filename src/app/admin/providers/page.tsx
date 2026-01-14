@@ -32,11 +32,6 @@ export default function AdminProviders() {
     }
   }, []);
 
-  useEffect(() => {
-    if (!authed) return;
-    fetchProviders();
-  }, [authed, activeTab]);
-
   const fetchProviders = async () => {
     try {
       const response = await fetch(`/api/providers?type=${activeTab}`);
@@ -52,6 +47,12 @@ export default function AdminProviders() {
       setError('Kunde inte hämta leverantörer: ' + (error as Error).message);
     }
   };
+
+  useEffect(() => {
+    if (!authed) return;
+    fetchProviders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authed, activeTab]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
