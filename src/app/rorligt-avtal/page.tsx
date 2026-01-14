@@ -294,6 +294,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
 export default function RorligtAvtalPage() {
   const [providers, setProviders] = React.useState<PageProvider[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [failedLogos, setFailedLogos] = React.useState<Set<number>>(new Set());
 
   React.useEffect(() => {
     const fetchProviders = async () => {
@@ -307,7 +308,17 @@ export default function RorligtAvtalPage() {
         
         if (result.providers && result.providers.length > 0) {
           console.log('Fetched providers from D1:', result.providers);
-          setProviders(result.providers);
+          // Merge with fallback data to ensure logo_url is always present
+          const mergedProviders = result.providers.map((provider: PageProvider) => {
+            const fallbackProvider = FALLBACK_PROVIDERS.find(fb => fb.name === provider.name);
+            return {
+              ...provider,
+              logo_url: provider.logo_url && provider.logo_url.trim() !== '' 
+                ? provider.logo_url 
+                : (fallbackProvider?.logo_url || '')
+            };
+          });
+          setProviders(mergedProviders);
         } else {
           console.warn('No providers returned from D1, using fallback providers');
           setProviders(FALLBACK_PROVIDERS);
@@ -387,7 +398,15 @@ export default function RorligtAvtalPage() {
           <ProvidersGrid>
             {providers.map((provider) => (
               <ProviderCard key={provider.id}>
-                <ProviderLogo src={provider.logo_url} alt={provider.name} />
+                {provider.logo_url && provider.logo_url.trim() !== '' && !failedLogos.has(provider.id) && (
+                  <ProviderLogo 
+                    src={provider.logo_url} 
+                    alt={provider.name}
+                    onError={() => {
+                      setFailedLogos(prev => new Set(prev).add(provider.id));
+                    }}
+                  />
+                )}
                 {provider.is_recommended && <HighlightBadge>Rekommenderat</HighlightBadge>}
                 <ProviderName>{provider.name}</ProviderName>
                 <ProviderDescription>
