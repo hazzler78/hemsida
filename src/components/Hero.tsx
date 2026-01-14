@@ -233,7 +233,7 @@ export default function Hero() {
             <h1>{String(heroTitle)}</h1>
             <p>{String(heroSub)}</p>
                          <ButtonRow>
-               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: 200 }}>
+               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: 220 }}>
                                    <div style={{
                     cursor: 'pointer',
                     position: 'relative',
@@ -280,7 +280,7 @@ export default function Hero() {
                    </GlassButton>
                  </div>
                  <div style={{ 
-                  fontSize: '0.9rem', 
+                  fontSize: '0.85rem', 
                   color: 'var(--foreground)', 
                   background: 'rgba(255, 255, 255, 0.95)', 
                   border: '1px solid rgba(0,0,0,0.06)', 
@@ -290,12 +290,13 @@ export default function Hero() {
                   backdropFilter: 'blur(8px)',
                   boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                   position: 'relative',
-                  zIndex: 10
+                  zIndex: 10,
+                  whiteSpace: 'nowrap'
                 }}>
                    0 kr i månadsavgift första året – utan bindningstid
                  </div>
                </div>
-                               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: 200 }}>
+                               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: 220 }}>
                                      <div style={{
                      cursor: 'pointer',
                      position: 'relative',
