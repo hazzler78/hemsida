@@ -272,7 +272,7 @@ export default function Hero() {
                        variant="primary" 
                        size="lg"
                        background="linear-gradient(135deg, var(--primary), var(--secondary))"
-                       aria-label="Rörligt avtal - 0 kr i avgifter första året – utan bindningstid"
+                       aria-label="Rörligt avtal - 0 kr i månadsavgift första året – utan bindningstid"
                        disableScrollEffect={true}
                        disableHoverEffect={true}
                      >
@@ -292,7 +292,7 @@ export default function Hero() {
                   position: 'relative',
                   zIndex: 10
                 }}>
-                   0 kr i avgifter första året – utan bindningstid
+                   0 kr i månadsavgift första året – utan bindningstid
                  </div>
                </div>
                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: 200 }}>
