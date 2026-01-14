@@ -3,13 +3,6 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { createClient } from '@supabase/supabase-js';
-
-const getSupabase = () =>
-  createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
-  );
 
 interface PageProvider {
   id: number;
@@ -305,25 +298,18 @@ export default function RorligtAvtalPage() {
   React.useEffect(() => {
     const fetchProviders = async () => {
       try {
-        const supabase = getSupabase();
-        const { data, error } = await supabase
-          .from('page_providers')
-          .select('*')
-          .eq('type', 'rorligt')
-          .eq('active', true)
-          .order('display_order', { ascending: true });
+        const response = await fetch('/api/providers?type=rorligt&active=true');
+        const result = await response.json();
         
-        if (error) {
-          console.error('Error fetching providers:', error);
-          console.error('Error details:', JSON.stringify(error, null, 2));
-          // Fallback till hårdkodade leverantörer när databasen inte är tillgänglig
-          console.log('Using fallback providers due to database error');
-          setProviders(FALLBACK_PROVIDERS);
-        } else if (data && data.length > 0) {
-          console.log('Fetched providers:', data);
-          setProviders(data);
+        if (!response.ok) {
+          throw new Error(result.error || 'Kunde inte hämta leverantörer');
+        }
+        
+        if (result.providers && result.providers.length > 0) {
+          console.log('Fetched providers from D1:', result.providers);
+          setProviders(result.providers);
         } else {
-          console.warn('No data returned from Supabase, using fallback providers');
+          console.warn('No providers returned from D1, using fallback providers');
           setProviders(FALLBACK_PROVIDERS);
         }
       } catch (error) {

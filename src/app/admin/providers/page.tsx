@@ -1,12 +1,6 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
-const getSupabase = () =>
-  createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
-  );
 
 const ADMIN_PASSWORD = "grodan2025";
 
@@ -45,18 +39,14 @@ export default function AdminProviders() {
 
   const fetchProviders = async () => {
     try {
-      const supabase = getSupabase();
-      const { data, error } = await supabase
-        .from('page_providers')
-        .select('*')
-        .eq('type', activeTab)
-        .order('display_order', { ascending: true });
+      const response = await fetch(`/api/providers?type=${activeTab}`);
+      const result = await response.json();
       
-      if (error) throw error;
-      
-      if (data) {
-        setProviders(data);
+      if (!response.ok) {
+        throw new Error(result.error || 'Kunde inte hämta leverantörer');
       }
+      
+      setProviders(result.providers || []);
     } catch (error) {
       console.error('Error fetching providers:', error);
       setError('Kunde inte hämta leverantörer: ' + (error as Error).message);
@@ -76,40 +66,23 @@ export default function AdminProviders() {
 
   const saveProvider = async (provider: PageProvider) => {
     try {
-      const supabase = getSupabase();
-      if (provider.id) {
-        // Update existing
-        const { error } = await supabase
-          .from('page_providers')
-          .update({
-            name: provider.name,
-            type: provider.type,
-            logo_url: provider.logo_url,
-            description: provider.description,
-            url: provider.url,
-            is_recommended: provider.is_recommended,
-            display_order: provider.display_order,
-            active: provider.active,
-          })
-          .eq('id', provider.id);
-        
-        if (error) throw error;
-      } else {
-        // Create new
-        const { error } = await supabase
-          .from('page_providers')
-          .insert([{
-            name: provider.name,
-            type: provider.type,
-            logo_url: provider.logo_url,
-            description: provider.description,
-            url: provider.url,
-            is_recommended: provider.is_recommended,
-            display_order: provider.display_order,
-            active: provider.active,
-          }]);
-        
-        if (error) throw error;
+      const method = provider.id ? 'PUT' : 'POST';
+      const response = await fetch('/api/providers', {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(provider),
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Kunde inte spara leverantör');
+      }
+      
+      if (!provider.id && result.id) {
+        provider.id = result.id;
       }
       
       setSuccess('Leverantör sparad!');
@@ -126,13 +99,15 @@ export default function AdminProviders() {
     if (!confirm('Är du säker på att du vill radera denna leverantör?')) return;
     
     try {
-      const supabase = getSupabase();
-      const { error } = await supabase
-        .from('page_providers')
-        .delete()
-        .eq('id', id);
+      const response = await fetch(`/api/providers?id=${id}`, {
+        method: 'DELETE',
+      });
       
-      if (error) throw error;
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Kunde inte radera leverantör');
+      }
       
       setSuccess('Leverantör raderad!');
       fetchProviders();
@@ -154,18 +129,28 @@ export default function AdminProviders() {
     const swapProvider = providers[newIndex];
     
     try {
-      const supabase = getSupabase();
-      
       // Swap display_order values
-      await supabase
-        .from('page_providers')
-        .update({ display_order: swapProvider.display_order })
-        .eq('id', provider.id);
+      await fetch('/api/providers', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...provider,
+          display_order: swapProvider.display_order,
+        }),
+      });
       
-      await supabase
-        .from('page_providers')
-        .update({ display_order: provider.display_order })
-        .eq('id', swapProvider.id);
+      await fetch('/api/providers', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...swapProvider,
+          display_order: provider.display_order,
+        }),
+      });
       
       fetchProviders();
     } catch (error) {

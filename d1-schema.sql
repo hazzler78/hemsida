@@ -12,3 +12,21 @@ CREATE TABLE IF NOT EXISTS robinhood_clicks (
 
 CREATE INDEX IF NOT EXISTS idx_robinhood_clicks_created_at ON robinhood_clicks(created_at);
 CREATE INDEX IF NOT EXISTS idx_robinhood_clicks_session_id ON robinhood_clicks(session_id);
+
+-- Page providers table (temporary storage while Supabase is full)
+CREATE TABLE IF NOT EXISTS page_providers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('rorligt', 'fastpris')),
+  logo_url TEXT NOT NULL,
+  description TEXT NOT NULL,
+  url TEXT NOT NULL,
+  is_recommended INTEGER DEFAULT 0 CHECK (is_recommended IN (0, 1)),
+  display_order INTEGER DEFAULT 0,
+  active INTEGER DEFAULT 1 CHECK (active IN (0, 1)),
+  created_at INTEGER DEFAULT (strftime('%s', 'now')),
+  updated_at INTEGER DEFAULT (strftime('%s', 'now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_page_providers_type ON page_providers(type, active);
+CREATE INDEX IF NOT EXISTS idx_page_providers_order ON page_providers(type, display_order, active);
