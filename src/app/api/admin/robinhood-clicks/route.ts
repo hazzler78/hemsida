@@ -110,6 +110,9 @@ export async function GET(req: NextRequest) {
       conversionRate: 0,
       conversionRateToday: 0,
       conversionRateThisWeek: 0,
+      trackingStartDate: null as string | null,
+      robinhoodVisitorsSinceTracking: 0,
+      conversionRateSinceTracking: 0,
     };
 
     try {
@@ -119,6 +122,20 @@ export async function GET(req: NextRequest) {
       if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
         const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
         
+        // Find when we started tracking came_via_robinhood (first affiliate click with this flag)
+        const { data: firstTracking } = await supabase
+          .from('affiliate_clicks')
+          .select('created_at')
+          .eq('came_via_robinhood', true)
+          .order('created_at', { ascending: true })
+          .limit(1)
+          .single();
+
+        const trackingStartDate = firstTracking?.created_at || null;
+        const trackingStartTimestamp = trackingStartDate 
+          ? Math.floor(new Date(trackingStartDate).getTime() / 1000)
+          : null;
+
         // Calculate date ranges (Supabase uses ISO timestamps)
         const now = new Date();
         const todayStart = new Date(now.setHours(0, 0, 0, 0));
@@ -144,6 +161,15 @@ export async function GET(req: NextRequest) {
           .eq('came_via_robinhood', true)
           .gte('created_at', weekStart.toISOString());
 
+        // Get robinhood visitors SINCE tracking started (for accurate conversion rate)
+        let robinhoodVisitorsSinceTracking = 0;
+        if (trackingStartTimestamp) {
+          const visitorsSinceTrackingResult = await db.prepare(
+            `SELECT COUNT(*) as total FROM robinhood_clicks WHERE created_at >= ?`
+          ).bind(trackingStartTimestamp).first();
+          robinhoodVisitorsSinceTracking = (visitorsSinceTrackingResult as { total?: number })?.total || 0;
+        }
+
         affiliateStats = {
           total: totalAffiliate || 0,
           today: todayAffiliate || 0,
@@ -151,6 +177,11 @@ export async function GET(req: NextRequest) {
           conversionRate: stats.total > 0 ? ((totalAffiliate || 0) / stats.total * 100) : 0,
           conversionRateToday: stats.today > 0 ? ((todayAffiliate || 0) / stats.today * 100) : 0,
           conversionRateThisWeek: stats.thisWeek > 0 ? ((weekAffiliate || 0) / stats.thisWeek * 100) : 0,
+          trackingStartDate: trackingStartDate,
+          robinhoodVisitorsSinceTracking: robinhoodVisitorsSinceTracking,
+          conversionRateSinceTracking: robinhoodVisitorsSinceTracking > 0 
+            ? ((totalAffiliate || 0) / robinhoodVisitorsSinceTracking * 100) 
+            : 0,
         };
       }
     } catch (error) {

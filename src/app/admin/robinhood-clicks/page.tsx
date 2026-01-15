@@ -58,6 +58,9 @@ export default function RobinhoodClicksPage() {
     conversionRate: 0,
     conversionRateToday: 0,
     conversionRateThisWeek: 0,
+    trackingStartDate: null as string | null,
+    robinhoodVisitorsSinceTracking: 0,
+    conversionRateSinceTracking: 0,
   });
   const [pagination, setPagination] = useState<Pagination>({
     page: 1,
@@ -344,11 +347,25 @@ export default function RobinhoodClicksPage() {
             boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
           }}>
             <h2 style={{ marginTop: 0, marginBottom: '1.5rem' }}>Konverteringsstatistik</h2>
-            <p style={{ marginBottom: '1.5rem', color: '#6b7280', fontSize: '0.875rem' }}>
+            <p style={{ marginBottom: '1rem', color: '#6b7280', fontSize: '0.875rem' }}>
               Visar hur många av besökarna på robinhood-sidan som faktiskt klickar vidare på affiliate-länkar. 
               Endast affiliate-klick från användare som kom via robinhood-länken räknas med. 
               Detta ger en indikation på hur många som blir försäljning.
             </p>
+            {affiliateStats.trackingStartDate && (
+              <div style={{
+                padding: '0.75rem 1rem',
+                background: '#fef3c7',
+                borderRadius: '6px',
+                marginBottom: '1.5rem',
+                border: '1px solid #fde68a'
+              }}>
+                <p style={{ margin: 0, fontSize: '0.875rem', color: '#92400e' }}>
+                  <strong>Viktigt:</strong> Spårning av robinhood-konverteringar började {new Date(affiliateStats.trackingStartDate).toLocaleDateString('sv-SE')}. 
+                  Konverteringsgraden nedan visar endast data från detta datum och framåt för korrekt statistik.
+                </p>
+              </div>
+            )}
             <div style={{ 
               display: 'grid', 
               gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
@@ -361,12 +378,28 @@ export default function RobinhoodClicksPage() {
                 <p style={{ margin: '0 0 0.5rem 0', fontSize: '2rem', fontWeight: 'bold', color: '#166534' }}>
                   {affiliateStats.total}
                 </p>
-                <p style={{ margin: 0, fontSize: '0.875rem', color: '#166534' }}>
-                  Konverteringsgrad: {affiliateStats.conversionRate.toFixed(1)}%
-                </p>
-                <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.75rem', color: '#6b7280' }}>
-                  {stats.total} besökare → {affiliateStats.total} klick
-                </p>
+                {affiliateStats.trackingStartDate ? (
+                  <>
+                    <p style={{ margin: 0, fontSize: '0.875rem', color: '#166534', fontWeight: '600' }}>
+                      Konverteringsgrad: {affiliateStats.conversionRateSinceTracking.toFixed(1)}%
+                    </p>
+                    <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.75rem', color: '#6b7280' }}>
+                      {affiliateStats.robinhoodVisitorsSinceTracking} besökare (efter tracking start) → {affiliateStats.total} klick
+                    </p>
+                    <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.7rem', color: '#9ca3af', fontStyle: 'italic' }}>
+                      Totalt: {stats.total} besökare (inkl. före tracking)
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p style={{ margin: 0, fontSize: '0.875rem', color: '#166534' }}>
+                      Konverteringsgrad: {affiliateStats.conversionRate.toFixed(1)}%
+                    </p>
+                    <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.75rem', color: '#6b7280' }}>
+                      {stats.total} besökare → {affiliateStats.total} klick
+                    </p>
+                  </>
+                )}
               </div>
               <div style={{ padding: '1rem', background: '#fef3c7', borderRadius: '8px', border: '1px solid #fde68a' }}>
                 <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.875rem', color: '#92400e', fontWeight: '600' }}>
@@ -381,6 +414,11 @@ export default function RobinhoodClicksPage() {
                 <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.75rem', color: '#6b7280' }}>
                   {stats.today} besökare → {affiliateStats.today} klick
                 </p>
+                {affiliateStats.trackingStartDate && new Date(affiliateStats.trackingStartDate) <= new Date(new Date().setHours(0, 0, 0, 0)) && (
+                  <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.7rem', color: '#9ca3af', fontStyle: 'italic' }}>
+                    (Idag är efter tracking start)
+                  </p>
+                )}
               </div>
               <div style={{ padding: '1rem', background: '#dbeafe', borderRadius: '8px', border: '1px solid #93c5fd' }}>
                 <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.875rem', color: '#1e40af', fontWeight: '600' }}>
@@ -395,6 +433,11 @@ export default function RobinhoodClicksPage() {
                 <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.75rem', color: '#6b7280' }}>
                   {stats.thisWeek} besökare → {affiliateStats.thisWeek} klick
                 </p>
+                {affiliateStats.trackingStartDate && new Date(affiliateStats.trackingStartDate) <= new Date(new Date().getTime() - (7 * 24 * 60 * 60 * 1000)) && (
+                  <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.7rem', color: '#9ca3af', fontStyle: 'italic' }}>
+                    (Veckan är efter tracking start)
+                  </p>
+                )}
               </div>
             </div>
           </div>
