@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
 // Type definition for Cloudflare D1 database
 // D1Database is available in Cloudflare runtime but not in TypeScript types during build
@@ -101,6 +102,62 @@ export async function GET(req: NextRequest) {
       count: r.count || 0
     }));
 
+    // Get affiliate clicks from Supabase for conversion statistics
+    let affiliateStats = {
+      total: 0,
+      today: 0,
+      thisWeek: 0,
+      conversionRate: 0,
+      conversionRateToday: 0,
+      conversionRateThisWeek: 0,
+    };
+
+    try {
+      const SUPABASE_URL = process.env.SUPABASE_URL;
+      const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      
+      if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+        const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+        
+        // Calculate date ranges (Supabase uses ISO timestamps)
+        const now = new Date();
+        const todayStart = new Date(now.setHours(0, 0, 0, 0));
+        const weekStart = new Date(todayStart.getTime() - (7 * 24 * 60 * 60 * 1000));
+
+        // Get total affiliate clicks FROM ROBINHOOD VISITORS ONLY
+        const { count: totalAffiliate } = await supabase
+          .from('affiliate_clicks')
+          .select('*', { count: 'exact', head: true })
+          .eq('came_via_robinhood', true);
+
+        // Get today's affiliate clicks FROM ROBINHOOD VISITORS ONLY
+        const { count: todayAffiliate } = await supabase
+          .from('affiliate_clicks')
+          .select('*', { count: 'exact', head: true })
+          .eq('came_via_robinhood', true)
+          .gte('created_at', todayStart.toISOString());
+
+        // Get this week's affiliate clicks FROM ROBINHOOD VISITORS ONLY
+        const { count: weekAffiliate } = await supabase
+          .from('affiliate_clicks')
+          .select('*', { count: 'exact', head: true })
+          .eq('came_via_robinhood', true)
+          .gte('created_at', weekStart.toISOString());
+
+        affiliateStats = {
+          total: totalAffiliate || 0,
+          today: todayAffiliate || 0,
+          thisWeek: weekAffiliate || 0,
+          conversionRate: stats.total > 0 ? ((totalAffiliate || 0) / stats.total * 100) : 0,
+          conversionRateToday: stats.today > 0 ? ((todayAffiliate || 0) / stats.today * 100) : 0,
+          conversionRateThisWeek: stats.thisWeek > 0 ? ((weekAffiliate || 0) / stats.thisWeek * 100) : 0,
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching affiliate clicks:', error);
+      // Continue without affiliate stats if Supabase is not available
+    }
+
     return NextResponse.json({ 
       clicks,
       stats,
@@ -110,7 +167,8 @@ export async function GET(req: NextRequest) {
         total,
         totalPages
       },
-      refererStats
+      refererStats,
+      affiliateStats
     });
   } catch (error) {
     console.error('Error fetching robinhood clicks:', error);

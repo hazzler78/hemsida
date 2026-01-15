@@ -394,6 +394,20 @@ export default function RorligtAvtalPage() {
     try {
       // Track affiliate link click
       const sessionId = typeof window !== 'undefined' ? (window.localStorage.getItem('invoice_session_id') || '') : '';
+      // Check if user came via robinhood link (within 24 hours)
+      const cameViaRobinhood = typeof window !== 'undefined' ? (() => {
+        const flag = localStorage.getItem('came_via_robinhood');
+        const time = localStorage.getItem('came_via_robinhood_time');
+        if (flag === 'true' && time) {
+          const timeDiff = Date.now() - parseInt(time, 10);
+          // Valid for 24 hours
+          if (timeDiff < 24 * 60 * 60 * 1000) {
+            return true;
+          }
+        }
+        return false;
+      })() : false;
+      
       fetch('/api/events/affiliate-click', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -401,7 +415,8 @@ export default function RorligtAvtalPage() {
           provider: providerName,
           contractType: 'rorligt',
           url,
-          sessionId
+          sessionId,
+          cameViaRobinhood
         }),
         keepalive: true,
       }).catch(() => {});

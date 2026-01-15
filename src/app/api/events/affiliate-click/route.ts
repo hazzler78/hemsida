@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const referer = req.headers.get('referer') || '';
 
     const body = await req.json().catch(() => ({}));
-    const { provider, contractType, url, sessionId } = body || {};
+    const { provider, contractType, url, sessionId, cameViaRobinhood } = body || {};
 
     const { error } = await supabase.from('affiliate_clicks').insert({
       provider: typeof provider === 'string' ? provider : null,
@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
       session_id: typeof sessionId === 'string' ? sessionId : null,
       user_agent: ua,
       referer,
+      came_via_robinhood: typeof cameViaRobinhood === 'boolean' ? cameViaRobinhood : false,
     });
 
     if (error) {

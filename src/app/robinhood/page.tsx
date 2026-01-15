@@ -7,6 +7,13 @@ export default function RobinhoodPage() {
   const router = useRouter();
 
   useEffect(() => {
+    // Mark that user came via robinhood link (for conversion tracking)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('came_via_robinhood', 'true');
+      // Set expiration (24 hours)
+      localStorage.setItem('came_via_robinhood_time', Date.now().toString());
+    }
+
     // Track the click in D1 database
     const trackClick = async () => {
       try {

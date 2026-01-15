@@ -51,6 +51,14 @@ export default function RobinhoodClicksPage() {
     today: 0,
     thisWeek: 0,
   });
+  const [affiliateStats, setAffiliateStats] = useState({
+    total: 0,
+    today: 0,
+    thisWeek: 0,
+    conversionRate: 0,
+    conversionRateToday: 0,
+    conversionRateThisWeek: 0,
+  });
   const [pagination, setPagination] = useState<Pagination>({
     page: 1,
     limit: 50,
@@ -93,6 +101,14 @@ export default function RobinhoodClicksPage() {
       const data = await response.json();
       setClicks(data.clicks || []);
       setStats(data.stats || { total: 0, today: 0, thisWeek: 0 });
+      setAffiliateStats(data.affiliateStats || {
+        total: 0,
+        today: 0,
+        thisWeek: 0,
+        conversionRate: 0,
+        conversionRateToday: 0,
+        conversionRateThisWeek: 0,
+      });
       setPagination(data.pagination || { page: 1, limit: 50, total: 0, totalPages: 0 });
       setRefererStats(data.refererStats || []);
     } catch (err) {
@@ -315,6 +331,71 @@ export default function RobinhoodClicksPage() {
               <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>
                 {stats.thisWeek}
               </p>
+            </div>
+          </div>
+
+          {/* Conversion Statistics */}
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            padding: '2rem',
+            marginBottom: '2rem',
+            border: '1px solid #e5e7eb',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+          }}>
+            <h2 style={{ marginTop: 0, marginBottom: '1.5rem' }}>Konverteringsstatistik</h2>
+            <p style={{ marginBottom: '1.5rem', color: '#6b7280', fontSize: '0.875rem' }}>
+              Visar hur många av besökarna på robinhood-sidan som faktiskt klickar vidare på affiliate-länkar. 
+              Endast affiliate-klick från användare som kom via robinhood-länken räknas med. 
+              Detta ger en indikation på hur många som blir försäljning.
+            </p>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+              gap: '1rem' 
+            }}>
+              <div style={{ padding: '1rem', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
+                <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.875rem', color: '#166534', fontWeight: '600' }}>
+                  Totalt: Affiliate-klick
+                </h3>
+                <p style={{ margin: '0 0 0.5rem 0', fontSize: '2rem', fontWeight: 'bold', color: '#166534' }}>
+                  {affiliateStats.total}
+                </p>
+                <p style={{ margin: 0, fontSize: '0.875rem', color: '#166534' }}>
+                  Konverteringsgrad: {affiliateStats.conversionRate.toFixed(1)}%
+                </p>
+                <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.75rem', color: '#6b7280' }}>
+                  {stats.total} besökare → {affiliateStats.total} klick
+                </p>
+              </div>
+              <div style={{ padding: '1rem', background: '#fef3c7', borderRadius: '8px', border: '1px solid #fde68a' }}>
+                <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.875rem', color: '#92400e', fontWeight: '600' }}>
+                  Idag: Affiliate-klick
+                </h3>
+                <p style={{ margin: '0 0 0.5rem 0', fontSize: '2rem', fontWeight: 'bold', color: '#92400e' }}>
+                  {affiliateStats.today}
+                </p>
+                <p style={{ margin: 0, fontSize: '0.875rem', color: '#92400e' }}>
+                  Konverteringsgrad: {affiliateStats.conversionRateToday.toFixed(1)}%
+                </p>
+                <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.75rem', color: '#6b7280' }}>
+                  {stats.today} besökare → {affiliateStats.today} klick
+                </p>
+              </div>
+              <div style={{ padding: '1rem', background: '#dbeafe', borderRadius: '8px', border: '1px solid #93c5fd' }}>
+                <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.875rem', color: '#1e40af', fontWeight: '600' }}>
+                  Denna vecka: Affiliate-klick
+                </h3>
+                <p style={{ margin: '0 0 0.5rem 0', fontSize: '2rem', fontWeight: 'bold', color: '#1e40af' }}>
+                  {affiliateStats.thisWeek}
+                </p>
+                <p style={{ margin: 0, fontSize: '0.875rem', color: '#1e40af' }}>
+                  Konverteringsgrad: {affiliateStats.conversionRateThisWeek.toFixed(1)}%
+                </p>
+                <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.75rem', color: '#6b7280' }}>
+                  {stats.thisWeek} besökare → {affiliateStats.thisWeek} klick
+                </p>
+              </div>
             </div>
           </div>
 
