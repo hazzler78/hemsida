@@ -95,7 +95,7 @@ export async function GET(req: NextRequest) {
        ORDER BY count DESC`
     ).all();
 
-    const refererStats = (refererResult.results || []).map((r: any) => ({
+    const refererStats = (refererResult.results || []).map((r: { source?: string; count?: number }) => ({
       source: r.source || 'Okänd',
       count: r.count || 0
     }));
