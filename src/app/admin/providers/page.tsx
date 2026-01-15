@@ -544,7 +544,7 @@ function ProviderForm({ provider, onSave, onCancel }: {
       </div>
 
       <div style={{ marginBottom: 16 }}>
-        <label style={{ display: "block", marginBottom: 4, fontWeight: "600" }}>Kampanjtext (t.ex. "KAMPANJ"):</label>
+        <label style={{ display: "block", marginBottom: 4, fontWeight: "600" }}>Kampanjtext (t.ex. &quot;KAMPANJ&quot;):</label>
         <input
           type="text"
           value={formData.campaign_text || ''}

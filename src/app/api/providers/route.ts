@@ -131,8 +131,8 @@ export async function POST(request: NextRequest) {
     
     const result = await db.prepare(
       `INSERT INTO page_providers 
-       (name, type, logo_url, description, url, is_recommended, display_order, active, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       (name, type, logo_url, description, url, is_recommended, display_order, active, campaign_text, campaign_bold, campaign_italic, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       body.name,
       body.type,
@@ -142,6 +142,9 @@ export async function POST(request: NextRequest) {
       body.is_recommended ? 1 : 0,
       body.display_order,
       body.active ? 1 : 0,
+      body.campaign_text || null,
+      body.campaign_bold ? 1 : 0,
+      body.campaign_italic ? 1 : 0,
       Math.floor(Date.now() / 1000),
       Math.floor(Date.now() / 1000)
     ).run();
