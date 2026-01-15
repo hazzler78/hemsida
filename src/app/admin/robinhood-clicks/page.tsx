@@ -13,6 +13,33 @@ interface RobinhoodClick {
   created_at: number;
 }
 
+interface RefererStat {
+  source: string;
+  count: number;
+}
+
+interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+// Färger för olika källor
+const SOURCE_COLORS: Record<string, string> = {
+  'Direkt/Ingen referer': '#6366f1',
+  'Elchef (intern)': '#8b5cf6',
+  'Google': '#4285f4',
+  'Facebook': '#1877f2',
+  'Twitter/X': '#000000',
+  'LinkedIn': '#0077b5',
+  'Instagram': '#e4405f',
+  'TikTok': '#000000',
+  'Bing': '#008373',
+  'DuckDuckGo': '#de5833',
+  'Övriga': '#6b7280',
+};
+
 export default function RobinhoodClicksPage() {
   const [authed, setAuthed] = useState(false);
   const [input, setInput] = useState("");
@@ -24,6 +51,13 @@ export default function RobinhoodClicksPage() {
     today: 0,
     thisWeek: 0,
   });
+  const [pagination, setPagination] = useState<Pagination>({
+    page: 1,
+    limit: 50,
+    total: 0,
+    totalPages: 0,
+  });
+  const [refererStats, setRefererStats] = useState<RefererStat[]>([]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -34,6 +68,7 @@ export default function RobinhoodClicksPage() {
   useEffect(() => {
     if (!authed) return;
     fetchClicks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authed]);
 
   function handleLogin(e: React.FormEvent) {
@@ -47,16 +82,19 @@ export default function RobinhoodClicksPage() {
     }
   }
 
-  const fetchClicks = async () => {
+  const fetchClicks = async (page?: number) => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/robinhood-clicks');
+      const currentPage = page ?? pagination.page;
+      const response = await fetch(`/api/admin/robinhood-clicks?page=${currentPage}&limit=${pagination.limit}`);
       if (!response.ok) {
         throw new Error('Kunde inte hämta klick');
       }
       const data = await response.json();
       setClicks(data.clicks || []);
       setStats(data.stats || { total: 0, today: 0, thisWeek: 0 });
+      setPagination(data.pagination || { page: 1, limit: 50, total: 0, totalPages: 0 });
+      setRefererStats(data.refererStats || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Okänt fel');
     } finally {
@@ -66,6 +104,126 @@ export default function RobinhoodClicksPage() {
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp * 1000).toLocaleString('sv-SE');
+  };
+
+  const getColorForSource = (source: string): string => {
+    return SOURCE_COLORS[source] || SOURCE_COLORS['Övriga'];
+  };
+
+  const renderPieChart = () => {
+    if (refererStats.length === 0) return null;
+
+    const total = refererStats.reduce((sum, stat) => sum + stat.count, 0);
+    let currentAngle = 0;
+    const size = 300;
+    const radius = size / 2 - 20;
+    const centerX = size / 2;
+    const centerY = size / 2;
+
+    const paths = refererStats.map((stat) => {
+      const percentage = (stat.count / total) * 100;
+      const angle = (stat.count / total) * 360;
+      const startAngle = currentAngle;
+      const endAngle = currentAngle + angle;
+      currentAngle += angle;
+
+      const startAngleRad = (startAngle - 90) * (Math.PI / 180);
+      const endAngleRad = (endAngle - 90) * (Math.PI / 180);
+
+      const x1 = centerX + radius * Math.cos(startAngleRad);
+      const y1 = centerY + radius * Math.sin(startAngleRad);
+      const x2 = centerX + radius * Math.cos(endAngleRad);
+      const y2 = centerY + radius * Math.sin(endAngleRad);
+
+      const largeArcFlag = angle > 180 ? 1 : 0;
+
+      const pathData = [
+        `M ${centerX} ${centerY}`,
+        `L ${x1} ${y1}`,
+        `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+        'Z'
+      ].join(' ');
+
+      return {
+        path: pathData,
+        color: getColorForSource(stat.source),
+        source: stat.source,
+        count: stat.count,
+        percentage: percentage.toFixed(1),
+      };
+    });
+
+    return (
+      <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+        <div>
+          <svg width={size} height={size} style={{ display: 'block' }}>
+            {paths.map((item, index) => (
+              <path
+                key={index}
+                d={item.path}
+                fill={item.color}
+                stroke="white"
+                strokeWidth="2"
+                style={{ cursor: 'pointer' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = '0.8';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = '1';
+                }}
+              />
+            ))}
+          </svg>
+        </div>
+        <div style={{ flex: 1, minWidth: '250px' }}>
+          <h3 style={{ marginTop: 0, marginBottom: '1rem' }}>Klick per källa</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {refererStats.map((stat, index) => {
+              const percentage = ((stat.count / total) * 100).toFixed(1);
+              return (
+                <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div
+                    style={{
+                      width: '16px',
+                      height: '16px',
+                      borderRadius: '4px',
+                      backgroundColor: getColorForSource(stat.source),
+                      flexShrink: 0,
+                    }}
+                  />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>{stat.source}</span>
+                      <span style={{ fontSize: '0.875rem', color: '#6b7280', marginLeft: '0.5rem' }}>
+                        {stat.count} ({percentage}%)
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        height: '4px',
+                        backgroundColor: '#e5e7eb',
+                        borderRadius: '2px',
+                        marginTop: '0.25rem',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <div
+                        style={{
+                          height: '100%',
+                          width: `${percentage}%`,
+                          backgroundColor: getColorForSource(stat.source),
+                          transition: 'width 0.3s ease',
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   if (!authed) {
@@ -120,7 +278,7 @@ export default function RobinhoodClicksPage() {
   }
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
+    <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
       <h1 style={{ marginBottom: '2rem' }}>Robinhood Klick-statistik</h1>
 
       {loading && <p>Laddar...</p>}
@@ -160,9 +318,27 @@ export default function RobinhoodClicksPage() {
             </div>
           </div>
 
-          <div style={{ marginBottom: '1rem' }}>
+          {/* Referer Graph */}
+          {refererStats.length > 0 && (
+            <div style={{
+              background: 'white',
+              borderRadius: '12px',
+              padding: '2rem',
+              marginBottom: '2rem',
+              border: '1px solid #e5e7eb',
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+            }}>
+              <h2 style={{ marginTop: 0, marginBottom: '1.5rem' }}>Klick per källa</h2>
+              {renderPieChart()}
+            </div>
+          )}
+
+          <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
             <button
-              onClick={fetchClicks}
+              onClick={() => {
+                setPagination({ ...pagination, page: 1 });
+                fetchClicks(1);
+              }}
               style={{
                 padding: '0.5rem 1rem',
                 background: '#3b82f6',
@@ -174,6 +350,49 @@ export default function RobinhoodClicksPage() {
             >
               Uppdatera
             </button>
+            {pagination.totalPages > 1 && (
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginLeft: 'auto' }}>
+                <button
+                  onClick={() => {
+                    const newPage = Math.max(1, pagination.page - 1);
+                    setPagination({ ...pagination, page: newPage });
+                    fetchClicks(newPage);
+                  }}
+                  disabled={pagination.page === 1}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    background: pagination.page === 1 ? '#e5e7eb' : '#3b82f6',
+                    color: pagination.page === 1 ? '#9ca3af' : 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: pagination.page === 1 ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  Föregående
+                </button>
+                <span style={{ padding: '0 0.5rem', fontSize: '0.875rem', color: '#6b7280' }}>
+                  Sida {pagination.page} av {pagination.totalPages} ({pagination.total} totalt)
+                </span>
+                <button
+                  onClick={() => {
+                    const newPage = Math.min(pagination.totalPages, pagination.page + 1);
+                    setPagination({ ...pagination, page: newPage });
+                    fetchClicks(newPage);
+                  }}
+                  disabled={pagination.page === pagination.totalPages}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    background: pagination.page === pagination.totalPages ? '#e5e7eb' : '#3b82f6',
+                    color: pagination.page === pagination.totalPages ? '#9ca3af' : 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: pagination.page === pagination.totalPages ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  Nästa
+                </button>
+              </div>
+            )}
           </div>
 
           <div style={{ overflowX: 'auto' }}>
