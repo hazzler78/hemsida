@@ -463,15 +463,19 @@ export default function RorligtAvtalPage() {
                   />
                 )}
                 {provider.is_recommended && <HighlightBadge>Rekommenderat</HighlightBadge>}
+                <ProviderName>{provider.name}</ProviderName>
                 {provider.campaign_text && (
-                  <HighlightBadge style={{
+                  <div style={{
                     fontWeight: provider.campaign_bold ? 'bold' : 'normal',
-                    fontStyle: provider.campaign_italic ? 'italic' : 'normal'
+                    fontStyle: provider.campaign_italic ? 'italic' : 'normal',
+                    fontSize: '0.9rem',
+                    color: '#6b7280',
+                    marginTop: '0.5rem',
+                    marginBottom: '0.5rem'
                   }}>
                     {provider.campaign_text}
-                  </HighlightBadge>
+                  </div>
                 )}
-                <ProviderName>{provider.name}</ProviderName>
                 <ProviderDescription>
                   {provider.description}
                 </ProviderDescription>
