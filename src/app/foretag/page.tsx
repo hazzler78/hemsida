@@ -41,7 +41,7 @@ export default function Foretag() {
         <GlassButton 
           variant="primary" 
           size="lg" 
-          onClick={() => window.open('https://energi2.se/elchef/', '_blank')}
+          onClick={() => window.open('https://www.energi2.se/elavtal/?src=Elchef', '_blank')}
           background={'linear-gradient(135deg, var(--primary), var(--secondary))'}
         >
           Läs mer & teckna företagsavtal
