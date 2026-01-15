@@ -37,6 +37,9 @@ interface PageProvider {
   is_recommended: boolean;
   display_order: number;
   active: boolean;
+  campaign_text?: string;
+  campaign_bold?: boolean;
+  campaign_italic?: boolean;
 }
 
 // GET - Fetch providers
@@ -80,6 +83,9 @@ export async function GET(request: NextRequest) {
       is_recommended: number;
       display_order: number;
       active: number;
+      campaign_text?: string | null;
+      campaign_bold?: number | null;
+      campaign_italic?: number | null;
       created_at: number;
       updated_at: number;
     };
@@ -93,6 +99,9 @@ export async function GET(request: NextRequest) {
       is_recommended: row.is_recommended === 1,
       display_order: row.display_order,
       active: row.active === 1,
+      campaign_text: row.campaign_text || undefined,
+      campaign_bold: row.campaign_bold === 1,
+      campaign_italic: row.campaign_italic === 1,
       created_at: row.created_at,
       updated_at: row.updated_at,
     }));
@@ -171,7 +180,8 @@ export async function PUT(request: NextRequest) {
     await db.prepare(
       `UPDATE page_providers 
        SET name = ?, type = ?, logo_url = ?, description = ?, url = ?, 
-           is_recommended = ?, display_order = ?, active = ?, updated_at = ?
+           is_recommended = ?, display_order = ?, active = ?, 
+           campaign_text = ?, campaign_bold = ?, campaign_italic = ?, updated_at = ?
        WHERE id = ?`
     ).bind(
       body.name,
@@ -182,6 +192,9 @@ export async function PUT(request: NextRequest) {
       body.is_recommended ? 1 : 0,
       body.display_order,
       body.active ? 1 : 0,
+      body.campaign_text || null,
+      body.campaign_bold ? 1 : 0,
+      body.campaign_italic ? 1 : 0,
       Math.floor(Date.now() / 1000),
       body.id
     ).run();

@@ -24,6 +24,9 @@ CREATE TABLE IF NOT EXISTS page_providers (
   is_recommended INTEGER DEFAULT 0 CHECK (is_recommended IN (0, 1)),
   display_order INTEGER DEFAULT 0,
   active INTEGER DEFAULT 1 CHECK (active IN (0, 1)),
+  campaign_text TEXT,
+  campaign_bold INTEGER DEFAULT 0 CHECK (campaign_bold IN (0, 1)),
+  campaign_italic INTEGER DEFAULT 0 CHECK (campaign_italic IN (0, 1)),
   created_at INTEGER DEFAULT (strftime('%s', 'now')),
   updated_at INTEGER DEFAULT (strftime('%s', 'now'))
 );

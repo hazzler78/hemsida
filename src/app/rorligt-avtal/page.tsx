@@ -14,6 +14,9 @@ interface PageProvider {
   is_recommended: boolean;
   display_order: number;
   active: boolean;
+  campaign_text?: string;
+  campaign_bold?: boolean;
+  campaign_italic?: boolean;
 }
 
 const PageContainer = styled.div`
@@ -460,6 +463,14 @@ export default function RorligtAvtalPage() {
                   />
                 )}
                 {provider.is_recommended && <HighlightBadge>Rekommenderat</HighlightBadge>}
+                {provider.campaign_text && (
+                  <HighlightBadge style={{
+                    fontWeight: provider.campaign_bold ? 'bold' : 'normal',
+                    fontStyle: provider.campaign_italic ? 'italic' : 'normal'
+                  }}>
+                    {provider.campaign_text}
+                  </HighlightBadge>
+                )}
                 <ProviderName>{provider.name}</ProviderName>
                 <ProviderDescription>
                   {provider.description}

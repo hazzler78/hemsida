@@ -14,6 +14,9 @@ interface PageProvider {
   is_recommended: boolean;
   display_order: number;
   active: boolean;
+  campaign_text?: string;
+  campaign_bold?: boolean;
+  campaign_italic?: boolean;
 }
 
 export default function AdminProviders() {
@@ -259,7 +262,10 @@ export default function AdminProviders() {
               url: '', 
               is_recommended: false,
               display_order: providers.length + 1,
-              active: true
+              active: true,
+              campaign_text: '',
+              campaign_bold: false,
+              campaign_italic: false
             })}
             style={{ 
               padding: "8px 16px", 
@@ -333,6 +339,17 @@ export default function AdminProviders() {
                     <p style={{ margin: 0, color: "#6b7280", fontSize: "12px" }}>
                       Ordning: {provider.display_order}
                     </p>
+                    {provider.campaign_text && (
+                      <p style={{ 
+                        margin: "8px 0 0 0", 
+                        color: "#374151", 
+                        fontSize: "14px",
+                        fontWeight: provider.campaign_bold ? "bold" : "normal",
+                        fontStyle: provider.campaign_italic ? "italic" : "normal"
+                      }}>
+                        Kampanj: {provider.campaign_text}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: "8px", flexDirection: "column" }}>
@@ -524,6 +541,45 @@ function ProviderForm({ provider, onSave, onCancel }: {
           />
           Aktiv
         </label>
+      </div>
+
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: "block", marginBottom: 4, fontWeight: "600" }}>Kampanjtext (t.ex. "KAMPANJ"):</label>
+        <input
+          type="text"
+          value={formData.campaign_text || ''}
+          onChange={(e) => setFormData({...formData, campaign_text: e.target.value})}
+          style={{ width: "100%", padding: 8, borderRadius: 4, border: "1px solid #d1d5db" }}
+          placeholder="T.ex. KAMPANJ"
+        />
+        <div style={{ marginTop: 8, display: "flex", gap: 16 }}>
+          <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <input
+              type="checkbox"
+              checked={formData.campaign_bold || false}
+              onChange={(e) => setFormData({...formData, campaign_bold: e.target.checked})}
+            />
+            Fet text
+          </label>
+          <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <input
+              type="checkbox"
+              checked={formData.campaign_italic || false}
+              onChange={(e) => setFormData({...formData, campaign_italic: e.target.checked})}
+            />
+            Kursiv text
+          </label>
+        </div>
+        {formData.campaign_text && (
+          <div style={{ marginTop: 8, padding: 8, background: "#f3f4f6", borderRadius: 4 }}>
+            <span style={{ 
+              fontWeight: formData.campaign_bold ? "bold" : "normal",
+              fontStyle: formData.campaign_italic ? "italic" : "normal"
+            }}>
+              Förhandsvisning: {formData.campaign_text}
+            </span>
+          </div>
+        )}
       </div>
 
       <div style={{ display: "flex", gap: 8 }}>
