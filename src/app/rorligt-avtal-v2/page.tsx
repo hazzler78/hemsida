@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
 interface PageProvider {
@@ -145,22 +145,6 @@ const Input = styled.input`
   }
 `;
 
-const Select = styled.select`
-  width: 100%;
-  padding: 0.875rem 1rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  font-size: 1rem;
-  background: white;
-  cursor: pointer;
-  transition: all 0.2s;
-  
-  &:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(22, 147, 255, 0.1);
-  }
-`;
 
 const ButtonGrid = styled.div`
   display: grid;
@@ -442,26 +426,9 @@ function getLogoUrl(providerName: string, existingLogoUrl?: string): string {
   return '';
 }
 
-function calculateSavings(annualUsage: number, priority: string): number {
-  // Enkel kalkylator baserat på genomsnittliga priser
-  // Detta kan förbättras med riktiga priser från API
-  const avgPricePerKwh = 1.2; // kr/kWh (exempel)
-  const avgMonthlyFee = 69; // kr/månad (exempel)
-  const avgMarkup = 0.15; // öre/kWh (exempel)
-  
-  // Billigaste alternativet (Cheap Energy)
-  const cheapMonthlyFee = 0;
-  const cheapMarkup = 0;
-  
-  const currentAnnual = (annualUsage * avgPricePerKwh) + (avgMonthlyFee * 12) + (annualUsage * avgMarkup / 100);
-  const newAnnual = (annualUsage * avgPricePerKwh) + (cheapMonthlyFee * 12) + (annualUsage * cheapMarkup / 100);
-  
-  return Math.max(0, Math.round(currentAnnual - newAnnual));
-}
-
 function getRecommendedProviders(providers: PageProvider[], preferences: UserPreferences): PageProvider[] {
   // Sortera baserat på preferenser
-  let sorted = [...providers];
+  const sorted = [...providers];
   
   if (preferences.priority === 'price') {
     // Prioritera billigaste (Cheap Energy först)
