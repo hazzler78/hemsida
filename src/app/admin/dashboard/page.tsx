@@ -313,17 +313,27 @@ export default function AdminDashboard() {
         .map(([date, stats]) => ({ date, ...stats }))
         .sort((a, b) => a.date.localeCompare(b.date));
 
-      // 10. Affiliate Clicks
-      const { count: affiliateClicks } = await supabase
+      // 10. Affiliate Clicks - VIKTIGT: Totalt antal affiliate-klick (alla länkar på sidan)
+      const { count: affiliateClicks, error: affiliateError } = await supabase
         .from('affiliate_clicks')
         .select('*', { count: 'exact', head: true })
         .gte('created_at', fromISO);
 
-      const { count: affiliateClicksFromRobinhood } = await supabase
+      if (affiliateError) {
+        console.error('Affiliate clicks error:', affiliateError);
+        // Don't throw, just log - we want other stats to still show
+      }
+
+      // Affiliate-klick från Robin Hood (en delmängd av totala klick)
+      const { count: affiliateClicksFromRobinhood, error: robinhoodError } = await supabase
         .from('affiliate_clicks')
         .select('*', { count: 'exact', head: true })
         .eq('came_via_robinhood', true)
         .gte('created_at', fromISO);
+
+      if (robinhoodError) {
+        console.error('Robinhood affiliate clicks error:', robinhoodError);
+      }
 
       // Calculate growth
       const pageViewsGrowth = prevPageViews && prevPageViews > 0 
@@ -595,13 +605,13 @@ export default function AdminDashboard() {
               color="#f59e0b"
             />
             <MetricCard 
-              title="Affiliate-klick"
+              title="Affiliate-klick (totalt)"
               value={stats.affiliateClicks}
               icon="🔗"
               color="#ec4899"
             />
             <MetricCard 
-              title="Affiliate från Robinhood"
+              title="Affiliate-klick från Robinhood"
               value={stats.affiliateClicksFromRobinhood}
               icon="🎯"
               color="#f97316"
@@ -646,6 +656,80 @@ export default function AdminDashboard() {
                 percent={stats.contractClicks > 0 ? (stats.formSubmissions / stats.contractClicks * 100) : 0}
                 color="#f59e0b"
               />
+            </div>
+          </div>
+
+          {/* Affiliate Clicks Section */}
+          <div style={{ 
+            background: 'white',
+            borderRadius: 12,
+            padding: 24,
+            marginBottom: 24,
+            border: '1px solid #e5e7eb',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+          }}>
+            <h2 style={{ margin: '0 0 20px 0', fontSize: '1.25rem' }}>Affiliate-klick</h2>
+            <p style={{ margin: '0 0 20px 0', fontSize: '0.875rem', color: '#6b7280' }}>
+              Totalt antal klick på affiliate-länkar (det kan finnas flera länkar per sida). 
+              En del av dessa klick kommer från användare som kom via Robin Hood-länken.
+            </p>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: 16
+            }}>
+              <div style={{ 
+                padding: 20, 
+                background: '#fef3c7', 
+                borderRadius: 8, 
+                border: '1px solid #fde68a' 
+              }}>
+                <div style={{ fontSize: '0.875rem', color: '#92400e', marginBottom: 8, fontWeight: 600 }}>
+                  Totalt affiliate-klick
+                </div>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#78350f' }}>
+                  {stats.affiliateClicks}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#92400e', marginTop: 4 }}>
+                  Alla klick på affiliate-länkar
+                </div>
+              </div>
+              <div style={{ 
+                padding: 20, 
+                background: '#f0fdf4', 
+                borderRadius: 8, 
+                border: '1px solid #bbf7d0' 
+              }}>
+                <div style={{ fontSize: '0.875rem', color: '#166534', marginBottom: 8, fontWeight: 600 }}>
+                  Från Robin Hood
+                </div>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#166534' }}>
+                  {stats.affiliateClicksFromRobinhood}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#166534', marginTop: 4 }}>
+                  {stats.affiliateClicks > 0 
+                    ? `${((stats.affiliateClicksFromRobinhood / stats.affiliateClicks) * 100).toFixed(1)}% av totalt`
+                    : '0% av totalt'}
+                </div>
+              </div>
+              <div style={{ 
+                padding: 20, 
+                background: '#f9fafb', 
+                borderRadius: 8, 
+                border: '1px solid #e5e7eb' 
+              }}>
+                <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: 8, fontWeight: 600 }}>
+                  Från andra källor
+                </div>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#374151' }}>
+                  {stats.affiliateClicks - stats.affiliateClicksFromRobinhood}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: 4 }}>
+                  {stats.affiliateClicks > 0 
+                    ? `${(((stats.affiliateClicks - stats.affiliateClicksFromRobinhood) / stats.affiliateClicks) * 100).toFixed(1)}% av totalt`
+                    : '0% av totalt'}
+                </div>
+              </div>
             </div>
           </div>
 
