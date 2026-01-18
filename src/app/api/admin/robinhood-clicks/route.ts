@@ -138,7 +138,8 @@ export async function GET(req: NextRequest) {
 
         // Calculate date ranges (Supabase uses ISO timestamps)
         const now = new Date();
-        const todayStart = new Date(now.setHours(0, 0, 0, 0));
+        const todayStart = new Date(now);
+        todayStart.setHours(0, 0, 0, 0);
         const weekStart = new Date(todayStart.getTime() - (7 * 24 * 60 * 60 * 1000));
 
         // Get total affiliate clicks FROM ROBINHOOD VISITORS ONLY

@@ -22,6 +22,10 @@ interface DashboardStats {
   contractClicksWithoutAi: number;
   socialShares: number;
   
+  // Affiliate clicks
+  affiliateClicks: number;
+  affiliateClicksFromRobinhood: number;
+  
   // A/B Tests
   heroWinner: { variant: string; ctr: number } | null;
   bannerWinner: { variant: string; ctr: number } | null;
@@ -309,6 +313,18 @@ export default function AdminDashboard() {
         .map(([date, stats]) => ({ date, ...stats }))
         .sort((a, b) => a.date.localeCompare(b.date));
 
+      // 10. Affiliate Clicks
+      const { count: affiliateClicks } = await supabase
+        .from('affiliate_clicks')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', fromISO);
+
+      const { count: affiliateClicksFromRobinhood } = await supabase
+        .from('affiliate_clicks')
+        .select('*', { count: 'exact', head: true })
+        .eq('came_via_robinhood', true)
+        .gte('created_at', fromISO);
+
       // Calculate growth
       const pageViewsGrowth = prevPageViews && prevPageViews > 0 
         ? ((pageViews || 0) - prevPageViews) / prevPageViews * 100 
@@ -329,6 +345,8 @@ export default function AdminDashboard() {
         contractClicksWithAi,
         contractClicksWithoutAi,
         socialShares: socialShares || 0,
+        affiliateClicks: affiliateClicks || 0,
+        affiliateClicksFromRobinhood: affiliateClicksFromRobinhood || 0,
         heroWinner,
         bannerWinner,
         pageViewsGrowth,
@@ -575,6 +593,18 @@ export default function AdminDashboard() {
               value={stats.formSubmissions}
               icon="✉️"
               color="#f59e0b"
+            />
+            <MetricCard 
+              title="Affiliate-klick"
+              value={stats.affiliateClicks}
+              icon="🔗"
+              color="#ec4899"
+            />
+            <MetricCard 
+              title="Affiliate från Robinhood"
+              value={stats.affiliateClicksFromRobinhood}
+              icon="🎯"
+              color="#f97316"
             />
           </div>
 
