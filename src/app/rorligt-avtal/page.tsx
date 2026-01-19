@@ -395,6 +395,9 @@ export default function RorligtAvtalPage() {
 
   const handleProviderClick = (providerName: string, url: string) => {
     try {
+      // Generera unikt tracking-ID för att koppla försäljningar till klick
+      const trackingId = `elchef_${Date.now()}_${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      
       // Track affiliate link click
       const sessionId = typeof window !== 'undefined' ? (window.localStorage.getItem('invoice_session_id') || '') : '';
       // Check if user came via robinhood link (within 24 hours)
@@ -411,6 +414,7 @@ export default function RorligtAvtalPage() {
         return false;
       })() : false;
       
+      // Skicka tracking-event (async, vänta inte)
       fetch('/api/events/affiliate-click', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -419,10 +423,19 @@ export default function RorligtAvtalPage() {
           contractType: 'rorligt',
           url,
           sessionId,
-          cameViaRobinhood
+          cameViaRobinhood,
+          trackingId
         }),
         keepalive: true,
       }).catch(() => {});
+
+      // Lägg till tracking-ID i affiliate-länken
+      const urlWithTracking = url.includes('?') 
+        ? `${url}&elchef_ref=${encodeURIComponent(trackingId)}`
+        : `${url}?elchef_ref=${encodeURIComponent(trackingId)}`;
+
+      // Öppna affiliate-länken med tracking-ID
+      window.open(urlWithTracking, '_blank');
 
       // TikTok event
       const ttq: any = (window as any).ttq;

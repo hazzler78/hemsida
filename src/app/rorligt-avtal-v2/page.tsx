@@ -524,6 +524,9 @@ export default function RorligtAvtalV2Page() {
 
   const handleProviderClick = (providerName: string, url: string) => {
     try {
+      // Generera unikt tracking-ID för att koppla försäljningar till klick
+      const trackingId = `elchef_${Date.now()}_${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      
       const sessionId = typeof window !== 'undefined' ? (window.localStorage.getItem('invoice_session_id') || '') : '';
       const cameViaRobinhood = typeof window !== 'undefined' ? (() => {
         const flag = localStorage.getItem('came_via_robinhood');
@@ -537,6 +540,7 @@ export default function RorligtAvtalV2Page() {
         return false;
       })() : false;
       
+      // Skicka tracking-event (async, vänta inte)
       fetch('/api/events/affiliate-click', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -547,10 +551,19 @@ export default function RorligtAvtalV2Page() {
           sessionId,
           cameViaRobinhood,
           source: 'rorligt-avtal-v2',
-          preferences: preferences
+          preferences: preferences,
+          trackingId
         }),
         keepalive: true,
       }).catch(() => {});
+
+      // Lägg till tracking-ID i affiliate-länken
+      const urlWithTracking = url.includes('?') 
+        ? `${url}&elchef_ref=${encodeURIComponent(trackingId)}`
+        : `${url}?elchef_ref=${encodeURIComponent(trackingId)}`;
+
+      // Öppna affiliate-länken med tracking-ID
+      window.open(urlWithTracking, '_blank');
 
       const ttq: any = (window as any).ttq;
       const cookiebot: any = (window as any).cookiebot || (window as any).Cookiebot || (window as any).CookieControl;
