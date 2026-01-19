@@ -25,6 +25,15 @@ interface DashboardStats {
   // Affiliate clicks
   affiliateClicks: number;
   affiliateClicksFromRobinhood: number;
+  affiliateClicksList: Array<{
+    id: number;
+    provider: string;
+    contract_type: string;
+    url: string;
+    tracking_id: string | null;
+    created_at: string;
+    came_via_robinhood: boolean;
+  }>;
   
   // A/B Tests
   heroWinner: { variant: string; ctr: number } | null;
@@ -335,6 +344,18 @@ export default function AdminDashboard() {
         console.error('Robinhood affiliate clicks error:', robinhoodError);
       }
 
+      // Hämta lista över affiliate-klick med detaljer
+      const { data: affiliateClicksList, error: affiliateListError } = await supabase
+        .from('affiliate_clicks')
+        .select('id, provider, contract_type, url, tracking_id, created_at, came_via_robinhood')
+        .gte('created_at', fromISO)
+        .order('created_at', { ascending: false })
+        .limit(100); // Visa senaste 100 klicken
+
+      if (affiliateListError) {
+        console.error('Affiliate clicks list error:', affiliateListError);
+      }
+
       // Calculate growth
       const pageViewsGrowth = prevPageViews && prevPageViews > 0 
         ? ((pageViews || 0) - prevPageViews) / prevPageViews * 100 
@@ -357,6 +378,7 @@ export default function AdminDashboard() {
         socialShares: socialShares || 0,
         affiliateClicks: affiliateClicks || 0,
         affiliateClicksFromRobinhood: affiliateClicksFromRobinhood || 0,
+        affiliateClicksList: affiliateClicksList || [],
         heroWinner,
         bannerWinner,
         pageViewsGrowth,
@@ -676,7 +698,8 @@ export default function AdminDashboard() {
             <div style={{ 
               display: 'grid', 
               gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: 16
+              gap: 16,
+              marginBottom: 24
             }}>
               <div style={{ 
                 padding: 20, 
@@ -731,6 +754,165 @@ export default function AdminDashboard() {
                 </div>
               </div>
             </div>
+
+            {/* Lista över affiliate-klick */}
+            {stats.affiliateClicksList && stats.affiliateClicksList.length > 0 && (
+              <div>
+                <h3 style={{ margin: '0 0 16px 0', fontSize: '1rem', fontWeight: 600 }}>
+                  Senaste affiliate-klick (visar max 100)
+                </h3>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ 
+                    width: '100%', 
+                    borderCollapse: 'collapse',
+                    fontSize: '0.875rem'
+                  }}>
+                    <thead>
+                      <tr style={{ 
+                        background: '#f9fafb',
+                        borderBottom: '2px solid #e5e7eb'
+                      }}>
+                        <th style={{ 
+                          padding: '12px', 
+                          textAlign: 'left', 
+                          fontWeight: 600,
+                          color: '#374151'
+                        }}>
+                          Tidpunkt
+                        </th>
+                        <th style={{ 
+                          padding: '12px', 
+                          textAlign: 'left', 
+                          fontWeight: 600,
+                          color: '#374151'
+                        }}>
+                          Leverantör
+                        </th>
+                        <th style={{ 
+                          padding: '12px', 
+                          textAlign: 'left', 
+                          fontWeight: 600,
+                          color: '#374151'
+                        }}>
+                          Avtalstyp
+                        </th>
+                        <th style={{ 
+                          padding: '12px', 
+                          textAlign: 'left', 
+                          fontWeight: 600,
+                          color: '#374151'
+                        }}>
+                          URL
+                        </th>
+                        <th style={{ 
+                          padding: '12px', 
+                          textAlign: 'left', 
+                          fontWeight: 600,
+                          color: '#374151'
+                        }}>
+                          Tracking-ID
+                        </th>
+                        <th style={{ 
+                          padding: '12px', 
+                          textAlign: 'left', 
+                          fontWeight: 600,
+                          color: '#374151'
+                        }}>
+                          Källa
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {stats.affiliateClicksList.map((click) => (
+                        <tr key={click.id} style={{ 
+                          borderBottom: '1px solid #f3f4f6'
+                        }}>
+                          <td style={{ padding: '12px', color: '#6b7280' }}>
+                            {new Date(click.created_at).toLocaleString('sv-SE', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </td>
+                          <td style={{ padding: '12px', fontWeight: 600, color: '#1f2937' }}>
+                            {click.provider}
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <span style={{
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                              color: 'white',
+                              background: click.contract_type === 'rorligt' ? 'var(--secondary)' : 'var(--primary)'
+                            }}>
+                              {click.contract_type === 'rorligt' ? 'Rörligt' : 'Fastpris'}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <a 
+                              href={click.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              style={{ 
+                                color: '#3b82f6',
+                                textDecoration: 'none',
+                                maxWidth: '300px',
+                                display: 'block',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                              }}
+                              title={click.url}
+                            >
+                              {click.url.length > 50 ? click.url.substring(0, 50) + '...' : click.url}
+                            </a>
+                          </td>
+                          <td style={{ padding: '12px', fontFamily: 'monospace', fontSize: '0.75rem', color: '#6b7280' }}>
+                            {click.tracking_id ? (
+                              <span title={click.tracking_id}>
+                                {click.tracking_id.length > 20 
+                                  ? click.tracking_id.substring(0, 20) + '...' 
+                                  : click.tracking_id}
+                              </span>
+                            ) : (
+                              <span style={{ color: '#9ca3af' }}>-</span>
+                            )}
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            {click.came_via_robinhood ? (
+                              <span style={{
+                                padding: '4px 8px',
+                                borderRadius: '4px',
+                                fontSize: '0.75rem',
+                                fontWeight: 600,
+                                color: '#166534',
+                                background: '#dcfce7'
+                              }}>
+                                🎯 Robin Hood
+                              </span>
+                            ) : (
+                              <span style={{
+                                padding: '4px 8px',
+                                borderRadius: '4px',
+                                fontSize: '0.75rem',
+                                fontWeight: 600,
+                                color: '#6b7280',
+                                background: '#f3f4f6'
+                              }}>
+                                Övrigt
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Two Column Layout */}
