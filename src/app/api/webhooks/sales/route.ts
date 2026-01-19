@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Hitta affiliate-klicket baserat på tracking-ID
-    const { data: affiliateClick, error: clickError } = await supabase
+    const { data: affiliateClick } = await supabase
       .from('affiliate_clicks')
       .select('id, provider, contract_type')
       .eq('tracking_id', trackingId)
