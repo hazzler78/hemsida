@@ -184,6 +184,8 @@ const LOGO_MAPPING: Record<string, string> = {
   'Greenely': '/greenely.png',
   'Skellefteå Kraft': '/skelleftea.png',
   'Skellefteå': '/skelleftea.png',
+  'Vattenfall': '/vattenfall.png',
+  'Bixia': '/bixia.png',
 };
 
 // Funktion för att hitta logo_url baserat på leverantörsnamn
