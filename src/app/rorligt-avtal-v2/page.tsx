@@ -302,6 +302,7 @@ const ProviderLogo = styled.img`
   margin: 0 auto 1.5rem;
   display: block;
   object-fit: contain;
+  align-self: center;
 `;
 
 const ProviderName = styled.h3`

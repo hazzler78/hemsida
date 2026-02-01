@@ -137,8 +137,11 @@ const ProviderCard = styled.div`
 const ProviderLogo = styled.img`
   height: 50px;
   max-width: 120px;
-  margin-bottom: 1rem;
+  width: auto;
+  margin: 0 auto 1rem;
+  display: block;
   object-fit: contain;
+  align-self: center;
   
   @media (min-width: 480px) {
     height: 60px;
