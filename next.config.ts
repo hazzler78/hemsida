@@ -47,8 +47,13 @@ const nextConfig: NextConfig = {
     // Playwright requires Node.js modules that are not available in Edge Runtime
     // This allows the build to succeed, but Playwright will fail at runtime in Edge Runtime
     
-    // Ignore Playwright completely in client builds - it's only used server-side in API routes
-    if (!isServer) {
+    // Check if we're building for Cloudflare Pages (Edge Runtime)
+    // Cloudflare Pages uses Edge Runtime which doesn't support Playwright
+    const isCloudflareBuild = process.env.CF_PAGES === '1' || process.env.CF_PAGES_BRANCH !== undefined;
+    
+    // Ignore Playwright completely in client builds and Cloudflare builds
+    // (Cloudflare Pages uses Edge Runtime which doesn't support Playwright)
+    if (!isServer || isCloudflareBuild) {
       // Add module rules to handle Playwright assets before they cause errors
       config.module = config.module || {};
       config.module.rules = config.module.rules || [];
@@ -66,13 +71,19 @@ const nextConfig: NextConfig = {
         },
       });
       
-      // Ignore all Playwright-related modules, assets, and dependencies in client builds
+      // Ignore all Playwright-related modules, assets, and dependencies
       config.plugins.push(
-        // Ignore Node.js built-in modules and electron when imported from Playwright
+        // Ignore Node.js built-in modules when imported from Playwright
         new webpack.IgnorePlugin({
           resourceRegExp: /^(fs|path|child_process|crypto|http2|stream|util|os|net|tls|dns|url|http|https|zlib|events|buffer|electron)$/,
           contextRegExp: /playwright/,
         }),
+        // Also ignore Node.js built-in modules globally when building for Cloudflare
+        ...(isCloudflareBuild ? [
+          new webpack.IgnorePlugin({
+            resourceRegExp: /^(fs|path|child_process|crypto|http2|stream|util|os|net|tls|dns|url|http|https|zlib|events|buffer|electron)$/,
+          }),
+        ] : []),
         // Ignore electron module completely in client builds
         new webpack.IgnorePlugin({
           resourceRegExp: /^electron$/,
