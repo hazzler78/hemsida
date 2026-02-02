@@ -49,6 +49,20 @@ const nextConfig: NextConfig = {
     
     // Ignore Playwright completely in client builds - it's only used server-side in API routes
     if (!isServer) {
+      // Add module rules to handle Playwright assets before they cause errors
+      config.module = config.module || {};
+      config.module.rules = config.module.rules || [];
+      
+      // Rule to return empty module for all files from playwright directories in client builds
+      // Place this FIRST in the rules array so it catches Playwright files before other rules
+      config.module.rules.unshift({
+        test: /\.(ttf|woff|woff2|eot|otf|png|jpg|jpeg|gif|svg|ico|css|json|js|ts|tsx|mjs|cjs)$/,
+        include: /node_modules[\\/]playwright/,
+        use: {
+          loader: 'ignore-loader',
+        },
+      });
+      
       // Ignore all Playwright-related modules, assets, and dependencies in client builds
       config.plugins.push(
         // Ignore Node.js built-in modules and electron when imported from Playwright
@@ -60,11 +74,14 @@ const nextConfig: NextConfig = {
         new webpack.IgnorePlugin({
           resourceRegExp: /^electron$/,
         }),
-        // Ignore ALL files from playwright directories in client builds
+        // Ignore ALL files from playwright directories in client builds (catch-all)
         new webpack.IgnorePlugin({
           checkResource(resource: string) {
             // Ignore everything from playwright in client builds
-            return /node_modules[\\/]playwright/.test(resource);
+            if (/node_modules[\\/]playwright/.test(resource)) {
+              return true;
+            }
+            return false;
           },
         })
       );
@@ -72,6 +89,14 @@ const nextConfig: NextConfig = {
       // Mark Playwright and electron as external to prevent bundling in client
       config.resolve.alias = {
         ...config.resolve.alias,
+        playwright: false,
+        'playwright-core': false,
+        electron: false,
+      };
+      
+      // Add fallback for Playwright modules
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
         playwright: false,
         'playwright-core': false,
         electron: false,
