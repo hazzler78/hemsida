@@ -6,6 +6,7 @@ import StyledComponentsRegistry from '../lib/registry';
 import BottomNav from '@/components/BottomNav';
 import CampaignBanner from '@/components/CampaignBanner';
 import GrokChat from '@/components/GrokChat';
+import CheapEnergyChat from '@/components/CheapEnergyChat';
 import Footer from '@/components/Footer';
 
 const inter = Inter({ subsets: ["latin"] });
@@ -251,6 +252,7 @@ export default function RootLayout({
           </div>
         </StyledComponentsRegistry>
         <GrokChat />
+        <CheapEnergyChat />
       </body>
     </html>
   );

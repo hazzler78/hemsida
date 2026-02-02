@@ -117,6 +117,7 @@ export default function GrokChat() {
   const [contractChoiceSubmitted, setContractChoiceSubmitted] = useState(false);
   const [showBillUpload, setShowBillUpload] = useState(false);
   const [billUploadSubmitted, setBillUploadSubmitted] = useState(false);
+  const [showCheapEnergyAutomation, setShowCheapEnergyAutomation] = useState(false);
 
   
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -226,6 +227,12 @@ export default function GrokChat() {
         aiMsg = aiMsg.replace('[BILL_UPLOAD_SUBMITTED]', '');
         setBillUploadSubmitted(true);
         setShowBillUpload(false);
+      }
+      
+      // Check if AI wants to start Cheap Energy automation
+      if (aiMsg.includes('[START_CHEAP_ENERGY_AUTOMATION]')) {
+        aiMsg = aiMsg.replace('[START_CHEAP_ENERGY_AUTOMATION]', '');
+        setShowCheapEnergyAutomation(true);
       }
       
       // Remove greeting on subsequent assistant replies
@@ -561,6 +568,60 @@ export default function GrokChat() {
                   <BillUpload 
                     onAnalyzed={handleBillAnalyzed}
                   />
+                </div>
+              </div>
+            )}
+            {showCheapEnergyAutomation && (
+              <div style={{
+                marginBottom: 18,
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+              }}>
+                <GrodanIcon />
+                <div style={{
+                  background: '#fef3c7',
+                  color: '#17416b',
+                  borderRadius: '16px 16px 16px 4px',
+                  padding: '12px 16px',
+                  maxWidth: 320,
+                  fontSize: 16,
+                  fontWeight: 500,
+                  boxShadow: '0 2px 8px rgba(251, 191, 36, 0.12)',
+                  marginLeft: 8,
+                }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, opacity: 0.7 }}>
+                    Grodan
+                  </div>
+                  <div style={{ marginBottom: 12 }}>
+                    Perfekt! Jag kan hjälpa dig byta elavtal automatiskt. 
+                    Klicka på knappen nedan för att starta automation-chatten där vi samlar in all information steg-för-steg och fyller i formuläret åt dig.
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowCheapEnergyAutomation(false);
+                      // Trigger custom event to open CheapEnergyChat
+                      window.dispatchEvent(new CustomEvent('openCheapEnergyChat'));
+                      setMessages(prev => [...prev, {
+                        role: 'assistant',
+                        content: 'Perfekt! Jag öppnar nu Cheap Energy automation-chatten där vi samlar in all information steg-för-steg och fyller i formuläret automatiskt åt dig!'
+                      }]);
+                    }}
+                    style={{
+                      background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
+                      color: 'white',
+                      border: 'none',
+                      padding: '10px 16px',
+                      borderRadius: 8,
+                      fontSize: 14,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      width: '100%',
+                      marginTop: 8,
+                    }}
+                  >
+                    Starta automation ⚡
+                  </button>
                 </div>
               </div>
             )}

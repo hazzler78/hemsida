@@ -41,6 +41,19 @@ export default function CheapEnergyChat() {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
+  // Listen for custom event to open chat from GrokChat
+  useEffect(() => {
+    const handleOpenCheapEnergyChat = () => {
+      setOpen(true);
+    };
+    
+    window.addEventListener('openCheapEnergyChat', handleOpenCheapEnergyChat);
+    
+    return () => {
+      window.removeEventListener('openCheapEnergyChat', handleOpenCheapEnergyChat);
+    };
+  }, []);
+
   // Scroll to bottom when new messages arrive
   useEffect(() => {
     if (chatEndRef.current) {
@@ -360,14 +373,14 @@ export default function CheapEnergyChat() {
 
   return (
     <>
-      {/* Floating button */}
+      {/* Floating button - positioned to the left of GrokChat button */}
       <button
         onClick={() => setOpen((o) => !o)}
         style={{
           position: 'fixed',
           bottom: 104,
-          right: 24,
-          zIndex: 1004,
+          right: 96, // Positioned to the left of GrokChat (24 + 56 + 16 margin)
+          zIndex: 1003, // Slightly lower than GrokChat
           background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
           color: 'white',
           border: '1px solid rgba(255, 255, 255, 0.2)',
