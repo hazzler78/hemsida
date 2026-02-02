@@ -52,6 +52,26 @@ interface DashboardStats {
   
   // Contract preference
   rorligtVsFastpris: { rorligt: number; fastpris: number };
+  
+  // Contact requests and newsletter subscriptions
+  contactRequests: Array<{
+    id: number;
+    name: string | null;
+    email: string;
+    phone: string | null;
+    message: string | null;
+    form_type: string | null;
+    ref: string | null;
+    campaign_code: string | null;
+    created_at: string;
+  }>;
+  newsletterSubscriptions: Array<{
+    id: number;
+    email: string;
+    ref: string | null;
+    campaign_code: string | null;
+    created_at: string;
+  }>;
 }
 
 export default function AdminDashboard() {
@@ -157,6 +177,23 @@ export default function AdminDashboard() {
         .gte('created_at', fromISO);
       
       const newsletterSubs = contactsData?.filter(c => c.subscribe_newsletter).length || 0;
+
+      // Fetch contact requests (all contacts, ordered by date)
+      const { data: contactRequests } = await supabase
+        .from('contacts')
+        .select('id, name, email, phone, message, form_type, ref, campaign_code, created_at')
+        .gte('created_at', fromISO)
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      // Fetch newsletter subscriptions (contacts with subscribe_newsletter = true)
+      const { data: newsletterSubscriptions } = await supabase
+        .from('contacts')
+        .select('id, email, ref, campaign_code, created_at')
+        .eq('subscribe_newsletter', true)
+        .gte('created_at', fromISO)
+        .order('created_at', { ascending: false })
+        .limit(100);
 
       // 5. Social Shares
       const { count: socialShares } = await supabase
@@ -386,7 +423,9 @@ export default function AdminDashboard() {
         topUtmSources,
         topUtmCampaigns,
         dailyStats,
-        rorligtVsFastpris: { rorligt, fastpris }
+        rorligtVsFastpris: { rorligt, fastpris },
+        contactRequests: contactRequests || [],
+        newsletterSubscriptions: newsletterSubscriptions || []
       });
 
     } catch (e) {
@@ -1315,6 +1354,262 @@ export default function AdminDashboard() {
               </div>
             </div>
           )}
+
+          {/* Contact Requests and Newsletter Subscriptions */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(600px, 1fr))',
+            gap: 24,
+            marginBottom: 24
+          }}>
+            {/* Contact Requests */}
+            <div style={{ 
+              background: 'white',
+              borderRadius: 12,
+              padding: 24,
+              border: '1px solid #e5e7eb',
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+            }}>
+              <h2 style={{ margin: '0 0 20px 0', fontSize: '1.25rem' }}>
+                📧 Kontaktförfrågningar ({stats.contactRequests.length})
+              </h2>
+              {stats.contactRequests.length > 0 ? (
+                <div style={{ overflowX: 'auto', maxHeight: '600px', overflowY: 'auto' }}>
+                  <table style={{ 
+                    width: '100%', 
+                    borderCollapse: 'collapse',
+                    fontSize: '0.875rem'
+                  }}>
+                    <thead>
+                      <tr style={{ 
+                        background: '#f9fafb',
+                        borderBottom: '2px solid #e5e7eb',
+                        position: 'sticky',
+                        top: 0,
+                        zIndex: 1
+                      }}>
+                        <th style={{ 
+                          padding: '12px', 
+                          textAlign: 'left', 
+                          fontWeight: 600,
+                          color: '#374151'
+                        }}>
+                          Datum
+                        </th>
+                        <th style={{ 
+                          padding: '12px', 
+                          textAlign: 'left', 
+                          fontWeight: 600,
+                          color: '#374151'
+                        }}>
+                          Namn
+                        </th>
+                        <th style={{ 
+                          padding: '12px', 
+                          textAlign: 'left', 
+                          fontWeight: 600,
+                          color: '#374151'
+                        }}>
+                          E-post
+                        </th>
+                        <th style={{ 
+                          padding: '12px', 
+                          textAlign: 'left', 
+                          fontWeight: 600,
+                          color: '#374151'
+                        }}>
+                          Typ
+                        </th>
+                        <th style={{ 
+                          padding: '12px', 
+                          textAlign: 'left', 
+                          fontWeight: 600,
+                          color: '#374151'
+                        }}>
+                          Meddelande
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {stats.contactRequests.map((contact) => (
+                        <tr key={contact.id} style={{ 
+                          borderBottom: '1px solid #f3f4f6'
+                        }}>
+                          <td style={{ padding: '12px', color: '#6b7280', whiteSpace: 'nowrap' }}>
+                            {new Date(contact.created_at).toLocaleString('sv-SE', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </td>
+                          <td style={{ padding: '12px', fontWeight: 600, color: '#1f2937' }}>
+                            {contact.name || '-'}
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <a 
+                              href={`mailto:${contact.email}`}
+                              style={{ color: '#3b82f6', textDecoration: 'none' }}
+                            >
+                              {contact.email}
+                            </a>
+                            {contact.phone && (
+                              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: 4 }}>
+                                📞 {contact.phone}
+                              </div>
+                            )}
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <span style={{
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                              color: '#6b7280',
+                              background: '#f3f4f6'
+                            }}>
+                              {contact.form_type || 'contact'}
+                            </span>
+                            {contact.ref && (
+                              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: 4 }}>
+                                Ref: {contact.ref}
+                              </div>
+                            )}
+                            {contact.campaign_code && (
+                              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: 2 }}>
+                                Kampanj: {contact.campaign_code}
+                              </div>
+                            )}
+                          </td>
+                          <td style={{ padding: '12px', color: '#6b7280', maxWidth: '300px' }}>
+                            {contact.message ? (
+                              <div style={{ 
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 3,
+                                WebkitBoxOrient: 'vertical'
+                              }}>
+                                {contact.message}
+                              </div>
+                            ) : (
+                              <span style={{ color: '#9ca3af' }}>-</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p style={{ color: '#6b7280', textAlign: 'center', padding: '2rem 0' }}>
+                  Inga kontaktförfrågningar i den valda perioden
+                </p>
+              )}
+            </div>
+
+            {/* Newsletter Subscriptions */}
+            <div style={{ 
+              background: 'white',
+              borderRadius: 12,
+              padding: 24,
+              border: '1px solid #e5e7eb',
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+            }}>
+              <h2 style={{ margin: '0 0 20px 0', fontSize: '1.25rem' }}>
+                📰 Nyhetsbrevsprenumerationer ({stats.newsletterSubscriptions.length})
+              </h2>
+              {stats.newsletterSubscriptions.length > 0 ? (
+                <div style={{ overflowX: 'auto', maxHeight: '600px', overflowY: 'auto' }}>
+                  <table style={{ 
+                    width: '100%', 
+                    borderCollapse: 'collapse',
+                    fontSize: '0.875rem'
+                  }}>
+                    <thead>
+                      <tr style={{ 
+                        background: '#f9fafb',
+                        borderBottom: '2px solid #e5e7eb',
+                        position: 'sticky',
+                        top: 0,
+                        zIndex: 1
+                      }}>
+                        <th style={{ 
+                          padding: '12px', 
+                          textAlign: 'left', 
+                          fontWeight: 600,
+                          color: '#374151'
+                        }}>
+                          Datum
+                        </th>
+                        <th style={{ 
+                          padding: '12px', 
+                          textAlign: 'left', 
+                          fontWeight: 600,
+                          color: '#374151'
+                        }}>
+                          E-post
+                        </th>
+                        <th style={{ 
+                          padding: '12px', 
+                          textAlign: 'left', 
+                          fontWeight: 600,
+                          color: '#374151'
+                        }}>
+                          Källa
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {stats.newsletterSubscriptions.map((sub) => (
+                        <tr key={sub.id} style={{ 
+                          borderBottom: '1px solid #f3f4f6'
+                        }}>
+                          <td style={{ padding: '12px', color: '#6b7280', whiteSpace: 'nowrap' }}>
+                            {new Date(sub.created_at).toLocaleString('sv-SE', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <a 
+                              href={`mailto:${sub.email}`}
+                              style={{ color: '#3b82f6', textDecoration: 'none', fontWeight: 500 }}
+                            >
+                              {sub.email}
+                            </a>
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            {sub.ref && (
+                              <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: 4 }}>
+                                Ref: {sub.ref}
+                              </div>
+                            )}
+                            {sub.campaign_code && (
+                              <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                                Kampanj: {sub.campaign_code}
+                              </div>
+                            )}
+                            {!sub.ref && !sub.campaign_code && (
+                              <span style={{ color: '#9ca3af', fontSize: '0.875rem' }}>-</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p style={{ color: '#6b7280', textAlign: 'center', padding: '2rem 0' }}>
+                  Inga nyhetsbrevsprenumerationer i den valda perioden
+                </p>
+              )}
+            </div>
+          </div>
 
           {/* Quick Links */}
           <div style={{ 

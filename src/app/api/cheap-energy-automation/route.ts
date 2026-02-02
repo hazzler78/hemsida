@@ -43,6 +43,7 @@ async function runAutomationSteps(
   steps: Array<{ action: string; data: Record<string, unknown> }>
 ) {
   // Dynamic import of Playwright (will fail in Edge Runtime)
+  // Webpack is configured to ignore Playwright's Node.js dependencies during build
   let chromium: any;
   try {
     const playwright = await import('playwright');
