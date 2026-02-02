@@ -182,8 +182,25 @@ export default function GrokChat() {
         }),
       });
       if (!res.ok) {
-        const err = await res.json();
-        setError(err.error || 'Något gick fel.');
+        // Check if response is JSON before parsing
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const err = await res.json();
+          setError(err.error || 'Något gick fel.');
+        } else {
+          const text = await res.text();
+          setError(`Serverfel: ${res.status} ${res.statusText}`);
+          console.error('Non-JSON error response:', text.substring(0, 200));
+        }
+        setLoading(false);
+        return;
+      }
+      // Check if response is JSON before parsing
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await res.text();
+        setError('Fick inte JSON-svar från servern');
+        console.error('Non-JSON response:', text.substring(0, 200));
         setLoading(false);
         return;
       }

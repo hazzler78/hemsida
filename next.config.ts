@@ -42,23 +42,41 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  webpack: (config, { webpack }) => {
+  webpack: (config, { webpack, isServer }) => {
     // Prevent webpack from bundling Playwright and its Node.js dependencies
     // Playwright requires Node.js modules that are not available in Edge Runtime
     // This allows the build to succeed, but Playwright will fail at runtime in Edge Runtime
-    config.plugins.push(
-      new webpack.IgnorePlugin({
-        resourceRegExp: /^(fs|path|child_process|crypto|http2|stream|util|os|net|tls|dns|url|http|https|zlib|events|buffer)$/,
-        contextRegExp: /playwright/,
-      })
-    );
     
-    // Mark Playwright as external to prevent bundling
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      playwright: false,
-      'playwright-core': false,
-    };
+    // Ignore Playwright completely in client builds - it's only used server-side in API routes
+    if (!isServer) {
+      // Ignore all Playwright-related modules, assets, and dependencies in client builds
+      config.plugins.push(
+        // Ignore Node.js built-in modules and electron when imported from Playwright
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^(fs|path|child_process|crypto|http2|stream|util|os|net|tls|dns|url|http|https|zlib|events|buffer|electron)$/,
+          contextRegExp: /playwright/,
+        }),
+        // Ignore electron module completely in client builds
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^electron$/,
+        }),
+        // Ignore ALL files from playwright directories in client builds
+        new webpack.IgnorePlugin({
+          checkResource(resource: string) {
+            // Ignore everything from playwright in client builds
+            return /node_modules[\\/]playwright/.test(resource);
+          },
+        })
+      );
+      
+      // Mark Playwright and electron as external to prevent bundling in client
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        playwright: false,
+        'playwright-core': false,
+        electron: false,
+      };
+    }
     
     return config;
   },

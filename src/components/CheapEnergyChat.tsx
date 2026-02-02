@@ -75,8 +75,22 @@ export default function CheapEnergyChat() {
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Något gick fel');
+        // Check if response is JSON before parsing
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || 'Något gick fel');
+        } else {
+          const text = await res.text();
+          throw new Error(`Serverfel: ${res.status} ${res.statusText}`);
+        }
+      }
+
+      // Check if response is JSON before parsing
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await res.text();
+        throw new Error('Fick inte JSON-svar från servern');
       }
 
       return await res.json();
@@ -98,8 +112,22 @@ export default function CheapEnergyChat() {
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Något gick fel');
+        // Check if response is JSON before parsing
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || 'Något gick fel');
+        } else {
+          const text = await res.text();
+          throw new Error(`Serverfel: ${res.status} ${res.statusText}`);
+        }
+      }
+
+      // Check if response is JSON before parsing
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await res.text();
+        throw new Error('Fick inte JSON-svar från servern');
       }
 
       return await res.json();
