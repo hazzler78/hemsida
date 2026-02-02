@@ -295,6 +295,27 @@ const InfoBadge = styled.div`
   z-index: 10;
 `;
 
+const BestPriceBadge = styled.div`
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #a855f7, #9333ea);
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
+  z-index: 10;
+  white-space: nowrap;
+  
+  @media (max-width: 640px) {
+    font-size: 0.75rem;
+    padding: 0.4rem 1rem;
+  }
+`;
+
 const ProviderLogo = styled.img`
   height: 60px;
   max-width: 140px;
@@ -691,10 +712,13 @@ export default function RorligtAvtalV2Page() {
                 <ProvidersGrid>
                   {recommendedProviders.map((provider, index) => (
                     <ProviderCard key={provider.id} recommended={index === 0 && preferences.priority === 'price'}>
-                      {index === 0 && preferences.priority === 'price' && (
+                      {provider.name === 'Cheap Energy' && (
+                        <BestPriceBadge>Vi har sveriges billigaste elavtal</BestPriceBadge>
+                      )}
+                      {index === 0 && preferences.priority === 'price' && provider.name !== 'Cheap Energy' && (
                         <InfoBadge>Matchar dina preferenser</InfoBadge>
                       )}
-                      {provider.is_recommended && !(index === 0 && preferences.priority === 'price') && (
+                      {provider.is_recommended && !(index === 0 && preferences.priority === 'price') && provider.name !== 'Cheap Energy' && (
                         <RecommendedBadge>Rekommenderat</RecommendedBadge>
                       )}
                       {provider.logo_url && provider.logo_url.trim() !== '' && !failedLogos.has(provider.id) && (
