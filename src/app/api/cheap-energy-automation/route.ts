@@ -44,11 +44,12 @@ async function runAutomationSteps(
 ) {
   // Dynamic import of Playwright (will fail in Edge Runtime)
   // Webpack is configured to ignore Playwright's Node.js dependencies during build
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let chromium: any;
   try {
     const playwright = await import('playwright');
     chromium = playwright.chromium;
-  } catch (error) {
+  } catch {
     throw new Error('Playwright is not available in Edge Runtime. Browser automation requires Node.js runtime. Please deploy this route to a platform that supports Node.js runtime (Vercel, Railway, Render, etc.) or use a browser automation service like Browserless.io.');
   }
 
