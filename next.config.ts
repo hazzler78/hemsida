@@ -84,14 +84,22 @@ const nextConfig: NextConfig = {
             resourceRegExp: /^(fs|path|child_process|crypto|http2|stream|util|os|net|tls|dns|url|http|https|zlib|events|buffer|electron)$/,
           }),
         ] : []),
-        // Ignore electron module completely in client builds
+        // Ignore electron module completely
         new webpack.IgnorePlugin({
           resourceRegExp: /^electron$/,
         }),
-        // Ignore chromium-bidi (Playwright dependency) completely in client builds
+        // Ignore chromium-bidi (Playwright dependency) completely
         new webpack.IgnorePlugin({
           resourceRegExp: /^chromium-bidi/,
         }),
+        // For Cloudflare builds, also ignore chromium-bidi imports globally
+        ...(isCloudflareBuild ? [
+          new webpack.IgnorePlugin({
+            checkResource(resource: string) {
+              return /chromium-bidi/.test(resource);
+            },
+          }),
+        ] : []),
         // Ignore ALL files from playwright directories (catch-all)
         new webpack.IgnorePlugin({
           checkResource(resource: string) {
@@ -113,6 +121,13 @@ const nextConfig: NextConfig = {
           }),
           new webpack.IgnorePlugin({
             resourceRegExp: /^playwright-core$/,
+          }),
+          // Ignore all Playwright-related imports in Cloudflare builds
+          new webpack.IgnorePlugin({
+            checkResource(resource: string) {
+              // Ignore any import that references playwright or chromium-bidi
+              return /playwright|chromium-bidi/.test(resource);
+            },
           }),
         ] : [])
       );
