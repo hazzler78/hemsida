@@ -61,40 +61,35 @@ const nextConfig: NextConfig = {
       // CRITICAL: Place Playwright ignore rules FIRST, before any other rules
       // This catches ALL files from Playwright directories before webpack tries to process them
       
-      // Rule 1: Catch font files specifically (most common issue)
+      // CRITICAL: These rules MUST be in this order and MUST use unshift to be first
+      // Rule 1: Catch font files specifically FIRST (most common issue with .ttf files)
       config.module.rules.unshift({
         test: /\.(ttf|woff|woff2|eot|otf)$/,
         include: [
           /node_modules[\\/]playwright/,
           /node_modules[\\/]chromium-bidi/,
         ],
-        use: {
-          loader: 'ignore-loader',
-        },
+        use: 'ignore-loader',
       });
       
       // Rule 2: Catch all other asset files
       config.module.rules.unshift({
-        test: /\.(png|jpg|jpeg|gif|svg|ico|css|json)$/,
+        test: /\.(png|jpg|jpeg|gif|svg|ico|css|json|js|ts|tsx|mjs|cjs)$/,
         include: [
           /node_modules[\\/]playwright/,
           /node_modules[\\/]chromium-bidi/,
         ],
-        use: {
-          loader: 'ignore-loader',
-        },
+        use: 'ignore-loader',
       });
       
-      // Rule 3: Catch ALL files from playwright directories (catch-all)
+      // Rule 3: Catch ALL files from playwright directories (catch-all - must be last)
       config.module.rules.unshift({
         test: /.*/,
         include: [
           /node_modules[\\/]playwright/,
           /node_modules[\\/]chromium-bidi/,
         ],
-        use: {
-          loader: 'ignore-loader',
-        },
+        use: 'ignore-loader',
       });
       
       // CRITICAL: Add IgnorePlugin FIRST to catch Playwright imports before webpack processes them

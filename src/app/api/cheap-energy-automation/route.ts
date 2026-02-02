@@ -46,7 +46,13 @@ async function runAutomationSteps(
 ) {
   // Check if we're in Edge Runtime (Cloudflare Pages, etc.)
   // Edge Runtime doesn't support Playwright, so return error immediately
-  if (typeof process === 'undefined' || !process.versions?.node) {
+  // Use a check that works in Edge Runtime (checking for globalThis instead of process)
+  const isEdgeRuntime = typeof globalThis !== 'undefined' && 
+    (globalThis.constructor?.name === 'DedicatedWorkerGlobalScope' || 
+     globalThis.constructor?.name === 'ServiceWorkerGlobalScope' ||
+     typeof EdgeRuntime !== 'undefined');
+  
+  if (isEdgeRuntime) {
     await logStep(sessionId, 'runtime_check_failed', {}, 'failed', 'Edge Runtime detected - Playwright requires Node.js runtime');
     throw new Error('Browser automation är inte tillgängligt i Edge Runtime. Denna funktion kräver Node.js runtime och fungerar endast lokalt eller på plattformar som Vercel, Railway, eller Render. För att testa lokalt, kör "npm run dev" och testa via localhost:3000.');
   }
@@ -349,7 +355,11 @@ export async function POST(req: NextRequest) {
   try {
     // Check if we're in Edge Runtime (Cloudflare Pages, etc.)
     // Edge Runtime doesn't support Playwright, so return error immediately
-    const isEdgeRuntime = typeof process === 'undefined' || !process.versions?.node;
+    // Use a check that works in Edge Runtime (checking for globalThis instead of process)
+    const isEdgeRuntime = typeof globalThis !== 'undefined' && 
+      (globalThis.constructor?.name === 'DedicatedWorkerGlobalScope' || 
+       globalThis.constructor?.name === 'ServiceWorkerGlobalScope' ||
+       typeof EdgeRuntime !== 'undefined');
     
     if (isEdgeRuntime) {
       return NextResponse.json({ 
