@@ -135,13 +135,38 @@ const dropOffPoints = automationLogs.reduce((acc, log) => {
 }, {});
 ```
 
+## ⚠️ VIKTIGT: Cloudflare Pages Kompatibilitet
+
+**Playwright fungerar INTE på Cloudflare Pages** eftersom:
+- Cloudflare Pages kräver Edge Runtime för alla routes
+- Playwright kräver Node.js runtime
+- Edge Runtime stöder inte Playwright's browser automation
+
+### Lösningar:
+
+#### Alternativ 1: Separerad Automation Server (REKOMMENDERAT)
+Kör automationen på en separat Node.js-server:
+- **Vercel**: Skapa ett separat projekt med Node.js runtime
+- **Railway**: Enkel Node.js deployment
+- **Render**: Gratis tier för Node.js apps
+- **Fly.io**: Bra för Docker-containers
+
+#### Alternativ 2: Browser Automation Service
+Använd en extern tjänst:
+- **Browserless.io**: Managed browser automation
+- **ScrapingBee**: API-baserad browser automation
+- **Puppeteer-as-a-Service**: Hosted Puppeteer
+
+#### Alternativ 3: Cloudflare Workers med Node.js Compat
+Använd Cloudflare Workers med `nodejs_compat` flag, men detta har begränsningar.
+
 ## Felsökning
 
 ### Playwright fungerar inte
 
 - Kontrollera att Playwright är installerat: `npx playwright --version`
 - Installera browsers: `npx playwright install chromium`
-- För Cloudflare Pages/Vercel: Använd Node.js runtime (inte Edge)
+- **För Cloudflare Pages**: Använd en separat Node.js-server för automation
 
 ### Selectors hittas inte
 

@@ -711,5 +711,10 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Note: This route cannot use 'edge' runtime because Playwright requires Node.js
-export const runtime = 'nodejs';
+// WARNING: Playwright requires Node.js runtime, but Cloudflare Pages requires Edge Runtime
+// This route will NOT work on Cloudflare Pages. Consider:
+// 1. Running automation on a separate Node.js server (Vercel, Railway, etc.)
+// 2. Using a browser automation service (Browserless, ScrapingBee, etc.)
+// 3. Using Puppeteer with Chrome for Testing in Edge Runtime (limited support)
+// For now, set to 'edge' to allow Cloudflare Pages build, but functionality will be limited
+export const runtime = 'edge';
