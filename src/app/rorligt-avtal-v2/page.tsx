@@ -505,7 +505,8 @@ export default function RorligtAvtalV2Page() {
             );
             return {
               ...provider,
-              logo_url: logoUrl
+              logo_url: logoUrl,
+              best_price_badge_text: provider.best_price_badge_text && provider.best_price_badge_text.trim() !== '' ? provider.best_price_badge_text : undefined
             };
           });
           setProviders(mergedProviders);
@@ -713,7 +714,7 @@ export default function RorligtAvtalV2Page() {
                 <ProvidersGrid>
                   {recommendedProviders.map((provider, index) => (
                     <ProviderCard key={provider.id} recommended={index === 0 && preferences.priority === 'price'}>
-                      {provider.best_price_badge_text && (
+                      {provider.best_price_badge_text && provider.best_price_badge_text.trim() !== '' && (
                         <BestPriceBadge>{provider.best_price_badge_text}</BestPriceBadge>
                       )}
                       {!provider.best_price_badge_text && index === 0 && preferences.priority === 'price' && (

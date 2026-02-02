@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
       campaign_text: row.campaign_text || undefined,
       campaign_bold: row.campaign_bold === 1,
       campaign_italic: row.campaign_italic === 1,
-      best_price_badge_text: row.best_price_badge_text || undefined,
+      best_price_badge_text: row.best_price_badge_text && row.best_price_badge_text.trim() !== '' ? row.best_price_badge_text : undefined,
       created_at: row.created_at,
       updated_at: row.updated_at,
     }));
