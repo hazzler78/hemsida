@@ -37,7 +37,6 @@ export default function CheapEnergyChat() {
   );
   const [formData, setFormData] = useState<FormData>({});
   const [currentStep, setCurrentStep] = useState<'postnummer' | 'forbrukning' | 'personnummer' | 'address_confirmation' | 'contact_details' | 'completed'>('postnummer');
-  const [signingUrl, setSigningUrl] = useState<string | null>(null);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -50,7 +49,7 @@ export default function CheapEnergyChat() {
   }, [messages]);
 
   // Helper to call automation API
-  const callAutomation = async (action: string, data: Record<string, any>) => {
+  const callAutomation = async (action: string, data: Record<string, unknown>) => {
     try {
       const res = await fetch('/api/cheap-energy-automation', {
         method: 'POST',
@@ -74,7 +73,7 @@ export default function CheapEnergyChat() {
   };
 
   // Helper to run multiple automation steps in sequence
-  const runAutomationSteps = async (steps: Array<{ action: string; data: Record<string, any> }>) => {
+  const runAutomationSteps = async (steps: Array<{ action: string; data: Record<string, unknown> }>) => {
     try {
       const res = await fetch('/api/cheap-energy-automation', {
         method: 'POST',
@@ -97,7 +96,7 @@ export default function CheapEnergyChat() {
   };
 
   // Parse user input for different steps
-  const parseInput = (input: string, step: string): any => {
+  const parseInput = (input: string, step: string): string | boolean | { type: string; value: string } | null => {
     const lowerInput = input.toLowerCase().trim();
 
     if (step === 'postnummer') {
@@ -172,14 +171,14 @@ export default function CheapEnergyChat() {
     try {
       if (step === 'postnummer') {
         const postnummer = parseInput(userInput, step);
-        if (!postnummer) {
+        if (!postnummer || typeof postnummer !== 'string') {
           setError('Skriv ditt postnummer (t.ex. 12345)');
           setLoading(false);
           return;
         }
 
         setFormData({ ...formData, postnummer });
-        const result = await callAutomation('fill_postnummer', { postnummer });
+        await callAutomation('fill_postnummer', { postnummer });
         
         setMessages(prev => [...prev, 
           { role: 'assistant', content: `Tack! Nu behöver jag veta din ungefärliga årsförbrukning. Välj ett av alternativen:\n\n1. 2000 kWh/år (liten lägenhet)\n2. 5000 kWh/år (normal familj)\n3. 20000 kWh/år (stor villa / elbil / hög förbrukning)` }
@@ -189,7 +188,7 @@ export default function CheapEnergyChat() {
 
       else if (step === 'forbrukning') {
         const forbrukning = parseInput(userInput, step);
-        if (!forbrukning) {
+        if (!forbrukning || typeof forbrukning !== 'string') {
           setError('Välj alternativ 1, 2 eller 3');
           setLoading(false);
           return;
@@ -209,7 +208,7 @@ export default function CheapEnergyChat() {
 
       else if (step === 'personnummer') {
         const personnummer = parseInput(userInput, step);
-        if (!personnummer || personnummer.length !== 12) {
+        if (!personnummer || typeof personnummer !== 'string' || personnummer.length !== 12) {
           setError('Skriv ditt personnummer i formatet ÅÅÅÅMMDD-XXXX');
           setLoading(false);
           return;
@@ -231,7 +230,7 @@ export default function CheapEnergyChat() {
 
       else if (step === 'address_confirmation') {
         const confirmed = parseInput(userInput, step);
-        if (confirmed === null) {
+        if (confirmed === null || typeof confirmed !== 'boolean') {
           setError('Svara Ja eller Nej');
           setLoading(false);
           return;
@@ -249,13 +248,15 @@ export default function CheapEnergyChat() {
       else if (step === 'contact_details') {
         const parsed = parseInput(userInput, step);
         
-        if (!parsed) {
+        if (!parsed || typeof parsed !== 'object' || !('type' in parsed) || !('value' in parsed)) {
           setError('Skriv din e-postadress, telefonnummer, eller annan uppgift');
           setLoading(false);
           return;
         }
 
-        const updatedFormData = { ...formData, [parsed.type]: parsed.value };
+        // Type guard ensures parsed is { type: string; value: string }
+        const contactData = parsed as { type: string; value: string };
+        const updatedFormData = { ...formData, [contactData.type]: contactData.value };
         setFormData(updatedFormData);
 
         // Check what's missing
@@ -307,10 +308,10 @@ export default function CheapEnergyChat() {
 
             const result = await runAutomationSteps(steps);
             
-            if (result.results?.signingUrl) {
-              setSigningUrl(result.results.signingUrl);
+            const signingUrl = (result.results as { signingUrl?: string })?.signingUrl;
+            if (signingUrl) {
               setMessages(prev => [...prev, 
-                { role: 'assistant', content: `Ditt avtal är nu klart att signera! Klicka här för att öppna BankID och godkänna:\n\n[${result.results.signingUrl}](${result.results.signingUrl})\n\nNär du signerat är du kund hos Cheap Energy – grattis!` }
+                { role: 'assistant', content: `Ditt avtal är nu klart att signera! Klicka här för att öppna BankID och godkänna:\n\n[${signingUrl}](${signingUrl})\n\nNär du signerat är du kund hos Cheap Energy – grattis!` }
               ]);
               setCurrentStep('completed');
             } else {
@@ -354,7 +355,6 @@ export default function CheapEnergyChat() {
     setInput('');
     setFormData({});
     setCurrentStep('postnummer');
-    setSigningUrl(null);
     setError('');
   };
 

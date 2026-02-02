@@ -6,18 +6,11 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const CHEAP_ENERGY_URL = 'https://www.cheapenergy.se/teckna-elavtal/?src=Elchef';
 
-interface AutomationStep {
-  step: string;
-  data: Record<string, any>;
-  status: 'in_progress' | 'completed' | 'failed';
-  error?: string;
-}
-
 // Helper function to log step to Supabase
 async function logStep(
   sessionId: string,
   step: string,
-  stepData: Record<string, any>,
+  stepData: Record<string, unknown>,
   status: 'in_progress' | 'completed' | 'failed' = 'in_progress',
   error?: string,
   signingUrl?: string
@@ -45,7 +38,7 @@ async function logStep(
 // Helper function to run automation steps in sequence
 async function runAutomationSteps(
   sessionId: string,
-  steps: Array<{ action: string; data: Record<string, any> }>
+  steps: Array<{ action: string; data: Record<string, unknown> }>
 ) {
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
@@ -61,7 +54,7 @@ async function runAutomationSteps(
     // Wait for initial load (5 seconds as mentioned)
     await page.waitForTimeout(5000);
 
-    const results: Record<string, any> = {};
+    const results: Record<string, unknown> = {};
 
     // Execute each step in sequence
     for (const step of steps) {
@@ -71,7 +64,7 @@ async function runAutomationSteps(
         if (action === 'fill_postnummer') {
           const postnummerSelector = 'input[name="postnummer"], input[placeholder*="postnummer" i], input[type="text"][id*="post" i], input[name="zip"], input[name="postal"]';
           await page.waitForSelector(postnummerSelector, { timeout: 10000 });
-          await page.fill(postnummerSelector, data.postnummer);
+          await page.fill(postnummerSelector, data.postnummer as string);
           await page.keyboard.press('Tab');
           await page.waitForTimeout(2000);
           await logStep(sessionId, 'postnummer_filled', { postnummer: data.postnummer }, 'completed');
@@ -87,22 +80,22 @@ async function runAutomationSteps(
             `input[value="${data.forbrukning}"]`,
           ];
           
-          let clicked = false;
+          let found = false;
           for (const selector of forbrukningSelectors) {
             try {
               await page.waitForSelector(selector, { timeout: 3000 });
               await page.click(selector);
-              clicked = true;
+              found = true;
               break;
             } catch {}
           }
           
-          if (!clicked) {
+          if (!found) {
             // Try input field instead
             const inputSelector = 'input[name="forbrukning"], input[name="usage"], input[type="number"]';
             const input = await page.$(inputSelector);
             if (input) {
-              await page.fill(inputSelector, data.forbrukning);
+              await page.fill(inputSelector, data.forbrukning as string);
             }
           }
           
@@ -120,12 +113,10 @@ async function runAutomationSteps(
             'input[value="variable"]',
           ];
           
-          let clicked = false;
           for (const selector of contractSelectors) {
             try {
               await page.waitForSelector(selector, { timeout: 3000 });
               await page.click(selector);
-              clicked = true;
               break;
             } catch {}
           }
@@ -138,7 +129,7 @@ async function runAutomationSteps(
         else if (action === 'fill_personnummer') {
           const personnummerSelector = 'input[name="personnummer"], input[name="ssn"], input[placeholder*="personnummer" i], input[type="text"][id*="person" i]';
           await page.waitForSelector(personnummerSelector, { timeout: 10000 });
-          await page.fill(personnummerSelector, data.personnummer);
+          await page.fill(personnummerSelector, data.personnummer as string);
           await page.keyboard.press('Tab');
           await page.waitForTimeout(3000);
 
@@ -174,12 +165,10 @@ async function runAutomationSteps(
             `input[value="${data.confirmed ? 'yes' : 'no'}"]`,
           ];
           
-          let clicked = false;
           for (const selector of buttonSelectors) {
             try {
               await page.waitForSelector(selector, { timeout: 3000 });
               await page.click(selector);
-              clicked = true;
               break;
             } catch {}
           }
@@ -195,7 +184,7 @@ async function runAutomationSteps(
             const emailSelector = 'input[type="email"], input[name="email"], input[placeholder*="e-post" i]';
             try {
               await page.waitForSelector(emailSelector, { timeout: 5000 });
-              await page.fill(emailSelector, data.email);
+              await page.fill(emailSelector, data.email as string);
             } catch {}
           }
 
@@ -204,7 +193,7 @@ async function runAutomationSteps(
             const telefonSelector = 'input[type="tel"], input[name="telefon"], input[name="phone"], input[placeholder*="telefon" i]';
             try {
               await page.waitForSelector(telefonSelector, { timeout: 5000 });
-              await page.fill(telefonSelector, data.telefon);
+              await page.fill(telefonSelector, data.telefon as string);
             } catch {}
           }
 
@@ -213,7 +202,7 @@ async function runAutomationSteps(
             const datumSelector = 'input[type="date"], input[name="tilltradesdatum"], input[name="startDate"], input[placeholder*="datum" i]';
             try {
               await page.waitForSelector(datumSelector, { timeout: 5000 });
-              await page.fill(datumSelector, data.tilltradesdatum);
+              await page.fill(datumSelector, data.tilltradesdatum as string);
             } catch {}
           }
 
@@ -222,7 +211,7 @@ async function runAutomationSteps(
             const anlaggningSelector = 'input[name*="anläggning" i], input[name*="anlaggning" i], input[name="facilityId"], input[placeholder*="anläggning" i]';
             try {
               await page.waitForSelector(anlaggningSelector, { timeout: 3000 });
-              await page.fill(anlaggningSelector, data.anlagningsId);
+              await page.fill(anlaggningSelector, data.anlagningsId as string);
             } catch {}
           }
 
@@ -233,11 +222,11 @@ async function runAutomationSteps(
               'kort': 'Kort',
               'faktura': 'Faktura',
             };
-            const betalsattText = betalsattMap[data.betalsatt] || data.betalsatt;
+            const betalsattText = betalsattMap[data.betalsatt as string] || (data.betalsatt as string);
             const betalsattSelectors = [
               `button:has-text("${betalsattText}")`,
               `[role="button"]:has-text("${betalsattText}")`,
-              `input[value="${data.betalsatt}"]`,
+              `input[value="${data.betalsatt as string}"]`,
             ];
             
             for (const selector of betalsattSelectors) {
@@ -264,18 +253,21 @@ async function runAutomationSteps(
             '.validation-error',
           ];
 
-          let hasErrors = false;
           for (const selector of errorSelectors) {
             try {
               const errorElement = await page.$(selector);
               if (errorElement) {
                 const errorText = await errorElement.textContent();
                 if (errorText && errorText.trim().length > 0 && !errorText.includes('success')) {
-                  hasErrors = true;
                   throw new Error(`Formulärfel: ${errorText}`);
                 }
               }
-            } catch {}
+            } catch (error) {
+              // Re-throw if it's our error, otherwise continue
+              if (error instanceof Error && error.message.startsWith('Formulärfel:')) {
+                throw error;
+              }
+            }
           }
 
           // Click submit button
@@ -667,13 +659,11 @@ export async function POST(req: NextRequest) {
           '[class*="error" i]',
         ];
 
-        let hasErrors = false;
         for (const selector of errorSelectors) {
           const errorElement = await page.$(selector);
           if (errorElement) {
             const errorText = await errorElement.textContent();
             if (errorText && errorText.trim().length > 0) {
-              hasErrors = true;
               await logStep(sessionId, 'form_validation_failed', { error: errorText }, 'failed');
               await browser.close();
               return NextResponse.json({ 
