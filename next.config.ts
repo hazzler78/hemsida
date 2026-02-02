@@ -57,7 +57,10 @@ const nextConfig: NextConfig = {
       // Place this FIRST in the rules array so it catches Playwright files before other rules
       config.module.rules.unshift({
         test: /\.(ttf|woff|woff2|eot|otf|png|jpg|jpeg|gif|svg|ico|css|json|js|ts|tsx|mjs|cjs)$/,
-        include: /node_modules[\\/]playwright/,
+        include: [
+          /node_modules[\\/]playwright/,
+          /node_modules[\\/]chromium-bidi/,
+        ],
         use: {
           loader: 'ignore-loader',
         },
@@ -74,11 +77,19 @@ const nextConfig: NextConfig = {
         new webpack.IgnorePlugin({
           resourceRegExp: /^electron$/,
         }),
+        // Ignore chromium-bidi (Playwright dependency) completely in client builds
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^chromium-bidi/,
+        }),
         // Ignore ALL files from playwright directories in client builds (catch-all)
         new webpack.IgnorePlugin({
           checkResource(resource: string) {
             // Ignore everything from playwright in client builds
             if (/node_modules[\\/]playwright/.test(resource)) {
+              return true;
+            }
+            // Also ignore chromium-bidi
+            if (/node_modules[\\/]chromium-bidi/.test(resource)) {
               return true;
             }
             return false;
@@ -92,6 +103,7 @@ const nextConfig: NextConfig = {
         playwright: false,
         'playwright-core': false,
         electron: false,
+        'chromium-bidi': false,
       };
       
       // Add fallback for Playwright modules
@@ -100,6 +112,7 @@ const nextConfig: NextConfig = {
         playwright: false,
         'playwright-core': false,
         electron: false,
+        'chromium-bidi': false,
       };
     }
     

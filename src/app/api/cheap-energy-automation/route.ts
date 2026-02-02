@@ -336,7 +336,17 @@ async function runAutomationSteps(
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    let body;
+    try {
+      body = await req.json();
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      return NextResponse.json({ 
+        error: 'Ogiltig JSON i request body',
+        details: parseError instanceof Error ? parseError.message : String(parseError)
+      }, { status: 400 });
+    }
+
     const { 
       sessionId, 
       action, 
@@ -357,6 +367,13 @@ export async function POST(req: NextRequest) {
           results 
         });
       } catch (error) {
+        console.error('Error in runAutomationSteps:', error);
+        const errorMsg = error instanceof Error ? error.message : 'Okänt fel';
+        await logStep(sessionId, 'automation_failed', { error: errorMsg }, 'failed', errorMsg);
+        return NextResponse.json({ 
+          error: errorMsg,
+          details: error instanceof Error ? error.stack : String(error)
+        }, { status: 500 });
         const errorMsg = error instanceof Error ? error.message : 'Okänt fel';
         return NextResponse.json({ error: errorMsg }, { status: 500 });
       }
@@ -740,8 +757,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Okänd action' }, { status: 400 });
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : 'Okänt fel';
+    const errorStack = error instanceof Error ? error.stack : String(error);
     console.error('Automation error:', error);
-    return NextResponse.json({ error: errorMsg }, { status: 500 });
+    console.error('Error stack:', errorStack);
+    return NextResponse.json({ 
+      error: errorMsg,
+      details: errorStack,
+      type: error instanceof Error ? error.constructor.name : typeof error
+    }, { status: 500 });
   }
 }
 
