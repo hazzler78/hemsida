@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { chromium } from 'playwright';
+
+// Note: Playwright requires Node.js runtime, but Cloudflare Pages requires Edge Runtime
+// This will cause runtime errors. Consider using a separate Node.js server for automation.
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -40,6 +42,15 @@ async function runAutomationSteps(
   sessionId: string,
   steps: Array<{ action: string; data: Record<string, unknown> }>
 ) {
+  // Dynamic import of Playwright (will fail in Edge Runtime)
+  let chromium: any;
+  try {
+    const playwright = await import('playwright');
+    chromium = playwright.chromium;
+  } catch (error) {
+    throw new Error('Playwright is not available in Edge Runtime. Browser automation requires Node.js runtime. Please deploy this route to a platform that supports Node.js runtime (Vercel, Railway, Render, etc.) or use a browser automation service like Browserless.io.');
+  }
+
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -364,6 +375,9 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Postnummer saknas' }, { status: 400 });
       }
 
+      const { chromium } = await import('playwright').catch(() => {
+        throw new Error('Playwright requires Node.js runtime. This route is running in Edge Runtime.');
+      });
       const browser = await chromium.launch({ headless: true });
       const context = await browser.newContext();
       const page = await context.newPage();
@@ -405,6 +419,9 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Förbrukning saknas' }, { status: 400 });
       }
 
+      const { chromium } = await import('playwright').catch(() => {
+        throw new Error('Playwright requires Node.js runtime. This route is running in Edge Runtime.');
+      });
       const browser = await chromium.launch({ headless: true });
       const context = await browser.newContext();
       const page = await context.newPage();
@@ -446,6 +463,9 @@ export async function POST(req: NextRequest) {
 
     // Select contract type (rörligt timpris)
     if (action === 'select_contract_type') {
+      const { chromium } = await import('playwright').catch(() => {
+        throw new Error('Playwright requires Node.js runtime. This route is running in Edge Runtime.');
+      });
       const browser = await chromium.launch({ headless: true });
       const context = await browser.newContext();
       const page = await context.newPage();
@@ -483,6 +503,9 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Personnummer saknas' }, { status: 400 });
       }
 
+      const { chromium } = await import('playwright').catch(() => {
+        throw new Error('Playwright requires Node.js runtime. This route is running in Edge Runtime.');
+      });
       const browser = await chromium.launch({ headless: true });
       const context = await browser.newContext();
       const page = await context.newPage();
@@ -535,6 +558,9 @@ export async function POST(req: NextRequest) {
     if (action === 'confirm_address') {
       const { confirmed } = data; // true or false
       
+      const { chromium } = await import('playwright').catch(() => {
+        throw new Error('Playwright requires Node.js runtime. This route is running in Edge Runtime.');
+      });
       const browser = await chromium.launch({ headless: true });
       const context = await browser.newContext();
       const page = await context.newPage();
@@ -572,6 +598,9 @@ export async function POST(req: NextRequest) {
     if (action === 'fill_contact_details') {
       const { email, telefon, tilltradesdatum, anlagningsId, betalsatt } = data;
 
+      const { chromium } = await import('playwright').catch(() => {
+        throw new Error('Playwright requires Node.js runtime. This route is running in Edge Runtime.');
+      });
       const browser = await chromium.launch({ headless: true });
       const context = await browser.newContext();
       const page = await context.newPage();
@@ -643,6 +672,9 @@ export async function POST(req: NextRequest) {
 
     // Submit form and get signing URL
     if (action === 'submit_form') {
+      const { chromium } = await import('playwright').catch(() => {
+        throw new Error('Playwright requires Node.js runtime. This route is running in Edge Runtime.');
+      });
       const browser = await chromium.launch({ headless: true });
       const context = await browser.newContext();
       const page = await context.newPage();
