@@ -714,8 +714,8 @@ export default function RorligtAvtalV2Page() {
                 <ProvidersGrid>
                   {recommendedProviders.map((provider, index) => (
                     <ProviderCard key={provider.id} recommended={index === 0 && preferences.priority === 'price'}>
-                      {provider.best_price_badge_text && provider.best_price_badge_text.trim() !== '' && (
-                        <BestPriceBadge>{provider.best_price_badge_text}</BestPriceBadge>
+                      {provider.best_price_badge_text && typeof provider.best_price_badge_text === 'string' && provider.best_price_badge_text.trim() !== '' && (
+                        <BestPriceBadge>{String(provider.best_price_badge_text)}</BestPriceBadge>
                       )}
                       {!provider.best_price_badge_text && index === 0 && preferences.priority === 'price' && (
                         <InfoBadge>Matchar dina preferenser</InfoBadge>
@@ -733,7 +733,7 @@ export default function RorligtAvtalV2Page() {
                         />
                       )}
                       <ProviderName>{provider.name}</ProviderName>
-                      {provider.campaign_text && (
+                      {provider.campaign_text && typeof provider.campaign_text === 'string' && (
                         <div style={{
                           fontWeight: provider.campaign_bold ? 'bold' : 'normal',
                           fontStyle: provider.campaign_italic ? 'italic' : 'normal',
@@ -742,11 +742,11 @@ export default function RorligtAvtalV2Page() {
                           marginTop: '0.5rem',
                           marginBottom: '0.5rem'
                         }}>
-                          {provider.campaign_text}
+                          {String(provider.campaign_text)}
                         </div>
                       )}
                       <ProviderDescription>
-                        {provider.description}
+                        {provider.description || ''}
                       </ProviderDescription>
                       <ProviderButton 
                         href={provider.url}
