@@ -58,10 +58,23 @@ const nextConfig: NextConfig = {
       config.module = config.module || {};
       config.module.rules = config.module.rules || [];
       
-      // Rule to return empty module for all files from playwright directories in client builds
+      // Rule to return empty module for all files from playwright directories
       // Place this FIRST in the rules array so it catches Playwright files before other rules
+      // This includes ALL file types from Playwright directories
       config.module.rules.unshift({
-        test: /\.(ttf|woff|woff2|eot|otf|png|jpg|jpeg|gif|svg|ico|css|json|js|ts|tsx|mjs|cjs)$/,
+        test: /.*/,
+        include: [
+          /node_modules[\\/]playwright/,
+          /node_modules[\\/]chromium-bidi/,
+        ],
+        use: {
+          loader: 'ignore-loader',
+        },
+      });
+      
+      // Also add a specific rule for font files from Playwright (more specific, catches them earlier)
+      config.module.rules.unshift({
+        test: /\.(ttf|woff|woff2|eot|otf)$/,
         include: [
           /node_modules[\\/]playwright/,
           /node_modules[\\/]chromium-bidi/,
@@ -101,14 +114,25 @@ const nextConfig: NextConfig = {
           }),
         ] : []),
         // Ignore ALL files from playwright directories (catch-all)
+        // This must come BEFORE other rules to catch everything
         new webpack.IgnorePlugin({
           checkResource(resource: string) {
-            // Ignore everything from playwright
+            // Ignore everything from playwright (including assets like .ttf, .woff, etc.)
             if (/node_modules[\\/]playwright/.test(resource)) {
               return true;
             }
             // Also ignore chromium-bidi
             if (/node_modules[\\/]chromium-bidi/.test(resource)) {
+              return true;
+            }
+            return false;
+          },
+        }),
+        // Additional IgnorePlugin specifically for Playwright assets (fonts, images, etc.)
+        new webpack.IgnorePlugin({
+          checkResource(resource: string) {
+            // Catch all asset files from Playwright
+            if (/node_modules[\\/]playwright.*\.(ttf|woff|woff2|eot|otf|png|jpg|jpeg|gif|svg|ico|css|json)$/i.test(resource)) {
               return true;
             }
             return false;
