@@ -44,21 +44,15 @@ async function runAutomationSteps(
   sessionId: string,
   steps: Array<{ action: string; data: Record<string, unknown> }>
 ) {
-  // Check if we're in Edge Runtime (Cloudflare Pages, etc.)
-  // Edge Runtime doesn't support Playwright, so return error immediately
-  // Use a check that works in Edge Runtime (checking for globalThis instead of process)
-  const isEdgeRuntime = typeof globalThis !== 'undefined' && 
-    (globalThis.constructor?.name === 'DedicatedWorkerGlobalScope' || 
-     globalThis.constructor?.name === 'ServiceWorkerGlobalScope' ||
-     typeof EdgeRuntime !== 'undefined');
+  // Since we're using Edge Runtime, Playwright will not work
+  // Return a clear error message immediately
+  await logStep(sessionId, 'runtime_check_failed', {}, 'failed', 'Edge Runtime detected - Playwright requires Node.js runtime');
+  throw new Error('Browser automation är inte tillgängligt i Edge Runtime. Denna funktion kräver Node.js runtime och fungerar endast lokalt eller på plattformar som Vercel, Railway, eller Render. För att testa lokalt, kör "npm run dev" och testa via localhost:3000.');
   
-  if (isEdgeRuntime) {
-    await logStep(sessionId, 'runtime_check_failed', {}, 'failed', 'Edge Runtime detected - Playwright requires Node.js runtime');
-    throw new Error('Browser automation är inte tillgängligt i Edge Runtime. Denna funktion kräver Node.js runtime och fungerar endast lokalt eller på plattformar som Vercel, Railway, eller Render. För att testa lokalt, kör "npm run dev" och testa via localhost:3000.');
-  }
-
-  // Dynamic import of Playwright (will fail in Edge Runtime)
-  // Webpack is configured to ignore Playwright's Node.js dependencies during build
+  // The code below will never execute in Edge Runtime, but we keep it for reference
+  // when running on Node.js platforms
+  /*
+  // Dynamic import of Playwright (only works in Node.js runtime)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let chromium: any;
   try {
@@ -67,8 +61,9 @@ async function runAutomationSteps(
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : 'Okänt fel';
     await logStep(sessionId, 'playwright_import_failed', {}, 'failed', `Playwright import failed: ${errorMsg}`);
-    throw new Error('Playwright kunde inte importeras. Browser automation kräver Node.js runtime. Denna funktion fungerar endast lokalt eller på plattformar som stödjer Node.js runtime (Vercel, Railway, Render, etc.).');
+    throw new Error('Playwright kunde inte importeras. Browser automation kräver Node.js runtime.');
   }
+  */
 
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
@@ -420,14 +415,11 @@ export async function POST(req: NextRequest) {
 
     // Fill postnummer
     if (action === 'fill_postnummer') {
-      const { postnummer } = data;
-      if (!postnummer) {
-        return NextResponse.json({ error: 'Postnummer saknas' }, { status: 400 });
-      }
-
-      const { chromium } = await import('playwright').catch(() => {
-        throw new Error('Playwright requires Node.js runtime. This route is running in Edge Runtime.');
-      });
+      return NextResponse.json({ 
+        error: 'Browser automation är inte tillgängligt i Edge Runtime',
+        message: 'Denna funktion kräver Node.js runtime och fungerar endast lokalt eller på plattformar som Vercel, Railway, eller Render.'
+      }, { status: 503 });
+    }
       const browser = await chromium.launch({ headless: true });
       const context = await browser.newContext();
       const page = await context.newPage();
@@ -464,14 +456,11 @@ export async function POST(req: NextRequest) {
 
     // Fill forbrukning
     if (action === 'fill_forbrukning') {
-      const { forbrukning } = data; // '2000', '5000', or '20000'
-      if (!forbrukning) {
-        return NextResponse.json({ error: 'Förbrukning saknas' }, { status: 400 });
-      }
-
-      const { chromium } = await import('playwright').catch(() => {
-        throw new Error('Playwright requires Node.js runtime. This route is running in Edge Runtime.');
-      });
+      return NextResponse.json({ 
+        error: 'Browser automation är inte tillgängligt i Edge Runtime',
+        message: 'Denna funktion kräver Node.js runtime och fungerar endast lokalt eller på plattformar som Vercel, Railway, eller Render.'
+      }, { status: 503 });
+    }
       const browser = await chromium.launch({ headless: true });
       const context = await browser.newContext();
       const page = await context.newPage();
@@ -548,14 +537,11 @@ export async function POST(req: NextRequest) {
 
     // Fill personnummer and get address
     if (action === 'fill_personnummer') {
-      const { personnummer } = data;
-      if (!personnummer) {
-        return NextResponse.json({ error: 'Personnummer saknas' }, { status: 400 });
-      }
-
-      const { chromium } = await import('playwright').catch(() => {
-        throw new Error('Playwright requires Node.js runtime. This route is running in Edge Runtime.');
-      });
+      return NextResponse.json({ 
+        error: 'Browser automation är inte tillgängligt i Edge Runtime',
+        message: 'Denna funktion kräver Node.js runtime och fungerar endast lokalt eller på plattformar som Vercel, Railway, eller Render.'
+      }, { status: 503 });
+    }
       const browser = await chromium.launch({ headless: true });
       const context = await browser.newContext();
       const page = await context.newPage();
@@ -646,11 +632,11 @@ export async function POST(req: NextRequest) {
 
     // Fill contact details
     if (action === 'fill_contact_details') {
-      const { email, telefon, tilltradesdatum, anlagningsId, betalsatt } = data;
-
-      const { chromium } = await import('playwright').catch(() => {
-        throw new Error('Playwright requires Node.js runtime. This route is running in Edge Runtime.');
-      });
+      return NextResponse.json({ 
+        error: 'Browser automation är inte tillgängligt i Edge Runtime',
+        message: 'Denna funktion kräver Node.js runtime och fungerar endast lokalt eller på plattformar som Vercel, Railway, eller Render.'
+      }, { status: 503 });
+    }
       const browser = await chromium.launch({ headless: true });
       const context = await browser.newContext();
       const page = await context.newPage();
@@ -722,9 +708,11 @@ export async function POST(req: NextRequest) {
 
     // Submit form and get signing URL
     if (action === 'submit_form') {
-      const { chromium } = await import('playwright').catch(() => {
-        throw new Error('Playwright requires Node.js runtime. This route is running in Edge Runtime.');
-      });
+      return NextResponse.json({ 
+        error: 'Browser automation är inte tillgängligt i Edge Runtime',
+        message: 'Denna funktion kräver Node.js runtime och fungerar endast lokalt eller på plattformar som Vercel, Railway, eller Render.'
+      }, { status: 503 });
+    }
       const browser = await chromium.launch({ headless: true });
       const context = await browser.newContext();
       const page = await context.newPage();
