@@ -44,6 +44,13 @@ async function runAutomationSteps(
   sessionId: string,
   steps: Array<{ action: string; data: Record<string, unknown> }>
 ) {
+  // Check if we're in Edge Runtime (Cloudflare Pages, etc.)
+  // Edge Runtime doesn't support Playwright, so return error immediately
+  if (typeof process === 'undefined' || !process.versions?.node) {
+    await logStep(sessionId, 'runtime_check_failed', {}, 'failed', 'Edge Runtime detected - Playwright requires Node.js runtime');
+    throw new Error('Browser automation är inte tillgängligt i Edge Runtime. Denna funktion kräver Node.js runtime och fungerar endast lokalt eller på plattformar som Vercel, Railway, eller Render. För att testa lokalt, kör "npm run dev" och testa via localhost:3000.');
+  }
+
   // Dynamic import of Playwright (will fail in Edge Runtime)
   // Webpack is configured to ignore Playwright's Node.js dependencies during build
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -51,8 +58,10 @@ async function runAutomationSteps(
   try {
     const playwright = await import('playwright');
     chromium = playwright.chromium;
-  } catch {
-    throw new Error('Playwright is not available in Edge Runtime. Browser automation requires Node.js runtime. Please deploy this route to a platform that supports Node.js runtime (Vercel, Railway, Render, etc.) or use a browser automation service like Browserless.io.');
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : 'Okänt fel';
+    await logStep(sessionId, 'playwright_import_failed', {}, 'failed', `Playwright import failed: ${errorMsg}`);
+    throw new Error('Playwright kunde inte importeras. Browser automation kräver Node.js runtime. Denna funktion fungerar endast lokalt eller på plattformar som stödjer Node.js runtime (Vercel, Railway, Render, etc.).');
   }
 
   const browser = await chromium.launch({ headless: true });
@@ -338,6 +347,18 @@ async function runAutomationSteps(
 
 export async function POST(req: NextRequest) {
   try {
+    // Check if we're in Edge Runtime (Cloudflare Pages, etc.)
+    // Edge Runtime doesn't support Playwright, so return error immediately
+    const isEdgeRuntime = typeof process === 'undefined' || !process.versions?.node;
+    
+    if (isEdgeRuntime) {
+      return NextResponse.json({ 
+        error: 'Browser automation är inte tillgängligt i Edge Runtime',
+        message: 'Denna funktion kräver Node.js runtime och fungerar endast lokalt eller på plattformar som Vercel, Railway, eller Render. För att testa lokalt, kör "npm run dev" och testa via localhost:3000.',
+        details: 'Playwright kräver Node.js runtime som inte är tillgängligt i Edge Runtime (Cloudflare Pages).'
+      }, { status: 503 }); // 503 Service Unavailable
+    }
+
     let body;
     try {
       body = await req.json();
