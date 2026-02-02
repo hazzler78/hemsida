@@ -51,8 +51,8 @@ const nextConfig: NextConfig = {
     // Cloudflare Pages uses Edge Runtime which doesn't support Playwright
     const isCloudflareBuild = process.env.CF_PAGES === '1' || process.env.CF_PAGES_BRANCH !== undefined;
     
-    // Ignore Playwright completely in client builds and Cloudflare builds
-    // (Cloudflare Pages uses Edge Runtime which doesn't support Playwright)
+    // Ignore Playwright completely in client builds
+    // Also ignore in server builds when building for Cloudflare (Edge Runtime)
     if (!isServer || isCloudflareBuild) {
       // Add module rules to handle Playwright assets before they cause errors
       config.module = config.module || {};
@@ -92,10 +92,10 @@ const nextConfig: NextConfig = {
         new webpack.IgnorePlugin({
           resourceRegExp: /^chromium-bidi/,
         }),
-        // Ignore ALL files from playwright directories in client builds (catch-all)
+        // Ignore ALL files from playwright directories (catch-all)
         new webpack.IgnorePlugin({
           checkResource(resource: string) {
-            // Ignore everything from playwright in client builds
+            // Ignore everything from playwright
             if (/node_modules[\\/]playwright/.test(resource)) {
               return true;
             }
@@ -105,7 +105,16 @@ const nextConfig: NextConfig = {
             }
             return false;
           },
-        })
+        }),
+        // For Cloudflare builds, also ignore Playwright module imports
+        ...(isCloudflareBuild ? [
+          new webpack.IgnorePlugin({
+            resourceRegExp: /^playwright$/,
+          }),
+          new webpack.IgnorePlugin({
+            resourceRegExp: /^playwright-core$/,
+          }),
+        ] : [])
       );
       
       // Mark Playwright and electron as external to prevent bundling in client
