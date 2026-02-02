@@ -40,6 +40,7 @@ interface PageProvider {
   campaign_text?: string;
   campaign_bold?: boolean;
   campaign_italic?: boolean;
+  best_price_badge_text?: string;
 }
 
 // GET - Fetch providers
@@ -86,6 +87,7 @@ export async function GET(request: NextRequest) {
       campaign_text?: string | null;
       campaign_bold?: number | null;
       campaign_italic?: number | null;
+      best_price_badge_text?: string | null;
       created_at: number;
       updated_at: number;
     };
@@ -102,6 +104,7 @@ export async function GET(request: NextRequest) {
       campaign_text: row.campaign_text || undefined,
       campaign_bold: row.campaign_bold === 1,
       campaign_italic: row.campaign_italic === 1,
+      best_price_badge_text: row.best_price_badge_text || undefined,
       created_at: row.created_at,
       updated_at: row.updated_at,
     }));
@@ -131,8 +134,8 @@ export async function POST(request: NextRequest) {
     
     const result = await db.prepare(
       `INSERT INTO page_providers 
-       (name, type, logo_url, description, url, is_recommended, display_order, active, campaign_text, campaign_bold, campaign_italic, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       (name, type, logo_url, description, url, is_recommended, display_order, active, campaign_text, campaign_bold, campaign_italic, best_price_badge_text, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       body.name,
       body.type,
@@ -145,6 +148,7 @@ export async function POST(request: NextRequest) {
       body.campaign_text || null,
       body.campaign_bold ? 1 : 0,
       body.campaign_italic ? 1 : 0,
+      body.best_price_badge_text || null,
       Math.floor(Date.now() / 1000),
       Math.floor(Date.now() / 1000)
     ).run();
@@ -184,7 +188,8 @@ export async function PUT(request: NextRequest) {
       `UPDATE page_providers 
        SET name = ?, type = ?, logo_url = ?, description = ?, url = ?, 
            is_recommended = ?, display_order = ?, active = ?, 
-           campaign_text = ?, campaign_bold = ?, campaign_italic = ?, updated_at = ?
+           campaign_text = ?, campaign_bold = ?, campaign_italic = ?, 
+           best_price_badge_text = ?, updated_at = ?
        WHERE id = ?`
     ).bind(
       body.name,
@@ -198,6 +203,7 @@ export async function PUT(request: NextRequest) {
       body.campaign_text || null,
       body.campaign_bold ? 1 : 0,
       body.campaign_italic ? 1 : 0,
+      body.best_price_badge_text || null,
       Math.floor(Date.now() / 1000),
       body.id
     ).run();

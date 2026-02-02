@@ -17,6 +17,7 @@ interface PageProvider {
   campaign_text?: string;
   campaign_bold?: boolean;
   campaign_italic?: boolean;
+  best_price_badge_text?: string;
 }
 
 interface UserPreferences {
@@ -712,13 +713,13 @@ export default function RorligtAvtalV2Page() {
                 <ProvidersGrid>
                   {recommendedProviders.map((provider, index) => (
                     <ProviderCard key={provider.id} recommended={index === 0 && preferences.priority === 'price'}>
-                      {provider.name === 'Cheap Energy' && (
-                        <BestPriceBadge>Vi har sveriges billigaste elavtal</BestPriceBadge>
+                      {provider.best_price_badge_text && (
+                        <BestPriceBadge>{provider.best_price_badge_text}</BestPriceBadge>
                       )}
-                      {index === 0 && preferences.priority === 'price' && provider.name !== 'Cheap Energy' && (
+                      {!provider.best_price_badge_text && index === 0 && preferences.priority === 'price' && (
                         <InfoBadge>Matchar dina preferenser</InfoBadge>
                       )}
-                      {provider.is_recommended && !(index === 0 && preferences.priority === 'price') && provider.name !== 'Cheap Energy' && (
+                      {!provider.best_price_badge_text && provider.is_recommended && !(index === 0 && preferences.priority === 'price') && (
                         <RecommendedBadge>Rekommenderat</RecommendedBadge>
                       )}
                       {provider.logo_url && provider.logo_url.trim() !== '' && !failedLogos.has(provider.id) && (

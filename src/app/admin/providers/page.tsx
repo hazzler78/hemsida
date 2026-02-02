@@ -17,6 +17,7 @@ interface PageProvider {
   campaign_text?: string;
   campaign_bold?: boolean;
   campaign_italic?: boolean;
+  best_price_badge_text?: string;
 }
 
 export default function AdminProviders() {
@@ -265,7 +266,8 @@ export default function AdminProviders() {
               active: true,
               campaign_text: '',
               campaign_bold: false,
-              campaign_italic: false
+              campaign_italic: false,
+              best_price_badge_text: ''
             })}
             style={{ 
               padding: "8px 16px", 
@@ -348,6 +350,20 @@ export default function AdminProviders() {
                         fontStyle: provider.campaign_italic ? "italic" : "normal"
                       }}>
                         Kampanj: {provider.campaign_text}
+                      </p>
+                    )}
+                    {provider.best_price_badge_text && (
+                      <p style={{ 
+                        margin: "8px 0 0 0", 
+                        color: "#9333ea", 
+                        fontSize: "14px",
+                        fontWeight: "600",
+                        background: "linear-gradient(135deg, #a855f7, #9333ea)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text"
+                      }}>
+                        💜 Badge: {provider.best_price_badge_text}
                       </p>
                     )}
                   </div>
@@ -578,6 +594,25 @@ function ProviderForm({ provider, onSave, onCancel }: {
             }}>
               Förhandsvisning: {formData.campaign_text}
             </span>
+          </div>
+        )}
+      </div>
+
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: "block", marginBottom: 4, fontWeight: "600" }}>Lila badge-text (t.ex. &quot;Vi har sveriges billigaste elavtal&quot;):</label>
+        <input
+          type="text"
+          value={formData.best_price_badge_text || ''}
+          onChange={(e) => setFormData({...formData, best_price_badge_text: e.target.value})}
+          style={{ width: "100%", padding: 8, borderRadius: 4, border: "1px solid #d1d5db" }}
+          placeholder="T.ex. Vi har sveriges billigaste elavtal"
+        />
+        <div style={{ marginTop: 4, fontSize: "12px", color: "#6b7280" }}>
+          Om denna text är ifylld visas en lila badge överst på kortet på rörligt-avtal-v2 sidan.
+        </div>
+        {formData.best_price_badge_text && (
+          <div style={{ marginTop: 8, padding: 8, background: "linear-gradient(135deg, #a855f7, #9333ea)", borderRadius: 4, color: "white", fontWeight: "600", fontSize: "14px" }}>
+            Förhandsvisning: {formData.best_price_badge_text}
           </div>
         )}
       </div>
