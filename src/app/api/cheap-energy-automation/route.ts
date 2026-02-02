@@ -374,8 +374,6 @@ export async function POST(req: NextRequest) {
           error: errorMsg,
           details: error instanceof Error ? error.stack : String(error)
         }, { status: 500 });
-        const errorMsg = error instanceof Error ? error.message : 'Okänt fel';
-        return NextResponse.json({ error: errorMsg }, { status: 500 });
       }
     }
 
