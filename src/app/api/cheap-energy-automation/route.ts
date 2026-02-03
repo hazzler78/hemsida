@@ -68,7 +68,8 @@ async function runAutomationSteps(
     throw new Error('Playwright kunde inte importeras. Browser automation kräver Node.js runtime.');
   }
 
-  const browser = await chromium.launch({ headless: true });
+  // Set headless: false to see browser window for debugging
+  const browser = await chromium.launch({ headless: false });
   const context = await browser.newContext({
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
   });
@@ -81,6 +82,13 @@ async function runAutomationSteps(
     
     // Wait for initial load (5 seconds as mentioned)
     await page.waitForTimeout(5000);
+    
+    // Wait for page to be fully interactive
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForLoadState('networkidle');
+    
+    // Take initial screenshot for debugging
+    await page.screenshot({ path: `debug-initial-${sessionId}.png`, fullPage: true });
 
     const results: Record<string, unknown> = {};
 
@@ -90,13 +98,42 @@ async function runAutomationSteps(
       
       try {
         if (action === 'fill_postnummer') {
-          const postnummerSelector = 'input[name="postnummer"], input[placeholder*="postnummer" i], input[type="text"][id*="post" i], input[name="zip"], input[name="postal"]';
-          await page.waitForSelector(postnummerSelector, { timeout: 10000 });
-          await page.fill(postnummerSelector, data.postnummer as string);
-          await page.keyboard.press('Tab');
-          await page.waitForTimeout(2000);
-          await logStep(sessionId, 'postnummer_filled', { postnummer: data.postnummer }, 'completed');
-          results.postnummer = 'completed';
+          // Try multiple selector strategies for postnummer
+          const postnummerSelectors = [
+            'input[name="postnummer"]',
+            'input[placeholder*="postnummer" i]',
+            'input[placeholder*="postnummer" i]',
+            'input[type="text"][id*="post" i]',
+            'input[name="zip"]',
+            'input[name="postal"]',
+            'input[type="text"][placeholder*="post" i]',
+            'input#postnummer',
+            'input.postnummer',
+          ];
+          
+          let found = false;
+          for (const selector of postnummerSelectors) {
+            try {
+              // Wait for selector to be visible (not just present)
+              await page.waitForSelector(selector, { state: 'visible', timeout: 5000 });
+              await page.fill(selector, data.postnummer as string);
+              await page.keyboard.press('Tab');
+              await page.waitForTimeout(2000);
+              found = true;
+              await logStep(sessionId, 'postnummer_filled', { postnummer: data.postnummer, selector }, 'completed');
+              results.postnummer = 'completed';
+              break;
+            } catch (selectorError) {
+              // Try next selector
+              continue;
+            }
+          }
+          
+          if (!found) {
+            // Take screenshot for debugging
+            await page.screenshot({ path: `debug-postnummer-${sessionId}.png`, fullPage: true });
+            throw new Error(`Kunde inte hitta postnummer-fältet. Screenshot sparad som debug-postnummer-${sessionId}.png`);
+          }
         }
 
         else if (action === 'fill_forbrukning') {
