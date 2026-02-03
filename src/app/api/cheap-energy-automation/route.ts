@@ -80,40 +80,49 @@ async function runAutomationSteps(
     await page.goto(CHEAP_ENERGY_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await logStep(sessionId, 'page_navigated', { url: CHEAP_ENERGY_URL }, 'completed');
     
-    // Wait for page to be fully loaded
-    await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {
-      // If networkidle times out, continue anyway
-      console.log('Network idle timeout, continuing...');
-    });
+    // Wait for page to be fully loaded - try multiple strategies
+    try {
+      await page.waitForLoadState('networkidle', { timeout: 30000 });
+    } catch {
+      // If networkidle times out, wait for load state instead
+      await page.waitForLoadState('load', { timeout: 30000 });
+    }
     
     // Wait for initial load (5 seconds as mentioned)
     await page.waitForTimeout(5000);
+    
+    // Wait for any dynamic content to load (forms, etc.)
+    await page.waitForFunction(() => {
+      return document.readyState === 'complete';
+    }, { timeout: 10000 }).catch(() => {});
+    
+    // Additional wait for JavaScript to finish executing
+    await page.waitForTimeout(3000);
     
     // Take initial screenshot for debugging
     await page.screenshot({ path: `debug-initial-${sessionId}.png`, fullPage: true });
     await logStep(sessionId, 'initial_screenshot', { screenshot: `debug-initial-${sessionId}.png` }, 'completed');
     
-    // Check for common overlays/modals that might block the form
-    // Cookie banners, popups, etc. - try multiple strategies
-    const cookieSelectors = [
-      'button:has-text("Acceptera")',
-      'button:has-text("Godkänn")',
-      'button:has-text("Accept")',
+    // Check for Cookiebot specifically (common cookie banner service)
+    // Cookiebot usually has specific IDs and classes
+    let cookieClicked = false;
+    
+    // Cookiebot-specific selectors
+    const cookiebotSelectors = [
+      '#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll',
+      '#CybotCookiebotDialogBodyButtonAccept',
+      'button[id*="Cookiebot"]',
+      'button[class*="Cookiebot"]',
+      '[id*="cookiebot"] button',
+      '[class*="cookiebot"] button',
       'button:has-text("Acceptera alla")',
       'button:has-text("Godkänn alla")',
-      '[id*="cookie"] button',
-      '[class*="cookie"] button',
-      '[id*="Cookie"] button',
-      '[class*="Cookie"] button',
-      '[data-testid*="cookie"] button',
-      '[aria-label*="cookie" i] button',
-      '[aria-label*="acceptera" i]',
-      '[aria-label*="godkänn" i]',
+      'button:has-text("Accept all")',
+      '#cookiebot button',
+      '.cookiebot button',
     ];
     
-    // Try to find and click cookie banner
-    let cookieClicked = false;
-    for (const selector of cookieSelectors) {
+    for (const selector of cookiebotSelectors) {
       try {
         const cookieButton = await page.$(selector);
         if (cookieButton) {
@@ -122,8 +131,8 @@ async function runAutomationSteps(
             await cookieButton.scrollIntoViewIfNeeded();
             await page.waitForTimeout(500);
             await cookieButton.click();
-            await page.waitForTimeout(2000);
-            await logStep(sessionId, 'cookie_accepted', { selector }, 'completed');
+            await page.waitForTimeout(3000); // Wait longer for Cookiebot
+            await logStep(sessionId, 'cookiebot_accepted', { selector }, 'completed');
             cookieClicked = true;
             break;
           }
@@ -133,41 +142,73 @@ async function runAutomationSteps(
       }
     }
     
-    // Also try to find cookie banner by looking for common cookie banner text
+    // Also try executing Cookiebot's accept function directly via JavaScript
     if (!cookieClicked) {
       try {
-        const cookieTexts = await page.$$eval('button', buttons => 
-          buttons
-            .map(btn => ({ text: btn.textContent?.toLowerCase() || '', element: btn }))
-            .filter(btn => 
-              btn.text.includes('acceptera') || 
-              btn.text.includes('godkänn') || 
-              btn.text.includes('accept') ||
-              btn.text.includes('cookie')
-            )
-        );
-        
-        for (const cookieText of cookieTexts) {
-          try {
-            const button = cookieText.element as any;
-            if (button && await page.evaluate((el) => el.offsetParent !== null, button)) {
-              await button.scrollIntoViewIfNeeded();
+        await page.evaluate(() => {
+          // Try Cookiebot's accept function
+          if ((window as any).Cookiebot) {
+            (window as any).Cookiebot.consent = true;
+            (window as any).Cookiebot.show = false;
+          }
+          // Try to find and click accept button via JavaScript
+          const acceptButtons = Array.from(document.querySelectorAll('button, a, [role="button"]')).filter((btn: any) => {
+            const text = btn.textContent?.toLowerCase() || '';
+            return text.includes('acceptera') || text.includes('godkänn') || text.includes('accept');
+          });
+          if (acceptButtons.length > 0) {
+            (acceptButtons[0] as HTMLElement).click();
+          }
+        });
+        await page.waitForTimeout(2000);
+        await logStep(sessionId, 'cookiebot_accepted_js', {}, 'completed');
+        cookieClicked = true;
+      } catch (error) {
+        await logStep(sessionId, 'cookiebot_js_failed', { error: String(error) }, 'failed');
+      }
+    }
+    
+    // Generic cookie banner fallback
+    if (!cookieClicked) {
+      const cookieSelectors = [
+        'button:has-text("Acceptera")',
+        'button:has-text("Godkänn")',
+        'button:has-text("Accept")',
+        '[id*="cookie"] button',
+        '[class*="cookie"] button',
+        '[aria-label*="cookie" i] button',
+        '[aria-label*="acceptera" i]',
+        '[aria-label*="godkänn" i]',
+      ];
+      
+      for (const selector of cookieSelectors) {
+        try {
+          const cookieButton = await page.$(selector);
+          if (cookieButton) {
+            const isVisible = await cookieButton.isVisible();
+            if (isVisible) {
+              await cookieButton.scrollIntoViewIfNeeded();
               await page.waitForTimeout(500);
-              await button.click();
+              await cookieButton.click();
               await page.waitForTimeout(2000);
-              await logStep(sessionId, 'cookie_accepted_text', { text: cookieText.text }, 'completed');
+              await logStep(sessionId, 'cookie_accepted', { selector }, 'completed');
               cookieClicked = true;
               break;
             }
-          } catch {}
+          }
+        } catch (error) {
+          continue;
         }
-      } catch {}
+      }
     }
     
     // Wait a bit more after handling cookies
     if (cookieClicked) {
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(3000);
     }
+    
+    // Take screenshot after cookie handling
+    await page.screenshot({ path: `debug-after-cookies-${sessionId}.png`, fullPage: true });
     
     // Wait a bit more after closing overlays
     await page.waitForTimeout(2000);
@@ -444,129 +485,114 @@ async function runAutomationSteps(
             } catch {}
           }
 
-          // Select betalsätt - try multiple times and strategies
+          // Select betalsätt - improved with multiple attempts
           if (data.betalsatt) {
             const betalsattMap: Record<string, string[]> = {
               'autogiro': ['Autogiro', 'Auto-giro', 'Autogirobetalning', 'Autogiro betalning'],
               'kort': ['Kort', 'Kortbetalning', 'Kort betalning', 'Kreditkort', 'Debitkort'],
-              'faktura': ['Faktura', 'Fakturabetalning', 'Faktura betalning', 'Invoice'],
+              'faktura': ['Faktura', 'Fakturabetalning', 'Faktura betalning', 'Invoice', 'Fakturabetalning'],
             };
             const betalsattTexts = betalsattMap[data.betalsatt as string] || [data.betalsatt as string];
             
-            let betalsattSelected = false;
-            
-            // Try multiple text variations
-            for (const betalsattText of betalsattTexts) {
-              const betalsattSelectors = [
-                `button:has-text("${betalsattText}")`,
-                `[role="button"]:has-text("${betalsattText}")`,
-                `button:has-text("${betalsattText}")`,
-                `label:has-text("${betalsattText}")`,
-                `input[value="${data.betalsatt as string}"]`,
-                `input[value="${betalsattText.toLowerCase()}"]`,
-                `input[type="radio"][value*="${data.betalsatt as string}"]`,
-              ];
+            // Try to select betalsätt - attempt multiple times
+            for (let attempt = 0; attempt < 3; attempt++) {
+              let betalsattSelected = false;
               
-              for (const selector of betalsattSelectors) {
-                try {
-                  const element = await page.$(selector);
-                  if (element) {
-                    const isVisible = await element.isVisible();
-                    if (isVisible) {
-                      await element.scrollIntoViewIfNeeded();
-                      await page.waitForTimeout(500);
-                      await element.click();
-                      await page.waitForTimeout(1000);
-                      betalsattSelected = true;
-                      await logStep(sessionId, 'betalsatt_selected', { 
-                        betalsatt: data.betalsatt, 
-                        selector,
-                        text: betalsattText 
-                      }, 'completed');
-                      break;
+              // Try multiple text variations
+              for (const betalsattText of betalsattTexts) {
+                const betalsattSelectors = [
+                  `button:has-text("${betalsattText}")`,
+                  `[role="button"]:has-text("${betalsattText}")`,
+                  `label:has-text("${betalsattText}")`,
+                  `input[type="radio"][value*="${data.betalsatt as string}"]`,
+                  `input[value="${data.betalsatt as string}"]`,
+                  `input[value="${betalsattText.toLowerCase()}"]`,
+                ];
+                
+                for (const selector of betalsattSelectors) {
+                  try {
+                    const element = await page.$(selector);
+                    if (element) {
+                      const isVisible = await element.isVisible();
+                      if (isVisible || element.tagName === 'INPUT') {
+                        await element.scrollIntoViewIfNeeded();
+                        await page.waitForTimeout(300);
+                        
+                        // For radio buttons, click the label if it exists
+                        if (element.tagName === 'INPUT' && (element as HTMLInputElement).type === 'radio') {
+                          const label = await page.$(`label[for="${(element as HTMLInputElement).id}"]`);
+                          if (label) {
+                            await label.click();
+                          } else {
+                            await element.click();
+                          }
+                        } else {
+                          await element.click();
+                        }
+                        
+                        await page.waitForTimeout(1000);
+                        betalsattSelected = true;
+                        await logStep(sessionId, 'betalsatt_selected', { 
+                          betalsatt: data.betalsatt, 
+                          selector,
+                          text: betalsattText,
+                          attempt: attempt + 1
+                        }, 'completed');
+                        break;
+                      }
                     }
+                  } catch {}
+                }
+                
+                if (betalsattSelected) break;
+              }
+              
+              // Fallback: find by text content
+              if (!betalsattSelected) {
+                try {
+                  const allElements = await page.$$('button, [role="button"], label, input[type="radio"]');
+                  const targetValue = (data.betalsatt as string).toLowerCase();
+                  
+                  for (const element of allElements) {
+                    try {
+                      const text = (await element.textContent())?.toLowerCase() || '';
+                      const value = await element.evaluate((el: any) => el.value?.toLowerCase() || '');
+                      const id = await element.evaluate((el: any) => el.id?.toLowerCase() || '');
+                      
+                      const matches = 
+                        (targetValue === 'faktura' && (text.includes('faktura') || value.includes('faktura') || id.includes('faktura'))) ||
+                        (targetValue === 'autogiro' && (text.includes('autogiro') || value.includes('autogiro') || id.includes('autogiro'))) ||
+                        (targetValue === 'kort' && (text.includes('kort') && !text.includes('autogiro') || value.includes('kort') || id.includes('kort')));
+                      
+                      if (matches) {
+                        const isVisible = await element.isVisible();
+                        if (isVisible || element.tagName === 'INPUT') {
+                          await element.scrollIntoViewIfNeeded();
+                          await page.waitForTimeout(300);
+                          await element.click();
+                          await page.waitForTimeout(1000);
+                          betalsattSelected = true;
+                          await logStep(sessionId, 'betalsatt_selected_fallback', { 
+                            betalsatt: data.betalsatt, 
+                            text,
+                            attempt: attempt + 1
+                          }, 'completed');
+                          break;
+                        }
+                      }
+                    } catch {}
                   }
                 } catch {}
               }
               
-              if (betalsattSelected) break;
-            }
-            
-            // If not found, try clicking by finding all payment options and matching text
-            if (!betalsattSelected) {
-              try {
-                const paymentOptions = await page.$$eval('button, [role="button"], label, input[type="radio"]', (elements) => 
-                  elements
-                    .map(el => ({
-                      text: el.textContent?.toLowerCase() || '',
-                      tagName: el.tagName,
-                      value: (el as HTMLInputElement).value || '',
-                      element: el
-                    }))
-                    .filter(el => 
-                      el.text.includes('autogiro') || 
-                      el.text.includes('kort') || 
-                      el.text.includes('faktura') ||
-                      el.value.includes('autogiro') ||
-                      el.value.includes('kort') ||
-                      el.value.includes('faktura')
-                    )
-                );
-                
-                const targetValue = (data.betalsatt as string).toLowerCase();
-                for (const option of paymentOptions) {
-                  if (
-                    (targetValue === 'autogiro' && (option.text.includes('autogiro') || option.value.includes('autogiro'))) ||
-                    (targetValue === 'kort' && (option.text.includes('kort') && !option.text.includes('autogiro') || option.value.includes('kort'))) ||
-                    (targetValue === 'faktura' && (option.text.includes('faktura') || option.value.includes('faktura')))
-                  ) {
-                    const element = option.element as any;
-                    if (await page.evaluate((el) => el.offsetParent !== null, element)) {
-                      await element.scrollIntoViewIfNeeded();
-                      await page.waitForTimeout(500);
-                      await element.click();
-                      await page.waitForTimeout(1000);
-                      betalsattSelected = true;
-                      await logStep(sessionId, 'betalsatt_selected_fallback', { 
-                        betalsatt: data.betalsatt, 
-                        optionText: option.text 
-                      }, 'completed');
-                      break;
-                    }
-                  }
-                }
-              } catch {}
-            }
-            
-            // Try one more time after a delay (sometimes the form needs time to update)
-            if (betalsattSelected) {
-              await page.waitForTimeout(2000);
-              // Verify it was selected by trying again
-              try {
-                const verifySelectors = [
-                  `input[type="radio"][value*="${data.betalsatt as string}"]:checked`,
-                  `button:has-text("${betalsattTexts[0]}")[aria-pressed="true"]`,
-                ];
-                for (const selector of verifySelectors) {
-                  const verified = await page.$(selector);
-                  if (!verified) {
-                    // Try clicking again
-                    const retrySelectors = [
-                      `button:has-text("${betalsattTexts[0]}")`,
-                      `input[type="radio"][value*="${data.betalsatt as string}"]`,
-                    ];
-                    for (const retrySelector of retrySelectors) {
-                      try {
-                        const retryElement = await page.$(retrySelector);
-                        if (retryElement && await retryElement.isVisible()) {
-                          await retryElement.click();
-                          await page.waitForTimeout(1000);
-                        }
-                      } catch {}
-                    }
-                  }
-                }
-              } catch {}
+              if (betalsattSelected) {
+                // Verify selection worked
+                await page.waitForTimeout(1500);
+                break;
+              } else {
+                // Wait before retry
+                await page.waitForTimeout(1000);
+              }
             }
           }
 
