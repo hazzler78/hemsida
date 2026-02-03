@@ -371,8 +371,8 @@ export default function CheapEnergyChat() {
         const stillMissing: string[] = [];
         if (!updatedFormData.email) stillMissing.push('e-postadress');
         if (!updatedFormData.telefon) stillMissing.push('telefonnummer');
-        if (!updatedFormData.tilltradesdatum && !updatedFormData.tilltradesdatum === false) {
-          // Allow empty string for "snarast"
+        // Allow empty string for "snarast", but check if it's undefined/null
+        if (updatedFormData.tilltradesdatum === undefined || updatedFormData.tilltradesdatum === null) {
           stillMissing.push('tillträdesdatum');
         }
         if (!updatedFormData.betalsatt) stillMissing.push('betalsätt');
