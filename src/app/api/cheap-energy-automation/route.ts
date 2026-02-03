@@ -322,31 +322,70 @@ async function runAutomationSteps(
     // After cookies, wait for form scripts to load and initialize
     await page.waitForTimeout(3000);
     
+    // Debug: Log everything about the page state
+    const pageDebugInfo = await page.evaluate(() => {
+      return {
+        url: window.location.href,
+        scripts: Array.from(document.querySelectorAll('script[src]')).map(s => ({
+          src: s.getAttribute('src'),
+          loaded: s.hasAttribute('data-loaded')
+        })),
+        hasCreateWebForm: typeof (window as any).createWebForm === 'function',
+        hasCookiebot: typeof (window as any).Cookiebot !== 'undefined',
+        allInputs: Array.from(document.querySelectorAll('input')).map(i => ({
+          name: i.getAttribute('name'),
+          id: i.id,
+          placeholder: i.getAttribute('placeholder'),
+          visible: i.offsetParent !== null
+        })),
+        allButtons: Array.from(document.querySelectorAll('button')).slice(0, 10).map(b => ({
+          text: b.textContent?.trim().substring(0, 50),
+          visible: b.offsetParent !== null
+        })),
+        bodyText: document.body.textContent?.substring(0, 200)
+      };
+    });
+    await logStep(sessionId, 'page_debug_info', pageDebugInfo, 'completed');
+    
     // Try to manually trigger form initialization if createWebForm exists
     try {
-      await page.evaluate(() => {
-        // Check if createWebForm function exists, if not, try to wait for it
+      const formInitResult = await page.evaluate(() => {
+        const result: any = { success: false, errors: [] };
+        
+        // Check if createWebForm exists
         if (typeof (window as any).createWebForm === 'function') {
-          try {
-            (window as any).createWebForm();
-          } catch (e) {
-            console.log('createWebForm error:', e);
-          }
-        }
-        // Also try to find and call initializeForm if it exists
-        const scripts = Array.from(document.querySelectorAll('script'));
-        scripts.forEach(script => {
-          if (script.textContent && script.textContent.includes('initializeForm')) {
+          result.hasCreateWebForm = true;
+          
+          // Try to find the form container
+          const containers = [
+            document.getElementById('form-container'),
+            document.querySelector('[id*="form"]'),
+            document.querySelector('[class*="form"]'),
+            document.body
+          ].filter(Boolean);
+          
+          for (const container of containers) {
+            if (!container) continue;
             try {
-              eval(script.textContent);
-            } catch (e) {
-              // Ignore errors
+              // Try to initialize form in this container
+              const formInstance = (window as any).createWebForm(container as HTMLElement, 'tmp-9075a4d0-eca0-4466-86db-6ae1c41f05d9');
+              result.success = true;
+              result.container = container.id || container.className;
+              return result;
+            } catch (e: any) {
+              result.errors.push(`Container ${container.id || container.className}: ${e.message}`);
             }
           }
-        });
+        } else {
+          result.hasCreateWebForm = false;
+          result.errors.push('createWebForm function not found');
+        }
+        
+        return result;
       });
+      
+      await logStep(sessionId, 'form_init_attempted', formInitResult, formInitResult.success ? 'completed' : 'failed');
       await page.waitForTimeout(2000);
-      await logStep(sessionId, 'form_init_attempted', {}, 'completed');
     } catch (error) {
       await logStep(sessionId, 'form_init_failed', { error: String(error) }, 'failed');
     }
