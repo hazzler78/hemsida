@@ -99,6 +99,22 @@ async function runAutomationSteps(
     // Additional wait for JavaScript to finish executing
     await page.waitForTimeout(3000);
     
+    // Wait specifically for the form to appear (user reports it takes 6 seconds)
+    // Wait for either the postnummer input field OR the "Se priser" button to appear
+    try {
+      await page.waitForSelector('input[placeholder*="postnummer" i], input[name="postnummer"], button:has-text("Se priser"), button:has-text("Se priser")', { 
+        timeout: 15000,
+        state: 'visible'
+      });
+      await logStep(sessionId, 'form_appeared', {}, 'completed');
+    } catch {
+      // If form doesn't appear, log but continue anyway
+      await logStep(sessionId, 'form_wait_timeout', {}, 'failed', 'Form did not appear within timeout');
+    }
+    
+    // Additional wait after form appears (to ensure it's fully interactive)
+    await page.waitForTimeout(2000);
+    
     // Take initial screenshot for debugging
     await page.screenshot({ path: `debug-initial-${sessionId}.png`, fullPage: true });
     await logStep(sessionId, 'initial_screenshot', { screenshot: `debug-initial-${sessionId}.png` }, 'completed');
@@ -344,10 +360,12 @@ async function runAutomationSteps(
       
       try {
         if (action === 'fill_postnummer') {
-          // Wait a bit more for form to fully load
-          await page.waitForTimeout(2000);
+          // Wait specifically for the postnummer form field to be visible and ready
+          // User reports it takes 6 seconds for the form to load
+          await page.waitForTimeout(3000);
           
           // Try multiple selector strategies for postnummer
+          // Based on the screenshot, the field has label "Postnummer" above it
           const postnummerSelectors = [
             'input[name="postnummer"]',
             'input[placeholder*="postnummer" i]',
@@ -360,29 +378,47 @@ async function runAutomationSteps(
             'input[data-name="postnummer"]',
             'input[aria-label*="postnummer" i]',
             'input[aria-label*="post" i]',
+            // Try to find input field near the "Se priser" button (which is visible in screenshot)
+            'form input[type="text"]',
             'input[type="text"]', // Fallback: try first text input if nothing else matches
           ];
           
           let found = false;
           for (const selector of postnummerSelectors) {
             try {
-              // Wait for selector to appear (with timeout)
+              // Wait for selector to appear and be visible (with longer timeout)
+              let element;
               try {
-                await page.waitForSelector(selector, { timeout: 5000, state: 'attached' });
+                await page.waitForSelector(selector, { timeout: 10000, state: 'visible' });
+                element = await page.$(selector);
               } catch {
-                // Selector not found, try next one
-                continue;
+                // If visible wait fails, try attached state
+                try {
+                  await page.waitForSelector(selector, { timeout: 5000, state: 'attached' });
+                  element = await page.$(selector);
+                } catch {
+                  // Selector not found, try next one
+                  continue;
+                }
               }
               
-              // First, try to find the element (even if hidden)
-              const element = await page.$(selector);
               if (element) {
                 // Check if it's visible
                 const isVisible = await element.isVisible();
                 
-                // If this is the fallback selector (last one), only use it if it's visible
+                // If this is the fallback selector, only use it if it's visible and near the form
                 if (selector === 'input[type="text"]' && !isVisible) {
                   continue;
+                }
+                
+                // For fallback selector, verify it's actually the postnummer field
+                if (selector === 'input[type="text"]' || selector === 'form input[type="text"]') {
+                  // Check if there's a "Se priser" button nearby (indicates it's the right form)
+                  const nearbyButton = await page.$('button:has-text("Se priser")');
+                  if (!nearbyButton) {
+                    // Not near the form, skip this selector
+                    continue;
+                  }
                 }
                 
                 if (!isVisible) {
@@ -396,20 +432,40 @@ async function runAutomationSteps(
                     await page.waitForTimeout(500);
                     // Check again if visible after focus
                     const stillHidden = !(await element.isVisible());
-                    if (stillHidden && selector !== 'input[type="text"]') {
+                    if (stillHidden && selector !== 'input[type="text"]' && selector !== 'form input[type="text"]') {
                       continue; // Skip this selector if still hidden (unless it's fallback)
                     }
                   } catch {}
                 }
                 
-                // Try to fill it
-                await page.fill(selector, data.postnummer as string);
+                // Scroll to element to ensure it's in view
+                await element.scrollIntoViewIfNeeded();
+                await page.waitForTimeout(500);
+                
+                // Clear any existing value and fill it
+                await element.fill('');
+                await page.waitForTimeout(200);
+                await element.fill(data.postnummer as string);
+                await page.waitForTimeout(500);
                 await page.keyboard.press('Tab');
                 await page.waitForTimeout(2000);
-                found = true;
-                await logStep(sessionId, 'postnummer_filled', { postnummer: data.postnummer, selector, wasHidden: !isVisible }, 'completed');
-                results.postnummer = 'completed';
-                break;
+                
+                // Verify the value was filled correctly
+                const filledValue = await element.inputValue();
+                if (filledValue === data.postnummer) {
+                  found = true;
+                  await logStep(sessionId, 'postnummer_filled', { postnummer: data.postnummer, selector, wasHidden: !isVisible }, 'completed');
+                  results.postnummer = 'completed';
+                  break;
+                } else {
+                  // Value didn't fill correctly, try next selector
+                  await logStep(sessionId, 'postnummer_fill_failed', { 
+                    postnummer: data.postnummer, 
+                    filledValue,
+                    selector 
+                  }, 'failed', 'Value did not match expected');
+                  continue;
+                }
               }
             } catch (selectorError) {
               // Try next selector
