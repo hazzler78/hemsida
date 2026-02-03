@@ -420,39 +420,6 @@ export async function POST(req: NextRequest) {
         message: 'Denna funktion kräver Node.js runtime och fungerar endast lokalt eller på plattformar som Vercel, Railway, eller Render.'
       }, { status: 503 });
     }
-      const browser = await chromium.launch({ headless: true });
-      const context = await browser.newContext();
-      const page = await context.newPage();
-
-      try {
-        await page.goto(CHEAP_ENERGY_URL, { waitUntil: 'networkidle', timeout: 30000 });
-        await page.waitForTimeout(5000);
-
-        // Find and fill postnummer field
-        // Note: These selectors need to be verified on the actual page
-        const postnummerSelector = 'input[name="postnummer"], input[placeholder*="postnummer" i], input[type="text"][id*="post" i]';
-        await page.waitForSelector(postnummerSelector, { timeout: 10000 });
-        await page.fill(postnummerSelector, postnummer);
-        
-        // Trigger any autocomplete/address lookup
-        await page.keyboard.press('Tab');
-        await page.waitForTimeout(2000);
-
-        await logStep(sessionId, 'postnummer_filled', { postnummer }, 'completed');
-        await browser.close();
-
-        return NextResponse.json({ 
-          success: true, 
-          message: 'Postnummer ifyllt',
-          nextStep: 'forbrukning'
-        });
-      } catch (error) {
-        await browser.close();
-        const errorMsg = error instanceof Error ? error.message : 'Okänt fel';
-        await logStep(sessionId, 'postnummer_failed', { postnummer }, 'failed', errorMsg);
-        return NextResponse.json({ error: errorMsg }, { status: 500 });
-      }
-    }
 
     // Fill forbrukning
     if (action === 'fill_forbrukning') {
@@ -461,78 +428,13 @@ export async function POST(req: NextRequest) {
         message: 'Denna funktion kräver Node.js runtime och fungerar endast lokalt eller på plattformar som Vercel, Railway, eller Render.'
       }, { status: 503 });
     }
-      const browser = await chromium.launch({ headless: true });
-      const context = await browser.newContext();
-      const page = await context.newPage();
-
-      try {
-        await page.goto(CHEAP_ENERGY_URL, { waitUntil: 'networkidle', timeout: 30000 });
-        await page.waitForTimeout(5000);
-
-        // Map forbrukning to button selection
-        // This needs to be verified on the actual page
-        const forbrukningMap: Record<string, string> = {
-          '2000': '2000 kWh/år',
-          '5000': '5000 kWh/år',
-          '20000': '20000 kWh/år',
-        };
-
-        const buttonText = forbrukningMap[forbrukning] || forbrukning;
-        const buttonSelector = `button:has-text("${buttonText}"), [role="button"]:has-text("${buttonText}")`;
-        
-        await page.waitForSelector(buttonSelector, { timeout: 10000 });
-        await page.click(buttonSelector);
-        await page.waitForTimeout(1000);
-
-        await logStep(sessionId, 'forbrukning_selected', { forbrukning }, 'completed');
-        await browser.close();
-
-        return NextResponse.json({ 
-          success: true, 
-          message: 'Förbrukning vald',
-          nextStep: 'contract_type'
-        });
-      } catch (error) {
-        await browser.close();
-        const errorMsg = error instanceof Error ? error.message : 'Okänt fel';
-        await logStep(sessionId, 'forbrukning_failed', { forbrukning }, 'failed', errorMsg);
-        return NextResponse.json({ error: errorMsg }, { status: 500 });
-      }
-    }
 
     // Select contract type (rörligt timpris)
     if (action === 'select_contract_type') {
-      const { chromium } = await import('playwright').catch(() => {
-        throw new Error('Playwright requires Node.js runtime. This route is running in Edge Runtime.');
-      });
-      const browser = await chromium.launch({ headless: true });
-      const context = await browser.newContext();
-      const page = await context.newPage();
-
-      try {
-        await page.goto(CHEAP_ENERGY_URL, { waitUntil: 'networkidle', timeout: 30000 });
-        await page.waitForTimeout(5000);
-
-        // Select "Rörligt timpris" automatically
-        const contractSelector = 'button:has-text("Rörligt timpris"), [role="button"]:has-text("Rörligt"), button:has-text("Timpris")';
-        await page.waitForSelector(contractSelector, { timeout: 10000 });
-        await page.click(contractSelector);
-        await page.waitForTimeout(1000);
-
-        await logStep(sessionId, 'contract_type_selected', { type: 'rorligt_timpris' }, 'completed');
-        await browser.close();
-
-        return NextResponse.json({ 
-          success: true, 
-          message: 'Rörligt timpris valt',
-          nextStep: 'personnummer'
-        });
-      } catch (error) {
-        await browser.close();
-        const errorMsg = error instanceof Error ? error.message : 'Okänt fel';
-        await logStep(sessionId, 'contract_type_failed', {}, 'failed', errorMsg);
-        return NextResponse.json({ error: errorMsg }, { status: 500 });
-      }
+      return NextResponse.json({ 
+        error: 'Browser automation är inte tillgängligt i Edge Runtime',
+        message: 'Denna funktion kräver Node.js runtime och fungerar endast lokalt eller på plattformar som Vercel, Railway, eller Render.'
+      }, { status: 503 });
     }
 
     // Fill personnummer and get address
@@ -542,92 +444,13 @@ export async function POST(req: NextRequest) {
         message: 'Denna funktion kräver Node.js runtime och fungerar endast lokalt eller på plattformar som Vercel, Railway, eller Render.'
       }, { status: 503 });
     }
-      const browser = await chromium.launch({ headless: true });
-      const context = await browser.newContext();
-      const page = await context.newPage();
-
-      try {
-        await page.goto(CHEAP_ENERGY_URL, { waitUntil: 'networkidle', timeout: 30000 });
-        await page.waitForTimeout(5000);
-
-        // Fill personnummer
-        const personnummerSelector = 'input[name="personnummer"], input[placeholder*="personnummer" i], input[type="text"][id*="person" i]';
-        await page.waitForSelector(personnummerSelector, { timeout: 10000 });
-        await page.fill(personnummerSelector, personnummer);
-        
-        // Wait for autofill
-        await page.keyboard.press('Tab');
-        await page.waitForTimeout(3000);
-
-        // Extract filled address data
-        const addressData: Record<string, string> = {};
-        const fornamnSelector = 'input[name="fornamn"], input[placeholder*="förnamn" i]';
-        const efternamnSelector = 'input[name="efternamn"], input[placeholder*="efternamn" i]';
-        const adressSelector = 'input[name="adress"], input[placeholder*="adress" i]';
-        const ortSelector = 'input[name="ort"], input[placeholder*="ort" i]';
-
-        try {
-          addressData.fornamn = await page.inputValue(fornamnSelector).catch(() => '');
-          addressData.efternamn = await page.inputValue(efternamnSelector).catch(() => '');
-          addressData.adress = await page.inputValue(adressSelector).catch(() => '');
-          addressData.ort = await page.inputValue(ortSelector).catch(() => '');
-        } catch {}
-
-        await logStep(sessionId, 'personnummer_filled', { personnummer, ...addressData }, 'completed');
-        await browser.close();
-
-        return NextResponse.json({ 
-          success: true, 
-          message: 'Personnummer ifyllt',
-          addressData,
-          nextStep: 'address_confirmation'
-        });
-      } catch (error) {
-        await browser.close();
-        const errorMsg = error instanceof Error ? error.message : 'Okänt fel';
-        await logStep(sessionId, 'personnummer_failed', { personnummer }, 'failed', errorMsg);
-        return NextResponse.json({ error: errorMsg }, { status: 500 });
-      }
-    }
 
     // Handle address confirmation
     if (action === 'confirm_address') {
-      const { confirmed } = data; // true or false
-      
-      const { chromium } = await import('playwright').catch(() => {
-        throw new Error('Playwright requires Node.js runtime. This route is running in Edge Runtime.');
-      });
-      const browser = await chromium.launch({ headless: true });
-      const context = await browser.newContext();
-      const page = await context.newPage();
-
-      try {
-        await page.goto(CHEAP_ENERGY_URL, { waitUntil: 'networkidle', timeout: 30000 });
-        await page.waitForTimeout(5000);
-
-        const buttonText = confirmed 
-          ? 'Ja, jag står på nuvarande elavtal på adressen'
-          : 'Nej, jag står inte på nuvarande elavtal på adressen';
-        
-        const buttonSelector = `button:has-text("${buttonText}"), [role="button"]:has-text("${buttonText.substring(0, 20)}")`;
-        await page.waitForSelector(buttonSelector, { timeout: 10000 });
-        await page.click(buttonSelector);
-        await page.waitForTimeout(1000);
-
-        await logStep(sessionId, 'address_confirmed', { confirmed }, 'completed');
-        await browser.close();
-
-        return NextResponse.json({ 
-          success: true, 
-          message: 'Adressbekräftelse registrerad',
-          nextStep: 'contact_details'
-        });
-      } catch (error) {
-        await browser.close();
-        const errorMsg = error instanceof Error ? error.message : 'Okänt fel';
-        await logStep(sessionId, 'address_confirmation_failed', { confirmed }, 'failed', errorMsg);
-        return NextResponse.json({ error: errorMsg }, { status: 500 });
-      }
+      return NextResponse.json({ 
+        error: 'Browser automation är inte tillgängligt i Edge Runtime',
+        message: 'Denna funktion kräver Node.js runtime och fungerar endast lokalt eller på plattformar som Vercel, Railway, eller Render.'
+      }, { status: 503 });
     }
 
     // Fill contact details
@@ -637,74 +460,6 @@ export async function POST(req: NextRequest) {
         message: 'Denna funktion kräver Node.js runtime och fungerar endast lokalt eller på plattformar som Vercel, Railway, eller Render.'
       }, { status: 503 });
     }
-      const browser = await chromium.launch({ headless: true });
-      const context = await browser.newContext();
-      const page = await context.newPage();
-
-      try {
-        await page.goto(CHEAP_ENERGY_URL, { waitUntil: 'networkidle', timeout: 30000 });
-        await page.waitForTimeout(5000);
-
-        // Fill email
-        if (email) {
-          const emailSelector = 'input[type="email"], input[name="email"], input[placeholder*="e-post" i]';
-          await page.waitForSelector(emailSelector, { timeout: 10000 });
-          await page.fill(emailSelector, email);
-        }
-
-        // Fill telefon
-        if (telefon) {
-          const telefonSelector = 'input[type="tel"], input[name="telefon"], input[placeholder*="telefon" i]';
-          await page.waitForSelector(telefonSelector, { timeout: 10000 });
-          await page.fill(telefonSelector, telefon);
-        }
-
-        // Fill tillträdesdatum
-        if (tilltradesdatum) {
-          const datumSelector = 'input[type="date"], input[name="tilltradesdatum"], input[placeholder*="datum" i]';
-          await page.waitForSelector(datumSelector, { timeout: 10000 });
-          await page.fill(datumSelector, tilltradesdatum);
-        }
-
-        // Fill anläggnings-ID (optional)
-        if (anlagningsId) {
-          const anlaggningSelector = 'input[name*="anläggning" i], input[name*="anlaggning" i], input[placeholder*="anläggning" i]';
-          await page.waitForSelector(anlaggningSelector, { timeout: 5000 }).catch(() => {});
-          if (await page.$(anlaggningSelector)) {
-            await page.fill(anlaggningSelector, anlagningsId);
-          }
-        }
-
-        // Select betalsätt
-        if (betalsatt) {
-          const betalsattMap: Record<string, string> = {
-            'autogiro': 'Autogiro',
-            'kort': 'Kort',
-            'faktura': 'Faktura',
-          };
-          const betalsattText = betalsattMap[betalsatt] || betalsatt;
-          const betalsattSelector = `button:has-text("${betalsattText}"), [role="button"]:has-text("${betalsattText}"), input[value="${betalsatt}"]`;
-          await page.waitForSelector(betalsattSelector, { timeout: 5000 }).catch(() => {});
-          if (await page.$(betalsattSelector)) {
-            await page.click(betalsattSelector);
-          }
-        }
-
-        await logStep(sessionId, 'contact_details_filled', { email, telefon, tilltradesdatum, anlagningsId, betalsatt }, 'completed');
-        await browser.close();
-
-        return NextResponse.json({ 
-          success: true, 
-          message: 'Kontaktuppgifter ifyllda',
-          nextStep: 'submit'
-        });
-      } catch (error) {
-        await browser.close();
-        const errorMsg = error instanceof Error ? error.message : 'Okänt fel';
-        await logStep(sessionId, 'contact_details_failed', data, 'failed', errorMsg);
-        return NextResponse.json({ error: errorMsg }, { status: 500 });
-      }
-    }
 
     // Submit form and get signing URL
     if (action === 'submit_form') {
@@ -712,65 +467,6 @@ export async function POST(req: NextRequest) {
         error: 'Browser automation är inte tillgängligt i Edge Runtime',
         message: 'Denna funktion kräver Node.js runtime och fungerar endast lokalt eller på plattformar som Vercel, Railway, eller Render.'
       }, { status: 503 });
-    }
-      const browser = await chromium.launch({ headless: true });
-      const context = await browser.newContext();
-      const page = await context.newPage();
-
-      try {
-        await page.goto(CHEAP_ENERGY_URL, { waitUntil: 'networkidle', timeout: 30000 });
-        await page.waitForTimeout(5000);
-
-        // Check for error messages
-        const errorSelectors = [
-          '.error',
-          '[role="alert"]',
-          '.alert-danger',
-          '[class*="error" i]',
-        ];
-
-        for (const selector of errorSelectors) {
-          const errorElement = await page.$(selector);
-          if (errorElement) {
-            const errorText = await errorElement.textContent();
-            if (errorText && errorText.trim().length > 0) {
-              await logStep(sessionId, 'form_validation_failed', { error: errorText }, 'failed');
-              await browser.close();
-              return NextResponse.json({ 
-                error: 'Formulärfel upptäckta', 
-                details: errorText 
-              }, { status: 400 });
-            }
-          }
-        }
-
-        // Click submit button
-        const submitSelector = 'button[type="submit"], button:has-text("Teckna elavtal"), button:has-text("Skicka"), button:has-text("Fortsätt")';
-        await page.waitForSelector(submitSelector, { timeout: 10000 });
-        await page.click(submitSelector);
-
-        // Wait for redirect to signing page
-        await page.waitForNavigation({ waitUntil: 'networkidle', timeout: 30000 });
-        
-        const currentUrl = page.url();
-        const signingUrl = currentUrl.includes('sign') || currentUrl.includes('avtal') || currentUrl.includes('signNow') 
-          ? currentUrl 
-          : null;
-
-        await logStep(sessionId, 'form_submitted', { signingUrl }, 'completed', undefined, signingUrl || undefined);
-        await browser.close();
-
-        return NextResponse.json({ 
-          success: true, 
-          message: 'Formulär skickat',
-          signingUrl: signingUrl || currentUrl
-        });
-      } catch (error) {
-        await browser.close();
-        const errorMsg = error instanceof Error ? error.message : 'Okänt fel';
-        await logStep(sessionId, 'submit_failed', {}, 'failed', errorMsg);
-        return NextResponse.json({ error: errorMsg }, { status: 500 });
-      }
     }
 
     return NextResponse.json({ error: 'Okänd action' }, { status: 400 });
