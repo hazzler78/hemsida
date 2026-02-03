@@ -219,7 +219,8 @@ export default function CheapEnergyChat() {
         }
 
         setFormData({ ...formData, postnummer });
-        await callAutomation('fill_postnummer', { postnummer });
+        // Note: We don't call automation here - we collect all data first
+        // Then run all steps in sequence at the end
         
         setMessages(prev => [...prev, 
           { role: 'assistant', content: `Tack! Nu behöver jag veta din ungefärliga årsförbrukning. Välj ett av alternativen:\n\n1. 2000 kWh/år (liten lägenhet)\n2. 5000 kWh/år (normal familj)\n3. 20000 kWh/år (stor villa / elbil / hög förbrukning)` }
@@ -236,13 +237,11 @@ export default function CheapEnergyChat() {
         }
 
         setFormData({ ...formData, forbrukning });
-        await callAutomation('fill_forbrukning', { forbrukning });
-        
-        // Automatically select rörligt timpris
-        await callAutomation('select_contract_type', {});
+        // Note: We don't call automation here - we collect all data first
+        // Contract type will be selected automatically in the final automation run
         
         setMessages(prev => [...prev, 
-          { role: 'assistant', content: 'Perfekt! Jag har valt rörligt timpris åt dig (det är det billigaste alternativet).\n\nNu behöver jag ditt personnummer (ÅÅÅÅMMDD-XXXX) så hämtar vi namn och adress automatiskt.' }
+          { role: 'assistant', content: 'Perfekt! Jag kommer välja rörligt timpris åt dig (det är det billigaste alternativet).\n\nNu behöver jag ditt personnummer (ÅÅÅÅMMDD-XXXX) så hämtar vi namn och adress automatiskt.' }
         ]);
         setCurrentStep('personnummer');
       }
@@ -256,15 +255,11 @@ export default function CheapEnergyChat() {
         }
 
         setFormData({ ...formData, personnummer });
-        const result = await callAutomation('fill_personnummer', { personnummer });
+        // Note: We don't call automation here - we collect all data first
+        // Address will be fetched automatically when we run the automation
         
-        const addressInfo = result.addressData || {};
-        const addressText = addressInfo.adress && addressInfo.ort 
-          ? `${addressInfo.adress}, ${addressInfo.ort}`
-          : 'din adress';
-
         setMessages(prev => [...prev, 
-          { role: 'assistant', content: `Tack! Jag har hämtat ${addressText}.\n\nStår du på ditt nuvarande elavtal på den här adressen? Svara Ja eller Nej.` }
+          { role: 'assistant', content: `Tack! Jag kommer hämta din adress automatiskt när vi fyller i formuläret.\n\nStår du på ditt nuvarande elavtal på den här adressen? Svara Ja eller Nej.` }
         ]);
         setCurrentStep('address_confirmation');
       }
@@ -278,7 +273,7 @@ export default function CheapEnergyChat() {
         }
 
         setFormData({ ...formData, addressConfirmed: confirmed });
-        await callAutomation('confirm_address', { confirmed });
+        // Note: We don't call automation here - we collect all data first
         
         setMessages(prev => [...prev, 
           { role: 'assistant', content: 'Bra! Nu behöver jag några sista uppgifter:\n\n• Din e-postadress?' }
