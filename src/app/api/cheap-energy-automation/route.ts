@@ -77,18 +77,64 @@ async function runAutomationSteps(
 
   try {
     // Navigate to Cheap Energy form
-    await page.goto(CHEAP_ENERGY_URL, { waitUntil: 'networkidle', timeout: 30000 });
-    await logStep(sessionId, 'page_loaded', { url: CHEAP_ENERGY_URL }, 'completed');
+    await page.goto(CHEAP_ENERGY_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await logStep(sessionId, 'page_navigated', { url: CHEAP_ENERGY_URL }, 'completed');
+    
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {
+      // If networkidle times out, continue anyway
+      console.log('Network idle timeout, continuing...');
+    });
     
     // Wait for initial load (5 seconds as mentioned)
     await page.waitForTimeout(5000);
     
-    // Wait for page to be fully interactive
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForLoadState('networkidle');
-    
     // Take initial screenshot for debugging
     await page.screenshot({ path: `debug-initial-${sessionId}.png`, fullPage: true });
+    await logStep(sessionId, 'initial_screenshot', { screenshot: `debug-initial-${sessionId}.png` }, 'completed');
+    
+    // Check for common overlays/modals that might block the form
+    // Cookie banners, popups, etc.
+    const overlaySelectors = [
+      'button:has-text("Acceptera")',
+      'button:has-text("Godkänn")',
+      'button:has-text("Accept")',
+      '[id*="cookie"] button',
+      '[class*="cookie"] button',
+      '[id*="popup"] button',
+      '[class*="popup"] button',
+      '[id*="modal"] button',
+      '[class*="modal"] button',
+      'button.close',
+      'button[aria-label*="close" i]',
+      'button[aria-label*="stäng" i]',
+    ];
+    
+    for (const selector of overlaySelectors) {
+      try {
+        const overlay = await page.$(selector);
+        if (overlay && await overlay.isVisible()) {
+          await overlay.click();
+          await page.waitForTimeout(1000);
+          await logStep(sessionId, 'overlay_closed', { selector }, 'completed');
+        }
+      } catch {}
+    }
+    
+    // Wait a bit more after closing overlays
+    await page.waitForTimeout(2000);
+    
+    // Take screenshot after closing overlays
+    await page.screenshot({ path: `debug-after-overlays-${sessionId}.png`, fullPage: true });
+    
+    // Log page title and URL for debugging
+    const pageTitle = await page.title();
+    const pageUrl = page.url();
+    await logStep(sessionId, 'page_ready', { 
+      title: pageTitle, 
+      url: pageUrl,
+      screenshot: `debug-after-overlays-${sessionId}.png`
+    }, 'completed');
 
     const results: Record<string, unknown> = {};
 
