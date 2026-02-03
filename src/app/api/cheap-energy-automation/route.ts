@@ -58,10 +58,12 @@ async function runAutomationSteps(
 
   // Dynamic import of Playwright (only works in Node.js runtime)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let chromium: any;
+  let browserType: any;
   try {
     const playwright = await import('playwright');
-    chromium = playwright.chromium;
+    // Try Firefox first (better JavaScript handling for some sites)
+    browserType = playwright.firefox;
+    await logStep(sessionId, 'browser_selected', { browser: 'firefox' }, 'completed');
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : 'Okänt fel';
     await logStep(sessionId, 'playwright_import_failed', {}, 'failed', `Playwright import failed: ${errorMsg}`);
@@ -69,10 +71,19 @@ async function runAutomationSteps(
   }
 
   // Set headless: false to see browser window for debugging
-  const browser = await chromium.launch({ headless: false });
+  const browser = await browserType.launch({ 
+    headless: false,
+    // Firefox-specific options
+    firefoxUserPrefs: {
+      'dom.webdriver.enabled': false,
+      'useAutomationExtension': false,
+    }
+  });
   const context = await browser.newContext({
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0',
     viewport: { width: 1920, height: 1080 }, // Full HD viewport
+    // Firefox might handle JavaScript differently
+    javaScriptEnabled: true,
   });
   const page = await context.newPage();
 
