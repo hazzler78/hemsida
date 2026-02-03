@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 // Note: Playwright requires Node.js runtime, but Cloudflare Pages requires Edge Runtime
 // This will cause runtime errors. Consider using a separate Node.js server for automation.
 // Set to 'edge' to allow Cloudflare Pages build, but Playwright will NOT work
+// Updated: 2026-02-03 - All Playwright code removed for Edge Runtime compatibility
 export const runtime = 'edge';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
