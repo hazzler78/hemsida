@@ -42,10 +42,8 @@ async function logStep(
 }
 
 // Helper function to run automation steps in sequence
-async function runAutomationSteps(
-  sessionId: string,
-  _steps: Array<{ action: string; data: Record<string, unknown> }> // Not used in Edge Runtime
-) {
+// Note: steps parameter removed as it's not used in Edge Runtime (Playwright not available)
+async function runAutomationSteps(sessionId: string) {
   // Since we're using Edge Runtime, Playwright will not work
   // Return a clear error message immediately
   await logStep(sessionId, 'runtime_check_failed', {}, 'failed', 'Edge Runtime detected - Playwright requires Node.js runtime');
@@ -95,7 +93,7 @@ export async function POST(req: NextRequest) {
     // Run multiple steps in sequence (preferred method)
     if (steps && Array.isArray(steps)) {
       try {
-        const results = await runAutomationSteps(sessionId, steps);
+        const results = await runAutomationSteps(sessionId);
         return NextResponse.json({ 
           success: true, 
           results 
