@@ -299,77 +299,104 @@ async function runAutomationSteps(
     
     await page.screenshot({ path: `debug-04-after-cookies-${sessionId}.png`, fullPage: true });
     
-    // NOW wait for the form to appear (user reports 6 seconds)
-    // Use a more robust waiting strategy
+    // NOW wait for the form to appear (user reports it opens after a few seconds in Chrome)
+    // Use Playwright's built-in waitForSelector which is more reliable
     await logStep(sessionId, 'waiting_for_form', {}, 'in_progress');
     
-    // Wait for the form to appear - try multiple strategies with longer timeout
     let formReady = false;
-    const maxWaitTime = 30000; // 30 seconds max (increased from 15)
-    const startTime = Date.now();
     
-    while (!formReady && (Date.now() - startTime) < maxWaitTime) {
-      // Check current URL - if it changed, we might have been redirected
-      const currentUrl = page.url();
-      if (!currentUrl.includes('?src=Elchef') && currentUrl.includes('teckna-elavtal')) {
-        await logStep(sessionId, 'url_lost_query_param', { url: currentUrl }, 'failed', 'Lost query parameter during wait');
-        // Try to navigate back with query parameter
-        try {
-          await page.goto(CHEAP_ENERGY_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-          await page.waitForTimeout(3000);
-        } catch {}
+    // Try to wait for the form using Playwright's waitForSelector (most reliable)
+    // This will wait up to 30 seconds for the element to appear
+    const formSelectors = [
+      'button:has-text("Se priser")',
+      'input[name="postnummer"]',
+      'input[placeholder*="postnummer" i]',
+      'input[type="text"][id*="post" i]',
+      'input[placeholder*="post" i]',
+    ];
+    
+    for (const selector of formSelectors) {
+      try {
+        await page.waitForSelector(selector, { 
+          state: 'visible', 
+          timeout: 30000 
+        });
+        await logStep(sessionId, 'form_detected', { selector }, 'completed');
+        formReady = true;
+        break;
+      } catch (error) {
+        // Try next selector
+        continue;
       }
+    }
+    
+    // If waitForSelector didn't work, try polling approach
+    if (!formReady) {
+      const maxWaitTime = 30000; // 30 seconds max
+      const startTime = Date.now();
       
-      // Check for "Se priser" button (most reliable indicator that form is ready)
-      try {
-        const sePriserButton = await page.$('button:has-text("Se priser")');
-        if (sePriserButton) {
-          const isVisible = await sePriserButton.isVisible();
-          if (isVisible) {
-            await logStep(sessionId, 'form_detected_by_button', {}, 'completed');
-            formReady = true;
-            break;
-          }
-        }
-      } catch {}
-      
-      // Check for postnummer input field
-      try {
-        const postnummerInputs = [
-          'input[name="postnummer"]',
-          'input[placeholder*="postnummer" i]',
-          'input[type="text"][id*="post" i]',
-          'input[type="text"]', // More generic fallback
-        ];
-        
-        for (const selector of postnummerInputs) {
+      while (!formReady && (Date.now() - startTime) < maxWaitTime) {
+        // Check current URL - if it changed, we might have been redirected
+        const currentUrl = page.url();
+        if (!currentUrl.includes('?src=Elchef') && currentUrl.includes('teckna-elavtal')) {
+          await logStep(sessionId, 'url_lost_query_param', { url: currentUrl }, 'failed', 'Lost query parameter during wait');
+          // Try to navigate back with query parameter
           try {
-            const input = await page.$(selector);
-            if (input) {
-              const isVisible = await input.isVisible();
-              if (isVisible) {
-                // Verify it's actually a postnummer field by checking nearby text
-                const nearbyText = await page.evaluate((sel) => {
-                  const el = document.querySelector(sel);
-                  if (!el) return '';
-                  const parent = el.closest('form, div, section');
-                  return parent?.textContent?.toLowerCase() || '';
-                }, selector);
-                
-                if (nearbyText.includes('postnummer') || nearbyText.includes('post') || selector === 'input[type="text"]') {
-                  await logStep(sessionId, 'form_detected_by_input', { selector, nearbyText: nearbyText.substring(0, 100) }, 'completed');
-                  formReady = true;
-                  break;
-                }
-              }
-            }
+            await page.goto(CHEAP_ENERGY_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+            await page.waitForTimeout(5000); // Wait longer after re-navigation
           } catch {}
         }
-        if (formReady) break;
-      } catch {}
-      
-      // Wait a bit before checking again
-      await page.waitForTimeout(2000); // Check every 2 seconds instead of 1
+        
+        // Check for "Se priser" button (most reliable indicator that form is ready)
+        try {
+          const sePriserButton = await page.$('button:has-text("Se priser")');
+          if (sePriserButton) {
+            const isVisible = await sePriserButton.isVisible();
+            if (isVisible) {
+              await logStep(sessionId, 'form_detected_by_button_polling', {}, 'completed');
+              formReady = true;
+              break;
+            }
+          }
+        } catch {}
+        
+        // Check for postnummer input field
+        try {
+          const postnummerInputs = [
+            'input[name="postnummer"]',
+            'input[placeholder*="postnummer" i]',
+            'input[type="text"][id*="post" i]',
+          ];
+          
+          for (const selector of postnummerInputs) {
+            try {
+              const input = await page.$(selector);
+              if (input) {
+                const isVisible = await input.isVisible();
+                if (isVisible) {
+                  // Verify it's actually a postnummer field by checking nearby text
+                  const nearbyText = await page.evaluate((sel) => {
+                    const el = document.querySelector(sel);
+                    if (!el) return '';
+                    const parent = el.closest('form, div, section');
+                    return parent?.textContent?.toLowerCase() || '';
+                  }, selector);
+                  
+                  if (nearbyText.includes('postnummer') || nearbyText.includes('post')) {
+                    await logStep(sessionId, 'form_detected_by_input_polling', { selector, nearbyText: nearbyText.substring(0, 100) }, 'completed');
+                    formReady = true;
+                    break;
+                  }
+                }
+              }
+            } catch {}
+          }
+          if (formReady) break;
+        } catch {}
+        
+        // Wait a bit before checking again
+        await page.waitForTimeout(2000); // Check every 2 seconds
+      }
     }
     
     if (!formReady) {
