@@ -72,9 +72,9 @@ const nextConfig: NextConfig = {
         use: 'ignore-loader',
       });
       
-      // Rule 2: Catch all other asset files
+      // Rule 2: Catch all other asset files (but NOT CSS - CSS needs to be handled by Next.js)
       config.module.rules.unshift({
-        test: /\.(png|jpg|jpeg|gif|svg|ico|css|json|js|ts|tsx|mjs|cjs)$/,
+        test: /\.(png|jpg|jpeg|gif|svg|ico|json|js|ts|tsx|mjs|cjs)$/,
         include: [
           /node_modules[\\/]playwright/,
           /node_modules[\\/]chromium-bidi/,
@@ -111,10 +111,11 @@ const nextConfig: NextConfig = {
           },
         }),
         // Additional IgnorePlugin specifically for Playwright assets (fonts, images, etc.)
+        // Note: We exclude CSS files here to avoid breaking Next.js CSS handling
         new webpack.IgnorePlugin({
           checkResource(resource: string) {
-            // Catch all asset files from Playwright
-            if (/node_modules[\\/]playwright.*\.(ttf|woff|woff2|eot|otf|png|jpg|jpeg|gif|svg|ico|css|json)$/i.test(resource)) {
+            // Catch all asset files from Playwright (but NOT CSS)
+            if (/node_modules[\\/]playwright.*\.(ttf|woff|woff2|eot|otf|png|jpg|jpeg|gif|svg|ico|json)$/i.test(resource)) {
               return true;
             }
             return false;
