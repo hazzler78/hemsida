@@ -201,19 +201,54 @@ async function runAutomationSteps(
     });
     await page.waitForTimeout(1000);
     
-    // Wait for all scripts to load before handling cookies
-    // The form initialization depends on scripts being loaded
-    await page.waitForFunction(() => {
-      // Check if all scripts have loaded
-      const scripts = Array.from(document.querySelectorAll('script[src]'));
-      return scripts.every(script => {
-        const src = script.getAttribute('src');
-        return script.hasAttribute('data-loaded') || 
-               (src && !src.includes('cookiebot') && !src.includes('cookie'));
-      });
-    }, { timeout: 15000 }).catch(() => {});
+    // Wait for Salesys web_form1.js script to load (same as SalesysForm component does)
+    // This script contains the createWebForm function that Cheap Energy needs
+    await logStep(sessionId, 'waiting_for_salesys_script', {}, 'in_progress');
     
-    await page.waitForTimeout(2000); // Additional wait for scripts to execute
+    // Wait for the Salesys script to be loaded
+    try {
+      await page.waitForFunction(() => {
+        // Check if Salesys script is loaded
+        const scripts = Array.from(document.querySelectorAll('script[src]'));
+        const salesysScript = scripts.find(script => {
+          const src = script.getAttribute('src');
+          return src && src.includes('salesys.se') && src.includes('web_form');
+        });
+        return salesysScript !== undefined;
+      }, { timeout: 20000 });
+      await logStep(sessionId, 'salesys_script_loaded', {}, 'completed');
+    } catch {
+      // Script might already be loaded or loading differently, continue anyway
+      await logStep(sessionId, 'salesys_script_wait_timeout', {}, 'failed', 'Salesys script not found, continuing anyway');
+    }
+    
+    // Wait for createWebForm function to be available (like SalesysForm component does)
+    await logStep(sessionId, 'waiting_for_createWebForm', {}, 'in_progress');
+    
+    let createWebFormReady = false;
+    const maxAttempts = 40; // 40 * 250ms = 10 seconds (same as SalesysForm)
+    let attempts = 0;
+    
+    while (!createWebFormReady && attempts < maxAttempts) {
+      const isReady = await page.evaluate(() => {
+        return typeof (window as any).createWebForm === 'function';
+      });
+      
+      if (isReady) {
+        createWebFormReady = true;
+        await logStep(sessionId, 'createWebForm_ready', { attempts }, 'completed');
+        break;
+      }
+      
+      attempts++;
+      await page.waitForTimeout(250); // Poll every 250ms (same as SalesysForm)
+    }
+    
+    if (!createWebFormReady) {
+      await logStep(sessionId, 'createWebForm_not_found', { attempts }, 'failed', 'createWebForm function not found after waiting');
+    }
+    
+    await page.waitForTimeout(1000); // Additional wait after createWebForm is ready
     
     // Handle cookies - but be careful not to break form initialization
     let cookieClicked = false;
