@@ -137,7 +137,7 @@ export default function CheapEnergyChat() {
   };
 
   // Parse user input for different steps
-  const parseInput = (input: string, step: string): string | boolean | { type: string; value: string } | null => {
+  const parseInput = (input: string, step: string, expectedField?: string): string | boolean | { type: string; value: string } | null => {
     const lowerInput = input.toLowerCase().trim();
 
     if (step === 'postnummer') {
@@ -177,17 +177,65 @@ export default function CheapEnergyChat() {
     }
 
     if (step === 'contact_details') {
+      // If we're expecting a specific field, prioritize that
+      if (expectedField === 'email' && input.includes('@')) {
+        return { type: 'email', value: input.trim() };
+      }
+      if (expectedField === 'telefon' && input.match(/^[\d\s\+\-\(\)]+$/)) {
+        return { type: 'telefon', value: input.trim() };
+      }
+      if (expectedField === 'tilltradesdatum') {
+        // Accept various date formats or "snarast"
+        if (lowerInput.includes('snarast') || lowerInput.includes('snabbt') || lowerInput.includes('så snart')) {
+          return { type: 'tilltradesdatum', value: '' };
+        }
+        // Try to parse various date formats
+        const dateMatch = input.match(/(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/) || 
+                         input.match(/(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/) ||
+                         input.match(/(\d{1,2})\s+(januari|februari|mars|april|maj|juni|juli|augusti|september|oktober|november|december)\s+(\d{4})/i);
+        if (dateMatch) {
+          return { type: 'tilltradesdatum', value: input.trim() };
+        }
+        // If it looks like a date (contains numbers and separators), accept it
+        if (input.match(/\d+[-\/\s]\d+/) && input.length < 20) {
+          return { type: 'tilltradesdatum', value: input.trim() };
+        }
+        // Fallback: accept any reasonable input as date
+        if (input.trim().length > 0 && input.trim().length < 50) {
+          return { type: 'tilltradesdatum', value: input.trim() };
+        }
+      }
+      if (expectedField === 'betalsatt') {
+        if (lowerInput.includes('autogiro')) {
+          return { type: 'betalsatt', value: 'autogiro' };
+        }
+        if (lowerInput.includes('kort')) {
+          return { type: 'betalsatt', value: 'kort' };
+        }
+        if (lowerInput.includes('faktura')) {
+          return { type: 'betalsatt', value: 'faktura' };
+        }
+      }
+
+      // General parsing (when no specific field expected)
       // Email
       if (input.includes('@')) {
         return { type: 'email', value: input.trim() };
       }
-      // Phone (Swedish format)
-      if (input.match(/^[\d\s\+\-\(\)]+$/)) {
+      // Phone (Swedish format) - but only if it's clearly a phone number
+      if (input.match(/^[\d\s\+\-\(\)]+$/) && input.replace(/\D/g, '').length >= 7) {
         return { type: 'telefon', value: input.trim() };
       }
-      // Date
-      if (input.match(/\d{4}-\d{2}-\d{2}/) || input.toLowerCase().includes('snarast')) {
-        return { type: 'tilltradesdatum', value: input.toLowerCase().includes('snarast') ? '' : input.trim() };
+      // Date - improved parsing
+      if (lowerInput.includes('snarast') || lowerInput.includes('snabbt') || lowerInput.includes('så snart')) {
+        return { type: 'tilltradesdatum', value: '' };
+      }
+      // Try various date formats
+      const dateMatch = input.match(/(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/) || 
+                       input.match(/(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/) ||
+                       input.match(/(\d{1,2})\s+(januari|februari|mars|april|maj|juni|juli|augusti|september|oktober|november|december)\s+(\d{4})/i);
+      if (dateMatch) {
+        return { type: 'tilltradesdatum', value: input.trim() };
       }
       // Betalsätt
       if (lowerInput.includes('autogiro') || lowerInput.includes('kort') || lowerInput.includes('faktura')) {
@@ -196,8 +244,8 @@ export default function CheapEnergyChat() {
           value: lowerInput.includes('autogiro') ? 'autogiro' : lowerInput.includes('kort') ? 'kort' : 'faktura' 
         };
       }
-      // Anläggnings-ID
-      if (input.match(/^\d+$/)) {
+      // Anläggnings-ID (only if it's clearly just digits)
+      if (input.match(/^\d+$/) && input.length >= 4) {
         return { type: 'anlagningsId', value: input.trim() };
       }
     }
@@ -282,10 +330,34 @@ export default function CheapEnergyChat() {
       }
 
       else if (step === 'contact_details') {
-        const parsed = parseInput(userInput, step);
+        // Check what's missing to know what we're expecting
+        const missing: string[] = [];
+        if (!formData.email) missing.push('e-postadress');
+        if (!formData.telefon) missing.push('telefonnummer');
+        if (!formData.tilltradesdatum) missing.push('tillträdesdatum');
+        if (!formData.betalsatt) missing.push('betalsätt');
+
+        // Parse input with context of what we're expecting
+        const expectedField = missing[0] === 'e-postadress' ? 'email' :
+                             missing[0] === 'telefonnummer' ? 'telefon' :
+                             missing[0] === 'tillträdesdatum' ? 'tilltradesdatum' :
+                             missing[0] === 'betalsätt' ? 'betalsatt' : undefined;
+        
+        const parsed = parseInput(userInput, step, expectedField);
         
         if (!parsed || typeof parsed !== 'object' || !('type' in parsed) || !('value' in parsed)) {
-          setError('Skriv din e-postadress, telefonnummer, eller annan uppgift');
+          // Give more specific error based on what we're expecting
+          if (expectedField === 'email') {
+            setError('Skriv din e-postadress (t.ex. namn@example.com)');
+          } else if (expectedField === 'telefon') {
+            setError('Skriv ditt telefonnummer (t.ex. 0701234567)');
+          } else if (expectedField === 'tilltradesdatum') {
+            setError('Skriv "snarast" eller ett datum (t.ex. 2026-03-01 eller 1 mars 2026)');
+          } else if (expectedField === 'betalsatt') {
+            setError('Välj betalsätt: autogiro, kort, eller faktura');
+          } else {
+            setError('Skriv din e-postadress, telefonnummer, eller annan uppgift');
+          }
           setLoading(false);
           return;
         }
@@ -295,22 +367,25 @@ export default function CheapEnergyChat() {
         const updatedFormData = { ...formData, [contactData.type]: contactData.value };
         setFormData(updatedFormData);
 
-        // Check what's missing
-        const missing: string[] = [];
-        if (!updatedFormData.email) missing.push('e-postadress');
-        if (!updatedFormData.telefon) missing.push('telefonnummer');
-        if (!updatedFormData.tilltradesdatum) missing.push('tillträdesdatum');
-        if (!updatedFormData.betalsatt) missing.push('betalsätt (autogiro/kort/faktura)');
+        // Check what's still missing
+        const stillMissing: string[] = [];
+        if (!updatedFormData.email) stillMissing.push('e-postadress');
+        if (!updatedFormData.telefon) stillMissing.push('telefonnummer');
+        if (!updatedFormData.tilltradesdatum && !updatedFormData.tilltradesdatum === false) {
+          // Allow empty string for "snarast"
+          stillMissing.push('tillträdesdatum');
+        }
+        if (!updatedFormData.betalsatt) stillMissing.push('betalsätt');
 
-        if (missing.length > 0) {
-          const nextQuestion = missing[0];
+        if (stillMissing.length > 0) {
+          const nextQuestion = stillMissing[0];
           let questionText = '';
           if (nextQuestion === 'e-postadress') {
             questionText = 'Din e-postadress?';
           } else if (nextQuestion === 'telefonnummer') {
             questionText = 'Ditt telefonnummer?';
           } else if (nextQuestion === 'tillträdesdatum') {
-            questionText = 'Tillträdesdatum? (t.ex. "snarast" eller ett specifikt datum)';
+            questionText = 'Tillträdesdatum? (t.ex. "snarast" eller ett specifikt datum som 2026-03-01)';
           } else if (nextQuestion.includes('betalsätt')) {
             questionText = 'Betalsätt? (autogiro, kort, eller faktura)';
           }
