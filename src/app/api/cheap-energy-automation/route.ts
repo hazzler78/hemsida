@@ -85,7 +85,42 @@ async function runAutomationSteps(
   }
 
   // Set headless: false to see browser window for debugging
-  const launchOptions: any = { headless: false };
+  const launchOptions: any = { 
+    headless: false,
+    // Try to use system Chrome instead of Chrome for Testing
+    channel: 'chrome', // This uses your local Chrome installation
+  };
+  
+  // If channel doesn't work, try executablePath for Windows Chrome
+  if (browserName === 'chromium') {
+    const possibleChromePaths = [
+      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+      process.env.LOCALAPPDATA + '\\Google\\Chrome\\Application\\chrome.exe',
+    ];
+    
+    // Try to find local Chrome installation
+    for (const chromePath of possibleChromePaths) {
+      try {
+        const fs = await import('fs');
+        if (fs.existsSync(chromePath)) {
+          launchOptions.executablePath = chromePath;
+          await logStep(sessionId, 'using_local_chrome', { path: chromePath }, 'completed');
+          break;
+        }
+      } catch {
+        continue;
+      }
+    }
+    
+    // Remove webdriver flag to avoid detection
+    launchOptions.args = [
+      '--disable-blink-features=AutomationControlled',
+      '--disable-dev-shm-usage',
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+    ];
+  }
   
   if (browserName === 'firefox') {
     // Firefox-specific options
@@ -100,13 +135,23 @@ async function runAutomationSteps(
   const contextOptions: any = {
     viewport: { width: 1920, height: 1080 }, // Full HD viewport
     javaScriptEnabled: true,
+    // Remove automation indicators
+    ignoreHTTPSErrors: true,
   };
   
   if (browserName === 'firefox') {
     contextOptions.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0';
   } else {
-    contextOptions.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+    // Use a real Chrome user agent
+    contextOptions.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
   }
+  
+  // Remove webdriver property
+  await contextOptions.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', {
+      get: () => undefined,
+    });
+  });
   
   const context = await browser.newContext(contextOptions);
   const page = await context.newPage();
