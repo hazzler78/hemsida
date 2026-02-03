@@ -201,7 +201,21 @@ async function runAutomationSteps(
     });
     await page.waitForTimeout(1000);
     
-    // Handle cookies FIRST (form might not appear until cookies are accepted)
+    // Wait for all scripts to load before handling cookies
+    // The form initialization depends on scripts being loaded
+    await page.waitForFunction(() => {
+      // Check if all scripts have loaded
+      const scripts = Array.from(document.querySelectorAll('script[src]'));
+      return scripts.every(script => {
+        const src = script.getAttribute('src');
+        return script.hasAttribute('data-loaded') || 
+               (src && !src.includes('cookiebot') && !src.includes('cookie'));
+      });
+    }, { timeout: 15000 }).catch(() => {});
+    
+    await page.waitForTimeout(2000); // Additional wait for scripts to execute
+    
+    // Handle cookies - but be careful not to break form initialization
     let cookieClicked = false;
     
     // Cookiebot-specific selectors
@@ -228,7 +242,7 @@ async function runAutomationSteps(
             await cookieButton.scrollIntoViewIfNeeded();
             await page.waitForTimeout(500);
             await cookieButton.click();
-            await page.waitForTimeout(3000);
+            await page.waitForTimeout(5000); // Wait longer after cookie accept
             await logStep(sessionId, 'cookiebot_accepted', { selector }, 'completed');
             cookieClicked = true;
             break;
@@ -240,13 +254,20 @@ async function runAutomationSteps(
     }
     
     // Also try executing Cookiebot's accept function directly via JavaScript
+    // But make sure we don't break form initialization
     if (!cookieClicked) {
       try {
         await page.evaluate(() => {
+          // Accept cookies via Cookiebot API
           if ((window as any).Cookiebot) {
             (window as any).Cookiebot.consent = true;
             (window as any).Cookiebot.show = false;
+            // Trigger consent update
+            if ((window as any).Cookiebot.consentUpdate) {
+              (window as any).Cookiebot.consentUpdate();
+            }
           }
+          // Also try clicking accept buttons
           const acceptButtons = Array.from(document.querySelectorAll('button, a, [role="button"]')).filter((btn: any) => {
             const text = btn.textContent?.toLowerCase() || '';
             return text.includes('acceptera') || text.includes('godkänn') || text.includes('accept');
@@ -255,12 +276,44 @@ async function runAutomationSteps(
             (acceptButtons[0] as HTMLElement).click();
           }
         });
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(5000); // Wait longer after cookie accept
         await logStep(sessionId, 'cookiebot_accepted_js', {}, 'completed');
         cookieClicked = true;
       } catch (error) {
         await logStep(sessionId, 'cookiebot_js_failed', { error: String(error) }, 'failed');
       }
+    }
+    
+    // After cookies, wait for form scripts to load and initialize
+    await page.waitForTimeout(3000);
+    
+    // Try to manually trigger form initialization if createWebForm exists
+    try {
+      await page.evaluate(() => {
+        // Check if createWebForm function exists, if not, try to wait for it
+        if (typeof (window as any).createWebForm === 'function') {
+          try {
+            (window as any).createWebForm();
+          } catch (e) {
+            console.log('createWebForm error:', e);
+          }
+        }
+        // Also try to find and call initializeForm if it exists
+        const scripts = Array.from(document.querySelectorAll('script'));
+        scripts.forEach(script => {
+          if (script.textContent && script.textContent.includes('initializeForm')) {
+            try {
+              eval(script.textContent);
+            } catch (e) {
+              // Ignore errors
+            }
+          }
+        });
+      });
+      await page.waitForTimeout(2000);
+      await logStep(sessionId, 'form_init_attempted', {}, 'completed');
+    } catch (error) {
+      await logStep(sessionId, 'form_init_failed', { error: String(error) }, 'failed');
     }
     
     // Generic cookie banner fallback
