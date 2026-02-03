@@ -730,8 +730,10 @@ async function runAutomationSteps(
       try {
         if (action === 'fill_postnummer') {
           // Wait specifically for the postnummer form field to be visible and ready
-          // User reports it takes 6 seconds for the form to load
-          await page.waitForTimeout(3000);
+          await page.waitForTimeout(2000);
+          
+          // Take screenshot before trying to fill
+          await page.screenshot({ path: `debug-before-postnummer-${sessionId}.png`, fullPage: true });
           
           // Try multiple selector strategies for postnummer
           // Based on the screenshot, the field has label "Postnummer" above it
@@ -811,20 +813,43 @@ async function runAutomationSteps(
                 await element.scrollIntoViewIfNeeded();
                 await page.waitForTimeout(500);
                 
-                // Clear any existing value and fill it
+                // Click on the input first to ensure it's focused
+                await element.click();
+                await page.waitForTimeout(300);
+                
+                // Clear any existing value
                 await element.fill('');
                 await page.waitForTimeout(200);
-                await element.fill(data.postnummer as string);
+                
+                // Type the postnummer character by character (more reliable for some forms)
+                const postnummer = data.postnummer as string;
+                await element.type(postnummer, { delay: 50 });
                 await page.waitForTimeout(500);
+                
+                // Also try fill as backup
+                await element.fill(postnummer);
+                await page.waitForTimeout(500);
+                
+                // Press Tab to trigger validation
                 await page.keyboard.press('Tab');
                 await page.waitForTimeout(2000);
                 
                 // Verify the value was filled correctly
                 const filledValue = await element.inputValue();
-                if (filledValue === data.postnummer) {
+                await logStep(sessionId, 'postnummer_fill_attempt', { 
+                  postnummer: data.postnummer, 
+                  filledValue,
+                  selector,
+                  isVisible 
+                }, filledValue === data.postnummer || filledValue.includes(postnummer) ? 'completed' : 'failed');
+                
+                if (filledValue === data.postnummer || filledValue.includes(postnummer)) {
                   found = true;
                   await logStep(sessionId, 'postnummer_filled', { postnummer: data.postnummer, selector, wasHidden: !isVisible }, 'completed');
                   results.postnummer = 'completed';
+                  
+                  // Take screenshot after filling
+                  await page.screenshot({ path: `debug-after-postnummer-${sessionId}.png`, fullPage: true });
                   break;
                 } else {
                   // Value didn't fill correctly, try next selector
