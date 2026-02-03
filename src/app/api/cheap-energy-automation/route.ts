@@ -9,7 +9,8 @@ export const runtime = 'edge';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const CHEAP_ENERGY_URL = 'https://www.cheapenergy.se/teckna-elavtal/?src=Elchef';
+// CHEAP_ENERGY_URL is not used in Edge Runtime (Playwright not available)
+// const CHEAP_ENERGY_URL = 'https://www.cheapenergy.se/teckna-elavtal/?src=Elchef';
 
 // Helper function to log step to Supabase
 async function logStep(
@@ -43,7 +44,7 @@ async function logStep(
 // Helper function to run automation steps in sequence
 async function runAutomationSteps(
   sessionId: string,
-  steps: Array<{ action: string; data: Record<string, unknown> }>
+  _steps: Array<{ action: string; data: Record<string, unknown> }> // Not used in Edge Runtime
 ) {
   // Since we're using Edge Runtime, Playwright will not work
   // Return a clear error message immediately
