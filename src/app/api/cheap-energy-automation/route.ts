@@ -94,31 +94,79 @@ async function runAutomationSteps(
     await logStep(sessionId, 'initial_screenshot', { screenshot: `debug-initial-${sessionId}.png` }, 'completed');
     
     // Check for common overlays/modals that might block the form
-    // Cookie banners, popups, etc.
-    const overlaySelectors = [
+    // Cookie banners, popups, etc. - try multiple strategies
+    const cookieSelectors = [
       'button:has-text("Acceptera")',
       'button:has-text("Godkänn")',
       'button:has-text("Accept")',
+      'button:has-text("Acceptera alla")',
+      'button:has-text("Godkänn alla")',
       '[id*="cookie"] button',
       '[class*="cookie"] button',
-      '[id*="popup"] button',
-      '[class*="popup"] button',
-      '[id*="modal"] button',
-      '[class*="modal"] button',
-      'button.close',
-      'button[aria-label*="close" i]',
-      'button[aria-label*="stäng" i]',
+      '[id*="Cookie"] button',
+      '[class*="Cookie"] button',
+      '[data-testid*="cookie"] button',
+      '[aria-label*="cookie" i] button',
+      '[aria-label*="acceptera" i]',
+      '[aria-label*="godkänn" i]',
     ];
     
-    for (const selector of overlaySelectors) {
+    // Try to find and click cookie banner
+    let cookieClicked = false;
+    for (const selector of cookieSelectors) {
       try {
-        const overlay = await page.$(selector);
-        if (overlay && await overlay.isVisible()) {
-          await overlay.click();
-          await page.waitForTimeout(1000);
-          await logStep(sessionId, 'overlay_closed', { selector }, 'completed');
+        const cookieButton = await page.$(selector);
+        if (cookieButton) {
+          const isVisible = await cookieButton.isVisible();
+          if (isVisible) {
+            await cookieButton.scrollIntoViewIfNeeded();
+            await page.waitForTimeout(500);
+            await cookieButton.click();
+            await page.waitForTimeout(2000);
+            await logStep(sessionId, 'cookie_accepted', { selector }, 'completed');
+            cookieClicked = true;
+            break;
+          }
+        }
+      } catch (error) {
+        continue;
+      }
+    }
+    
+    // Also try to find cookie banner by looking for common cookie banner text
+    if (!cookieClicked) {
+      try {
+        const cookieTexts = await page.$$eval('button', buttons => 
+          buttons
+            .map(btn => ({ text: btn.textContent?.toLowerCase() || '', element: btn }))
+            .filter(btn => 
+              btn.text.includes('acceptera') || 
+              btn.text.includes('godkänn') || 
+              btn.text.includes('accept') ||
+              btn.text.includes('cookie')
+            )
+        );
+        
+        for (const cookieText of cookieTexts) {
+          try {
+            const button = cookieText.element as any;
+            if (button && await page.evaluate((el) => el.offsetParent !== null, button)) {
+              await button.scrollIntoViewIfNeeded();
+              await page.waitForTimeout(500);
+              await button.click();
+              await page.waitForTimeout(2000);
+              await logStep(sessionId, 'cookie_accepted_text', { text: cookieText.text }, 'completed');
+              cookieClicked = true;
+              break;
+            }
+          } catch {}
         }
       } catch {}
+    }
+    
+    // Wait a bit more after handling cookies
+    if (cookieClicked) {
+      await page.waitForTimeout(2000);
     }
     
     // Wait a bit more after closing overlays
@@ -396,25 +444,128 @@ async function runAutomationSteps(
             } catch {}
           }
 
-          // Select betalsätt
+          // Select betalsätt - try multiple times and strategies
           if (data.betalsatt) {
-            const betalsattMap: Record<string, string> = {
-              'autogiro': 'Autogiro',
-              'kort': 'Kort',
-              'faktura': 'Faktura',
+            const betalsattMap: Record<string, string[]> = {
+              'autogiro': ['Autogiro', 'Auto-giro', 'Autogirobetalning', 'Autogiro betalning'],
+              'kort': ['Kort', 'Kortbetalning', 'Kort betalning', 'Kreditkort', 'Debitkort'],
+              'faktura': ['Faktura', 'Fakturabetalning', 'Faktura betalning', 'Invoice'],
             };
-            const betalsattText = betalsattMap[data.betalsatt as string] || (data.betalsatt as string);
-            const betalsattSelectors = [
-              `button:has-text("${betalsattText}")`,
-              `[role="button"]:has-text("${betalsattText}")`,
-              `input[value="${data.betalsatt as string}"]`,
-            ];
+            const betalsattTexts = betalsattMap[data.betalsatt as string] || [data.betalsatt as string];
             
-            for (const selector of betalsattSelectors) {
+            let betalsattSelected = false;
+            
+            // Try multiple text variations
+            for (const betalsattText of betalsattTexts) {
+              const betalsattSelectors = [
+                `button:has-text("${betalsattText}")`,
+                `[role="button"]:has-text("${betalsattText}")`,
+                `button:has-text("${betalsattText}")`,
+                `label:has-text("${betalsattText}")`,
+                `input[value="${data.betalsatt as string}"]`,
+                `input[value="${betalsattText.toLowerCase()}"]`,
+                `input[type="radio"][value*="${data.betalsatt as string}"]`,
+              ];
+              
+              for (const selector of betalsattSelectors) {
+                try {
+                  const element = await page.$(selector);
+                  if (element) {
+                    const isVisible = await element.isVisible();
+                    if (isVisible) {
+                      await element.scrollIntoViewIfNeeded();
+                      await page.waitForTimeout(500);
+                      await element.click();
+                      await page.waitForTimeout(1000);
+                      betalsattSelected = true;
+                      await logStep(sessionId, 'betalsatt_selected', { 
+                        betalsatt: data.betalsatt, 
+                        selector,
+                        text: betalsattText 
+                      }, 'completed');
+                      break;
+                    }
+                  }
+                } catch {}
+              }
+              
+              if (betalsattSelected) break;
+            }
+            
+            // If not found, try clicking by finding all payment options and matching text
+            if (!betalsattSelected) {
               try {
-                await page.waitForSelector(selector, { timeout: 3000 });
-                await page.click(selector);
-                break;
+                const paymentOptions = await page.$$eval('button, [role="button"], label, input[type="radio"]', (elements) => 
+                  elements
+                    .map(el => ({
+                      text: el.textContent?.toLowerCase() || '',
+                      tagName: el.tagName,
+                      value: (el as HTMLInputElement).value || '',
+                      element: el
+                    }))
+                    .filter(el => 
+                      el.text.includes('autogiro') || 
+                      el.text.includes('kort') || 
+                      el.text.includes('faktura') ||
+                      el.value.includes('autogiro') ||
+                      el.value.includes('kort') ||
+                      el.value.includes('faktura')
+                    )
+                );
+                
+                const targetValue = (data.betalsatt as string).toLowerCase();
+                for (const option of paymentOptions) {
+                  if (
+                    (targetValue === 'autogiro' && (option.text.includes('autogiro') || option.value.includes('autogiro'))) ||
+                    (targetValue === 'kort' && (option.text.includes('kort') && !option.text.includes('autogiro') || option.value.includes('kort'))) ||
+                    (targetValue === 'faktura' && (option.text.includes('faktura') || option.value.includes('faktura')))
+                  ) {
+                    const element = option.element as any;
+                    if (await page.evaluate((el) => el.offsetParent !== null, element)) {
+                      await element.scrollIntoViewIfNeeded();
+                      await page.waitForTimeout(500);
+                      await element.click();
+                      await page.waitForTimeout(1000);
+                      betalsattSelected = true;
+                      await logStep(sessionId, 'betalsatt_selected_fallback', { 
+                        betalsatt: data.betalsatt, 
+                        optionText: option.text 
+                      }, 'completed');
+                      break;
+                    }
+                  }
+                }
+              } catch {}
+            }
+            
+            // Try one more time after a delay (sometimes the form needs time to update)
+            if (betalsattSelected) {
+              await page.waitForTimeout(2000);
+              // Verify it was selected by trying again
+              try {
+                const verifySelectors = [
+                  `input[type="radio"][value*="${data.betalsatt as string}"]:checked`,
+                  `button:has-text("${betalsattTexts[0]}")[aria-pressed="true"]`,
+                ];
+                for (const selector of verifySelectors) {
+                  const verified = await page.$(selector);
+                  if (!verified) {
+                    // Try clicking again
+                    const retrySelectors = [
+                      `button:has-text("${betalsattTexts[0]}")`,
+                      `input[type="radio"][value*="${data.betalsatt as string}"]`,
+                    ];
+                    for (const retrySelector of retrySelectors) {
+                      try {
+                        const retryElement = await page.$(retrySelector);
+                        if (retryElement && await retryElement.isVisible()) {
+                          await retryElement.click();
+                          await page.waitForTimeout(1000);
+                        }
+                      } catch {}
+                    }
+                  }
+                }
               } catch {}
             }
           }
