@@ -206,31 +206,46 @@ export default function CheapEnergyChat() {
         }
       }
       if (expectedField === 'betalsatt') {
-        // More flexible parsing for payment method
-        if (lowerInput.includes('autogiro') || lowerInput.includes('auto-giro') || lowerInput === '1') {
-          return { type: 'betalsatt', value: 'autogiro' };
-        }
-        if (lowerInput.includes('kort') || lowerInput.includes('kreditkort') || lowerInput.includes('debitkort') || lowerInput === '2') {
-          return { type: 'betalsatt', value: 'kort' };
-        }
-        if (lowerInput.includes('faktura') || lowerInput.includes('invoice') || lowerInput === '3') {
+        // More flexible parsing for payment method - check exact matches first
+        const trimmedLower = lowerInput.trim();
+        
+        // Exact matches (highest priority)
+        if (trimmedLower === 'faktura' || trimmedLower === 'invoice' || trimmedLower === '3' || trimmedLower === 'fakturabetalning') {
           return { type: 'betalsatt', value: 'faktura' };
         }
+        if (trimmedLower === 'autogiro' || trimmedLower === 'auto-giro' || trimmedLower === '1' || trimmedLower === 'autogirobetalning') {
+          return { type: 'betalsatt', value: 'autogiro' };
+        }
+        if (trimmedLower === 'kort' || trimmedLower === 'kreditkort' || trimmedLower === 'debitkort' || trimmedLower === '2' || trimmedLower === 'kortbetalning') {
+          return { type: 'betalsatt', value: 'kort' };
+        }
+        
+        // Contains matches (second priority)
+        if (lowerInput.includes('faktura') || lowerInput.includes('invoice')) {
+          return { type: 'betalsatt', value: 'faktura' };
+        }
+        if (lowerInput.includes('autogiro') || lowerInput.includes('auto-giro')) {
+          return { type: 'betalsatt', value: 'autogiro' };
+        }
+        if (lowerInput.includes('kort') || lowerInput.includes('kreditkort') || lowerInput.includes('debitkort')) {
+          return { type: 'betalsatt', value: 'kort' };
+        }
+        
         // Fallback: accept any reasonable input as payment method
         if (input.trim().length > 0 && input.trim().length < 50) {
-          // Try to match the closest option
+          // Try to match the closest option using scoring
           const autogiroScore = (lowerInput.match(/auto|giro/g) || []).length;
           const kortScore = (lowerInput.match(/kort|card|kredit|debit/g) || []).length;
           const fakturaScore = (lowerInput.match(/faktura|invoice|bill/g) || []).length;
           
-          if (autogiroScore > 0 && autogiroScore >= kortScore && autogiroScore >= fakturaScore) {
+          if (fakturaScore > 0 && fakturaScore >= autogiroScore && fakturaScore >= kortScore) {
+            return { type: 'betalsatt', value: 'faktura' };
+          }
+          if (autogiroScore > 0 && autogiroScore >= kortScore) {
             return { type: 'betalsatt', value: 'autogiro' };
           }
-          if (kortScore > 0 && kortScore >= fakturaScore) {
+          if (kortScore > 0) {
             return { type: 'betalsatt', value: 'kort' };
-          }
-          if (fakturaScore > 0) {
-            return { type: 'betalsatt', value: 'faktura' };
           }
           // Default to autogiro if unclear
           return { type: 'betalsatt', value: 'autogiro' };
@@ -257,15 +272,29 @@ export default function CheapEnergyChat() {
       if (dateMatch) {
         return { type: 'tilltradesdatum', value: input.trim() };
       }
-      // Betalsätt - improved parsing
+      // Betalsätt - improved parsing (for general parsing when no specific field expected)
+      const trimmedLower = lowerInput.trim();
+      
+      // Exact matches first
+      if (trimmedLower === 'faktura' || trimmedLower === 'invoice' || trimmedLower === '3') {
+        return { type: 'betalsatt', value: 'faktura' };
+      }
+      if (trimmedLower === 'autogiro' || trimmedLower === 'auto-giro' || trimmedLower === '1') {
+        return { type: 'betalsatt', value: 'autogiro' };
+      }
+      if (trimmedLower === 'kort' || trimmedLower === 'kreditkort' || trimmedLower === 'debitkort' || trimmedLower === '2') {
+        return { type: 'betalsatt', value: 'kort' };
+      }
+      
+      // Contains matches
+      if (lowerInput.includes('faktura') || lowerInput.includes('invoice')) {
+        return { type: 'betalsatt', value: 'faktura' };
+      }
       if (lowerInput.includes('autogiro') || lowerInput.includes('auto-giro')) {
         return { type: 'betalsatt', value: 'autogiro' };
       }
       if (lowerInput.includes('kort') || lowerInput.includes('kreditkort') || lowerInput.includes('debitkort')) {
         return { type: 'betalsatt', value: 'kort' };
-      }
-      if (lowerInput.includes('faktura') || lowerInput.includes('invoice')) {
-        return { type: 'betalsatt', value: 'faktura' };
       }
       // Anläggnings-ID (only if it's clearly just digits)
       if (input.match(/^\d+$/) && input.length >= 4) {
