@@ -130,10 +130,43 @@ async function runAutomationSteps(
     // Log page title and URL for debugging
     const pageTitle = await page.title();
     const pageUrl = page.url();
+    
+    // Check what forms/inputs are actually on the page
+    const pageInfo = await page.evaluate(() => {
+      const inputs = Array.from(document.querySelectorAll('input')).map(input => ({
+        name: input.getAttribute('name'),
+        id: input.id,
+        placeholder: input.getAttribute('placeholder'),
+        type: input.type,
+        visible: input.offsetParent !== null,
+        value: input.value,
+      }));
+      
+      const forms = Array.from(document.querySelectorAll('form')).map(form => ({
+        id: form.id,
+        action: form.action,
+        method: form.method,
+        inputs: form.querySelectorAll('input').length,
+      }));
+      
+      const buttons = Array.from(document.querySelectorAll('button')).map(button => ({
+        text: button.textContent?.trim().substring(0, 50),
+        visible: button.offsetParent !== null,
+      }));
+      
+      return {
+        inputs,
+        forms,
+        buttons: buttons.slice(0, 20), // Limit to first 20 buttons
+        bodyText: document.body.textContent?.substring(0, 500), // First 500 chars
+      };
+    });
+    
     await logStep(sessionId, 'page_ready', { 
       title: pageTitle, 
       url: pageUrl,
-      screenshot: `debug-after-overlays-${sessionId}.png`
+      screenshot: `debug-after-overlays-${sessionId}.png`,
+      pageInfo
     }, 'completed');
 
     const results: Record<string, unknown> = {};
