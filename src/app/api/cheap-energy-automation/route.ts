@@ -57,8 +57,7 @@ export async function POST(req: NextRequest) {
     // Use a check that works in Edge Runtime (checking for globalThis instead of process)
     const isEdgeRuntime = typeof globalThis !== 'undefined' && 
       (globalThis.constructor?.name === 'DedicatedWorkerGlobalScope' || 
-       globalThis.constructor?.name === 'ServiceWorkerGlobalScope' ||
-       typeof EdgeRuntime !== 'undefined');
+       globalThis.constructor?.name === 'ServiceWorkerGlobalScope');
     
     if (isEdgeRuntime) {
       return NextResponse.json({ 
