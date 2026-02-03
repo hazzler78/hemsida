@@ -71,7 +71,8 @@ async function runAutomationSteps(
   // Set headless: false to see browser window for debugging
   const browser = await chromium.launch({ headless: false });
   const context = await browser.newContext({
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    viewport: { width: 1920, height: 1080 }, // Full HD viewport
   });
   const page = await context.newPage();
 
@@ -79,6 +80,9 @@ async function runAutomationSteps(
     // Navigate to Cheap Energy form
     await page.goto(CHEAP_ENERGY_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await logStep(sessionId, 'page_navigated', { url: CHEAP_ENERGY_URL }, 'completed');
+    
+    // Take screenshot immediately after navigation
+    await page.screenshot({ path: `debug-01-after-navigation-${sessionId}.png`, fullPage: true });
     
     // Wait for page to be fully loaded - try multiple strategies
     try {
@@ -88,39 +92,16 @@ async function runAutomationSteps(
       await page.waitForLoadState('load', { timeout: 30000 });
     }
     
-    // Wait for initial load (5 seconds as mentioned)
-    await page.waitForTimeout(5000);
+    await page.screenshot({ path: `debug-02-after-load-${sessionId}.png`, fullPage: true });
     
     // Wait for any dynamic content to load (forms, etc.)
     await page.waitForFunction(() => {
       return document.readyState === 'complete';
     }, { timeout: 10000 }).catch(() => {});
     
-    // Additional wait for JavaScript to finish executing
-    await page.waitForTimeout(3000);
+    await page.screenshot({ path: `debug-03-after-ready-${sessionId}.png`, fullPage: true });
     
-    // Wait specifically for the form to appear (user reports it takes 6 seconds)
-    // Wait for either the postnummer input field OR the "Se priser" button to appear
-    try {
-      await page.waitForSelector('input[placeholder*="postnummer" i], input[name="postnummer"], button:has-text("Se priser"), button:has-text("Se priser")', { 
-        timeout: 15000,
-        state: 'visible'
-      });
-      await logStep(sessionId, 'form_appeared', {}, 'completed');
-    } catch {
-      // If form doesn't appear, log but continue anyway
-      await logStep(sessionId, 'form_wait_timeout', {}, 'failed', 'Form did not appear within timeout');
-    }
-    
-    // Additional wait after form appears (to ensure it's fully interactive)
-    await page.waitForTimeout(2000);
-    
-    // Take initial screenshot for debugging
-    await page.screenshot({ path: `debug-initial-${sessionId}.png`, fullPage: true });
-    await logStep(sessionId, 'initial_screenshot', { screenshot: `debug-initial-${sessionId}.png` }, 'completed');
-    
-    // Check for Cookiebot specifically (common cookie banner service)
-    // Cookiebot usually has specific IDs and classes
+    // Handle cookies FIRST (form might not appear until cookies are accepted)
     let cookieClicked = false;
     
     // Cookiebot-specific selectors
@@ -147,7 +128,7 @@ async function runAutomationSteps(
             await cookieButton.scrollIntoViewIfNeeded();
             await page.waitForTimeout(500);
             await cookieButton.click();
-            await page.waitForTimeout(3000); // Wait longer for Cookiebot
+            await page.waitForTimeout(3000);
             await logStep(sessionId, 'cookiebot_accepted', { selector }, 'completed');
             cookieClicked = true;
             break;
@@ -162,12 +143,10 @@ async function runAutomationSteps(
     if (!cookieClicked) {
       try {
         await page.evaluate(() => {
-          // Try Cookiebot's accept function
           if ((window as any).Cookiebot) {
             (window as any).Cookiebot.consent = true;
             (window as any).Cookiebot.show = false;
           }
-          // Try to find and click accept button via JavaScript
           const acceptButtons = Array.from(document.querySelectorAll('button, a, [role="button"]')).filter((btn: any) => {
             const text = btn.textContent?.toLowerCase() || '';
             return text.includes('acceptera') || text.includes('godkänn') || text.includes('accept');
@@ -218,19 +197,87 @@ async function runAutomationSteps(
       }
     }
     
-    // Wait a bit more after handling cookies
-    if (cookieClicked) {
-      await page.waitForTimeout(3000);
+    await page.screenshot({ path: `debug-04-after-cookies-${sessionId}.png`, fullPage: true });
+    
+    // NOW wait for the form to appear (user reports 6 seconds)
+    // Use a more robust waiting strategy
+    await logStep(sessionId, 'waiting_for_form', {}, 'in_progress');
+    
+    // Wait for the form to appear - try multiple strategies
+    let formReady = false;
+    const maxWaitTime = 15000; // 15 seconds max
+    const startTime = Date.now();
+    
+    while (!formReady && (Date.now() - startTime) < maxWaitTime) {
+      // Check for "Se priser" button (most reliable indicator that form is ready)
+      try {
+        const sePriserButton = await page.$('button:has-text("Se priser")');
+        if (sePriserButton) {
+          const isVisible = await sePriserButton.isVisible();
+          if (isVisible) {
+            await logStep(sessionId, 'form_detected_by_button', {}, 'completed');
+            formReady = true;
+            break;
+          }
+        }
+      } catch {}
+      
+      // Check for postnummer input field
+      try {
+        const postnummerInputs = [
+          'input[name="postnummer"]',
+          'input[placeholder*="postnummer" i]',
+          'input[type="text"][id*="post" i]',
+        ];
+        
+        for (const selector of postnummerInputs) {
+          try {
+            const input = await page.$(selector);
+            if (input) {
+              const isVisible = await input.isVisible();
+              if (isVisible) {
+                await logStep(sessionId, 'form_detected_by_input', { selector }, 'completed');
+                formReady = true;
+                break;
+              }
+            }
+          } catch {}
+        }
+        if (formReady) break;
+      } catch {}
+      
+      // Wait a bit before checking again
+      await page.waitForTimeout(1000);
     }
     
-    // Take screenshot after cookie handling
-    await page.screenshot({ path: `debug-after-cookies-${sessionId}.png`, fullPage: true });
-    
-    // Wait a bit more after closing overlays
-    await page.waitForTimeout(2000);
-    
-    // Take screenshot after closing overlays
-    await page.screenshot({ path: `debug-after-overlays-${sessionId}.png`, fullPage: true });
+    if (!formReady) {
+      // Take screenshot to see what's actually on the page
+      await page.screenshot({ path: `debug-05-form-not-found-${sessionId}.png`, fullPage: true });
+      
+      // Log all inputs and buttons for debugging
+      const debugInfo = await page.evaluate(() => {
+        const inputs = Array.from(document.querySelectorAll('input')).map(input => ({
+          name: input.getAttribute('name'),
+          id: input.id,
+          placeholder: input.getAttribute('placeholder'),
+          type: input.type,
+          visible: input.offsetParent !== null,
+        }));
+        
+        const buttons = Array.from(document.querySelectorAll('button')).map(button => ({
+          text: button.textContent?.trim().substring(0, 50),
+          visible: button.offsetParent !== null,
+        }));
+        
+        return { inputs, buttons };
+      });
+      
+      await logStep(sessionId, 'form_not_found', debugInfo, 'failed', 'Form did not appear after waiting');
+    } else {
+      // Form is ready, wait a bit more to ensure it's fully interactive
+      await page.waitForTimeout(2000);
+      await page.screenshot({ path: `debug-06-form-ready-${sessionId}.png`, fullPage: true });
+    }
     
     // Log page title and URL for debugging
     const pageTitle = await page.title();
