@@ -206,14 +206,34 @@ export default function CheapEnergyChat() {
         }
       }
       if (expectedField === 'betalsatt') {
-        if (lowerInput.includes('autogiro')) {
+        // More flexible parsing for payment method
+        if (lowerInput.includes('autogiro') || lowerInput.includes('auto-giro') || lowerInput === '1') {
           return { type: 'betalsatt', value: 'autogiro' };
         }
-        if (lowerInput.includes('kort')) {
+        if (lowerInput.includes('kort') || lowerInput.includes('kreditkort') || lowerInput.includes('debitkort') || lowerInput === '2') {
           return { type: 'betalsatt', value: 'kort' };
         }
-        if (lowerInput.includes('faktura')) {
+        if (lowerInput.includes('faktura') || lowerInput.includes('invoice') || lowerInput === '3') {
           return { type: 'betalsatt', value: 'faktura' };
+        }
+        // Fallback: accept any reasonable input as payment method
+        if (input.trim().length > 0 && input.trim().length < 50) {
+          // Try to match the closest option
+          const autogiroScore = (lowerInput.match(/auto|giro/g) || []).length;
+          const kortScore = (lowerInput.match(/kort|card|kredit|debit/g) || []).length;
+          const fakturaScore = (lowerInput.match(/faktura|invoice|bill/g) || []).length;
+          
+          if (autogiroScore > 0 && autogiroScore >= kortScore && autogiroScore >= fakturaScore) {
+            return { type: 'betalsatt', value: 'autogiro' };
+          }
+          if (kortScore > 0 && kortScore >= fakturaScore) {
+            return { type: 'betalsatt', value: 'kort' };
+          }
+          if (fakturaScore > 0) {
+            return { type: 'betalsatt', value: 'faktura' };
+          }
+          // Default to autogiro if unclear
+          return { type: 'betalsatt', value: 'autogiro' };
         }
       }
 
@@ -237,12 +257,15 @@ export default function CheapEnergyChat() {
       if (dateMatch) {
         return { type: 'tilltradesdatum', value: input.trim() };
       }
-      // Betalsätt
-      if (lowerInput.includes('autogiro') || lowerInput.includes('kort') || lowerInput.includes('faktura')) {
-        return { 
-          type: 'betalsatt', 
-          value: lowerInput.includes('autogiro') ? 'autogiro' : lowerInput.includes('kort') ? 'kort' : 'faktura' 
-        };
+      // Betalsätt - improved parsing
+      if (lowerInput.includes('autogiro') || lowerInput.includes('auto-giro')) {
+        return { type: 'betalsatt', value: 'autogiro' };
+      }
+      if (lowerInput.includes('kort') || lowerInput.includes('kreditkort') || lowerInput.includes('debitkort')) {
+        return { type: 'betalsatt', value: 'kort' };
+      }
+      if (lowerInput.includes('faktura') || lowerInput.includes('invoice')) {
+        return { type: 'betalsatt', value: 'faktura' };
       }
       // Anläggnings-ID (only if it's clearly just digits)
       if (input.match(/^\d+$/) && input.length >= 4) {
