@@ -113,7 +113,8 @@ async function runAutomationSteps(
 
   try {
     // Navigate to Cheap Energy form
-    await page.goto(CHEAP_ENERGY_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    // Use 'networkidle' to wait for all network requests to finish
+    await page.goto(CHEAP_ENERGY_URL, { waitUntil: 'networkidle', timeout: 60000 });
     await logStep(sessionId, 'page_navigated', { url: CHEAP_ENERGY_URL }, 'completed');
     
     // Take screenshot immediately after navigation
@@ -134,7 +135,21 @@ async function runAutomationSteps(
       return document.readyState === 'complete';
     }, { timeout: 10000 }).catch(() => {});
     
+    // Wait for React/Vue/Angular or other framework to finish rendering
+    // Many modern sites use frameworks that load content dynamically
+    await page.waitForFunction(() => {
+      // Check if there are any loading indicators
+      const loadingElements = document.querySelectorAll('[class*="loading"], [class*="spinner"], [id*="loading"]');
+      return loadingElements.length === 0 || Array.from(loadingElements).every(el => {
+        const style = window.getComputedStyle(el);
+        return style.display === 'none' || style.visibility === 'hidden';
+      });
+    }, { timeout: 10000 }).catch(() => {});
+    
     await page.screenshot({ path: `debug-03-after-ready-${sessionId}.png`, fullPage: true });
+    
+    // Additional wait for JavaScript frameworks to initialize (React, Vue, etc.)
+    await page.waitForTimeout(3000);
     
     // Handle cookies FIRST (form might not appear until cookies are accepted)
     let cookieClicked = false;
