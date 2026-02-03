@@ -257,6 +257,84 @@ async function runAutomationSteps(
       screenshot: `debug-after-overlays-${sessionId}.png`,
       pageInfo
     }, 'completed');
+    
+    // Try to find and click "Start" button or similar to open the form
+    // Many forms have a button to start the process
+    const startButtonSelectors = [
+      'button:has-text("Start")',
+      'button:has-text("Börja")',
+      'button:has-text("Börja här")',
+      'button:has-text("Kom igång")',
+      'button:has-text("Teckna avtal")',
+      'button:has-text("Teckna")',
+      'a:has-text("Start")',
+      'a:has-text("Börja")',
+      '[role="button"]:has-text("Start")',
+      '[role="button"]:has-text("Börja")',
+    ];
+    
+    let startButtonClicked = false;
+    for (const selector of startButtonSelectors) {
+      try {
+        const startButton = await page.$(selector);
+        if (startButton) {
+          const isVisible = await startButton.isVisible();
+          if (isVisible) {
+            await startButton.scrollIntoViewIfNeeded();
+            await page.waitForTimeout(500);
+            await startButton.click();
+            await page.waitForTimeout(3000); // Wait for form to appear
+            await logStep(sessionId, 'start_button_clicked', { selector }, 'completed');
+            startButtonClicked = true;
+            break;
+          }
+        }
+      } catch (error) {
+        continue;
+      }
+    }
+    
+    // Also try to find start button by text content
+    if (!startButtonClicked) {
+      try {
+        const allButtons = await page.$$('button, a, [role="button"]');
+        for (const button of allButtons) {
+          try {
+            const text = (await button.textContent())?.toLowerCase().trim() || '';
+            if (text.includes('start') || text.includes('börja') || text.includes('kom igång') || text.includes('teckna')) {
+              const isVisible = await button.isVisible();
+              if (isVisible) {
+                await button.scrollIntoViewIfNeeded();
+                await page.waitForTimeout(500);
+                await button.click();
+                await page.waitForTimeout(3000);
+                await logStep(sessionId, 'start_button_clicked_text', { text }, 'completed');
+                startButtonClicked = true;
+                break;
+              }
+            }
+          } catch {}
+        }
+      } catch {}
+    }
+    
+    // Wait for form to appear (if we clicked start button or if form loads dynamically)
+    if (startButtonClicked) {
+      await page.waitForTimeout(2000);
+    }
+    
+    // Wait for any input fields to appear (form might be loading dynamically)
+    try {
+      await page.waitForSelector('input', { timeout: 10000 });
+    } catch {
+      // If no inputs appear, continue anyway - we'll handle error later
+    }
+    
+    // Additional wait for dynamic content
+    await page.waitForTimeout(2000);
+    
+    // Take another screenshot after potential start button click
+    await page.screenshot({ path: `debug-before-form-${sessionId}.png`, fullPage: true });
 
     const results: Record<string, unknown> = {};
 
@@ -266,6 +344,9 @@ async function runAutomationSteps(
       
       try {
         if (action === 'fill_postnummer') {
+          // Wait a bit more for form to fully load
+          await page.waitForTimeout(2000);
+          
           // Try multiple selector strategies for postnummer
           const postnummerSelectors = [
             'input[name="postnummer"]',
@@ -278,16 +359,31 @@ async function runAutomationSteps(
             'input.postnummer',
             'input[data-name="postnummer"]',
             'input[aria-label*="postnummer" i]',
+            'input[aria-label*="post" i]',
+            'input[type="text"]', // Fallback: try first text input if nothing else matches
           ];
           
           let found = false;
           for (const selector of postnummerSelectors) {
             try {
+              // Wait for selector to appear (with timeout)
+              try {
+                await page.waitForSelector(selector, { timeout: 5000, state: 'attached' });
+              } catch {
+                // Selector not found, try next one
+                continue;
+              }
+              
               // First, try to find the element (even if hidden)
               const element = await page.$(selector);
               if (element) {
                 // Check if it's visible
                 const isVisible = await element.isVisible();
+                
+                // If this is the fallback selector (last one), only use it if it's visible
+                if (selector === 'input[type="text"]' && !isVisible) {
+                  continue;
+                }
                 
                 if (!isVisible) {
                   // If hidden, try to scroll to it and wait for it to become visible
@@ -298,6 +394,11 @@ async function runAutomationSteps(
                   try {
                     await element.focus();
                     await page.waitForTimeout(500);
+                    // Check again if visible after focus
+                    const stillHidden = !(await element.isVisible());
+                    if (stillHidden && selector !== 'input[type="text"]') {
+                      continue; // Skip this selector if still hidden (unless it's fallback)
+                    }
                   } catch {}
                 }
                 
@@ -329,15 +430,23 @@ async function runAutomationSteps(
                 placeholder: input.getAttribute('placeholder'),
                 type: input.type,
                 visible: input.offsetParent !== null,
+                className: input.className,
               }))
             );
             
+            // Also log all visible buttons/text that might help identify the form
+            const visibleText = await page.evaluate(() => {
+              const text = document.body.textContent || '';
+              return text.substring(0, 1000); // First 1000 chars
+            });
+            
             await logStep(sessionId, 'postnummer_selector_failed', { 
               allInputs,
+              visibleText: visibleText.substring(0, 500),
               screenshotPath 
             }, 'failed', 'Kunde inte hitta postnummer-fältet');
             
-            throw new Error(`Kunde inte hitta postnummer-fältet. Screenshot sparad som ${screenshotPath}. Hittade ${allInputs.length} input-fält på sidan.`);
+            throw new Error(`Kunde inte hitta postnummer-fältet. Screenshot sparad som ${screenshotPath}. Hittade ${allInputs.length} input-fält på sidan. Kolla screenshot och loggar för mer information.`);
           }
         }
 
