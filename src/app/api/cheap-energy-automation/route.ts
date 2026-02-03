@@ -777,19 +777,48 @@ async function runAutomationSteps(
                 // Check if it's visible
                 const isVisible = await element.isVisible();
                 
-                // If this is the fallback selector, only use it if it's visible and near the form
-                if (selector === 'input[type="text"]' && !isVisible) {
-                  continue;
-                }
+                // Log what we found
+                const elementInfo = await page.evaluate((sel) => {
+                  const el = document.querySelector(sel);
+                  if (!el) return null;
+                  return {
+                    name: el.getAttribute('name'),
+                    id: el.id,
+                    placeholder: el.getAttribute('placeholder'),
+                    type: (el as HTMLInputElement).type,
+                    visible: el.offsetParent !== null,
+                    parentText: el.closest('form, div, section')?.textContent?.substring(0, 150) || '',
+                  };
+                }, selector);
+                await logStep(sessionId, 'postnummer_element_found', { selector, elementInfo, isVisible }, 'completed');
                 
                 // For fallback selector, verify it's actually the postnummer field
                 if (selector === 'input[type="text"]' || selector === 'form input[type="text"]') {
                   // Check if there's a "Se priser" button nearby (indicates it's the right form)
                   const nearbyButton = await page.$('button:has-text("Se priser")');
-                  if (!nearbyButton) {
+                  const nearbyText = elementInfo?.parentText?.toLowerCase() || '';
+                  if (!nearbyButton && !nearbyText.includes('postnummer') && !nearbyText.includes('post')) {
                     // Not near the form, skip this selector
+                    await logStep(sessionId, 'postnummer_selector_skipped', { selector, reason: 'not_near_form' }, 'failed');
                     continue;
                   }
+                }
+                
+                if (!isVisible) {
+                  await logStep(sessionId, 'postnummer_element_hidden', { selector }, 'failed');
+                  // If hidden, try to scroll to it and wait for it to become visible
+                  await element.scrollIntoViewIfNeeded();
+                  await page.waitForTimeout(1000);
+                  
+                  // Try to make it visible by focusing
+                  try {
+                    await element.focus();
+                    await page.waitForTimeout(500);
+                    const stillHidden = !(await element.isVisible());
+                    if (stillHidden && selector !== 'input[type="text"]' && selector !== 'form input[type="text"]') {
+                      continue; // Skip if still hidden (unless it's fallback)
+                    }
+                  } catch {}
                 }
                 
                 if (!isVisible) {
