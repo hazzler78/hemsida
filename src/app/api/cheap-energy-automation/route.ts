@@ -102,27 +102,46 @@ async function runAutomationSteps(
           const postnummerSelectors = [
             'input[name="postnummer"]',
             'input[placeholder*="postnummer" i]',
-            'input[placeholder*="postnummer" i]',
             'input[type="text"][id*="post" i]',
             'input[name="zip"]',
             'input[name="postal"]',
             'input[type="text"][placeholder*="post" i]',
             'input#postnummer',
             'input.postnummer',
+            'input[data-name="postnummer"]',
+            'input[aria-label*="postnummer" i]',
           ];
           
           let found = false;
           for (const selector of postnummerSelectors) {
             try {
-              // Wait for selector to be visible (not just present)
-              await page.waitForSelector(selector, { state: 'visible', timeout: 5000 });
-              await page.fill(selector, data.postnummer as string);
-              await page.keyboard.press('Tab');
-              await page.waitForTimeout(2000);
-              found = true;
-              await logStep(sessionId, 'postnummer_filled', { postnummer: data.postnummer, selector }, 'completed');
-              results.postnummer = 'completed';
-              break;
+              // First, try to find the element (even if hidden)
+              const element = await page.$(selector);
+              if (element) {
+                // Check if it's visible
+                const isVisible = await element.isVisible();
+                
+                if (!isVisible) {
+                  // If hidden, try to scroll to it and wait for it to become visible
+                  await element.scrollIntoViewIfNeeded();
+                  await page.waitForTimeout(1000);
+                  
+                  // Try to make it visible by clicking nearby or focusing
+                  try {
+                    await element.focus();
+                    await page.waitForTimeout(500);
+                  } catch {}
+                }
+                
+                // Try to fill it
+                await page.fill(selector, data.postnummer as string);
+                await page.keyboard.press('Tab');
+                await page.waitForTimeout(2000);
+                found = true;
+                await logStep(sessionId, 'postnummer_filled', { postnummer: data.postnummer, selector, wasHidden: !isVisible }, 'completed');
+                results.postnummer = 'completed';
+                break;
+              }
             } catch (selectorError) {
               // Try next selector
               continue;
@@ -131,8 +150,26 @@ async function runAutomationSteps(
           
           if (!found) {
             // Take screenshot for debugging
-            await page.screenshot({ path: `debug-postnummer-${sessionId}.png`, fullPage: true });
-            throw new Error(`Kunde inte hitta postnummer-fältet. Screenshot sparad som debug-postnummer-${sessionId}.png`);
+            const screenshotPath = `debug-postnummer-${sessionId}.png`;
+            await page.screenshot({ path: screenshotPath, fullPage: true });
+            
+            // Also log all input fields on the page for debugging
+            const allInputs = await page.$$eval('input', (inputs) => 
+              inputs.map(input => ({
+                name: input.getAttribute('name'),
+                id: input.id,
+                placeholder: input.getAttribute('placeholder'),
+                type: input.type,
+                visible: input.offsetParent !== null,
+              }))
+            );
+            
+            await logStep(sessionId, 'postnummer_selector_failed', { 
+              allInputs,
+              screenshotPath 
+            }, 'failed', 'Kunde inte hitta postnummer-fältet');
+            
+            throw new Error(`Kunde inte hitta postnummer-fältet. Screenshot sparad som ${screenshotPath}. Hittade ${allInputs.length} input-fält på sidan.`);
           }
         }
 
