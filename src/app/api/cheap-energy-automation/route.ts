@@ -378,7 +378,7 @@ export async function POST(req: NextRequest) {
     const { 
       sessionId, 
       action, 
-      data,
+      data: _data, // Not used in Edge Runtime, but kept for API compatibility
       steps // For running multiple steps in sequence
     } = body;
 

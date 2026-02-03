@@ -81,7 +81,7 @@ export default function CheapEnergyChat() {
           const errorData = await res.json();
           throw new Error(errorData.error || 'Något gick fel');
         } else {
-          const text = await res.text();
+          await res.text(); // Read response but don't use it
           throw new Error(`Serverfel: ${res.status} ${res.statusText}`);
         }
       }
@@ -89,7 +89,7 @@ export default function CheapEnergyChat() {
       // Check if response is JSON before parsing
       const contentType = res.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
-        const text = await res.text();
+        await res.text(); // Read response but don't use it
         throw new Error('Fick inte JSON-svar från servern');
       }
 
@@ -118,7 +118,7 @@ export default function CheapEnergyChat() {
           const errorData = await res.json();
           throw new Error(errorData.error || 'Något gick fel');
         } else {
-          const text = await res.text();
+          await res.text(); // Read response but don't use it
           throw new Error(`Serverfel: ${res.status} ${res.statusText}`);
         }
       }
@@ -126,7 +126,7 @@ export default function CheapEnergyChat() {
       // Check if response is JSON before parsing
       const contentType = res.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
-        const text = await res.text();
+        await res.text(); // Read response but don't use it
         throw new Error('Fick inte JSON-svar från servern');
       }
 

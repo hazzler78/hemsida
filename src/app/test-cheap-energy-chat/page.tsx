@@ -30,7 +30,7 @@ export default function TestCheapEnergyChat() {
           lineHeight: '1.6'
         }}>
           Denna sida låter dig testa Cheap Energy automation-chatten lokalt.
-          Chatten kommer att automatiskt fylla i formuläret på Cheap Energy's sida
+          Chatten kommer att automatiskt fylla i formuläret på Cheap Energy&apos;s sida
           medan du chattar med AI:n.
         </p>
         
