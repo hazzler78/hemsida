@@ -92,9 +92,10 @@ const nextConfig: NextConfig = {
         use: 'ignore-loader',
       });
       
-      // CRITICAL: Add IgnorePlugin FIRST to catch Playwright imports before webpack processes them
+      // Add IgnorePlugin to catch Playwright imports
       // Ignore all Playwright-related modules, assets, and dependencies
-      config.plugins.unshift(
+      // Use push() instead of unshift() to avoid breaking Next.js's built-in plugins
+      config.plugins.push(
         // Ignore ALL files from playwright directories FIRST (most aggressive, catches everything)
         new webpack.IgnorePlugin({
           checkResource(resource: string) {
