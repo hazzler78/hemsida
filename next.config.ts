@@ -56,66 +56,27 @@ const nextConfig: NextConfig = {
     // NOTE: We use IgnorePlugin only, not module rules, to avoid interfering with Next.js CSS handling
     if (!isServer || isCloudflareBuild) {
       // Add IgnorePlugin to catch Playwright imports
-      // Ignore all Playwright-related modules, assets, and dependencies
-      // Use push() instead of unshift() to avoid breaking Next.js's built-in plugins
+      // Use a single, specific IgnorePlugin that only targets Playwright directories
+      // This avoids interfering with Next.js internal modules
       config.plugins.push(
-        // Ignore ALL files from playwright directories FIRST (most aggressive, catches everything)
         new webpack.IgnorePlugin({
           checkResource(resource: string) {
-            // Ignore everything from playwright (including assets like .ttf, .woff, etc.)
-            if (/node_modules[\\/]playwright/.test(resource)) {
-              return true;
-            }
-            // Also ignore chromium-bidi
-            if (/node_modules[\\/]chromium-bidi/.test(resource)) {
-              return true;
-            }
-            return false;
+            // Only ignore resources that are explicitly from playwright or chromium-bidi node_modules
+            // Be very specific to avoid false positives with Next.js or other modules
+            const playwrightMatch = /node_modules[\\/](playwright|chromium-bidi)/.test(resource);
+            return playwrightMatch;
           },
         }),
-        // Ignore Node.js built-in modules when imported from Playwright
+        // Ignore Node.js built-in modules ONLY when imported from Playwright context
         new webpack.IgnorePlugin({
           resourceRegExp: /^(fs|path|child_process|crypto|http2|stream|util|os|net|tls|dns|url|http|https|zlib|events|buffer|electron)$/,
-          contextRegExp: /playwright/,
+          contextRegExp: /[\\/](playwright|chromium-bidi)[\\/]/,
         }),
-        // Also ignore Node.js built-in modules globally when building for Cloudflare
-        ...(isCloudflareBuild ? [
-          new webpack.IgnorePlugin({
-            resourceRegExp: /^(fs|path|child_process|crypto|http2|stream|util|os|net|tls|dns|url|http|https|zlib|events|buffer|electron)$/,
-          }),
-        ] : []),
-        // Ignore electron module completely
+        // Ignore electron module when imported from Playwright context
         new webpack.IgnorePlugin({
           resourceRegExp: /^electron$/,
-        }),
-        // Ignore chromium-bidi (Playwright dependency) completely
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^chromium-bidi/,
-        }),
-        // For Cloudflare builds, also ignore chromium-bidi imports globally
-        ...(isCloudflareBuild ? [
-          new webpack.IgnorePlugin({
-            checkResource(resource: string) {
-              return /chromium-bidi/.test(resource);
-            },
-          }),
-        ] : []),
-        // For Cloudflare builds, also ignore Playwright module imports
-        ...(isCloudflareBuild ? [
-          new webpack.IgnorePlugin({
-            resourceRegExp: /^playwright$/,
-          }),
-          new webpack.IgnorePlugin({
-            resourceRegExp: /^playwright-core$/,
-          }),
-          // Ignore all Playwright-related imports in Cloudflare builds
-          new webpack.IgnorePlugin({
-            checkResource(resource: string) {
-              // Ignore any import that references playwright or chromium-bidi
-              return /playwright|chromium-bidi/.test(resource);
-            },
-          }),
-        ] : [])
+          contextRegExp: /[\\/](playwright|chromium-bidi)[\\/]/,
+        })
       );
       
       // Mark Playwright and electron as external to prevent bundling in client
