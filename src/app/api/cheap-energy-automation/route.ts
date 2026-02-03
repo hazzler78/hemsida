@@ -59,11 +59,25 @@ async function runAutomationSteps(
   // Dynamic import of Playwright (only works in Node.js runtime)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let browserType: any;
+  let browserName = 'chromium';
   try {
     const playwright = await import('playwright');
+    
     // Try Firefox first (better JavaScript handling for some sites)
-    browserType = playwright.firefox;
-    await logStep(sessionId, 'browser_selected', { browser: 'firefox' }, 'completed');
+    // But fallback to Chromium if Firefox is not installed
+    try {
+      await playwright.firefox.launch({ headless: true }).then(b => b.close()).catch(() => {
+        throw new Error('Firefox not installed');
+      });
+      browserType = playwright.firefox;
+      browserName = 'firefox';
+      await logStep(sessionId, 'browser_selected', { browser: 'firefox' }, 'completed');
+    } catch {
+      // Firefox not available, use Chromium
+      browserType = playwright.chromium;
+      browserName = 'chromium';
+      await logStep(sessionId, 'browser_selected', { browser: 'chromium', reason: 'firefox_not_installed' }, 'completed');
+    }
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : 'Okänt fel';
     await logStep(sessionId, 'playwright_import_failed', {}, 'failed', `Playwright import failed: ${errorMsg}`);
@@ -71,20 +85,30 @@ async function runAutomationSteps(
   }
 
   // Set headless: false to see browser window for debugging
-  const browser = await browserType.launch({ 
-    headless: false,
+  const launchOptions: any = { headless: false };
+  
+  if (browserName === 'firefox') {
     // Firefox-specific options
-    firefoxUserPrefs: {
+    launchOptions.firefoxUserPrefs = {
       'dom.webdriver.enabled': false,
       'useAutomationExtension': false,
-    }
-  });
-  const context = await browser.newContext({
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0',
+    };
+  }
+  
+  const browser = await browserType.launch(launchOptions);
+  
+  const contextOptions: any = {
     viewport: { width: 1920, height: 1080 }, // Full HD viewport
-    // Firefox might handle JavaScript differently
     javaScriptEnabled: true,
-  });
+  };
+  
+  if (browserName === 'firefox') {
+    contextOptions.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0';
+  } else {
+    contextOptions.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+  }
+  
+  const context = await browser.newContext(contextOptions);
   const page = await context.newPage();
 
   try {

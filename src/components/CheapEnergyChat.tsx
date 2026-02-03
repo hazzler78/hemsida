@@ -207,38 +207,47 @@ export default function CheapEnergyChat() {
       }
       if (expectedField === 'betalsatt') {
         // More flexible parsing for payment method - check exact matches first
-        const trimmedLower = lowerInput.trim();
+        const trimmedInput = input.trim();
+        const trimmedLower = trimmedInput.toLowerCase();
         
-        // Exact matches (highest priority)
-        if (trimmedLower === 'faktura' || trimmedLower === 'invoice' || trimmedLower === '3' || trimmedLower === 'fakturabetalning') {
+        // Exact matches (highest priority) - check both original and lowercase
+        if (trimmedLower === 'faktura' || trimmedLower === 'invoice' || trimmedLower === '3' || 
+            trimmedLower === 'fakturabetalning' || trimmedInput === 'faktura' || trimmedInput === 'Faktura') {
           return { type: 'betalsatt', value: 'faktura' };
         }
-        if (trimmedLower === 'autogiro' || trimmedLower === 'auto-giro' || trimmedLower === '1' || trimmedLower === 'autogirobetalning') {
+        if (trimmedLower === 'autogiro' || trimmedLower === 'auto-giro' || trimmedLower === '1' || 
+            trimmedLower === 'autogirobetalning' || trimmedInput === 'autogiro' || trimmedInput === 'Autogiro') {
           return { type: 'betalsatt', value: 'autogiro' };
         }
-        if (trimmedLower === 'kort' || trimmedLower === 'kreditkort' || trimmedLower === 'debitkort' || trimmedLower === '2' || trimmedLower === 'kortbetalning') {
+        if (trimmedLower === 'kort' || trimmedLower === 'kreditkort' || trimmedLower === 'debitkort' || 
+            trimmedLower === '2' || trimmedLower === 'kortbetalning' || trimmedInput === 'kort' || trimmedInput === 'Kort') {
           return { type: 'betalsatt', value: 'kort' };
         }
         
-        // Contains matches (second priority)
+        // Contains matches (second priority) - check if input contains the keyword
         if (lowerInput.includes('faktura') || lowerInput.includes('invoice')) {
           return { type: 'betalsatt', value: 'faktura' };
         }
         if (lowerInput.includes('autogiro') || lowerInput.includes('auto-giro')) {
           return { type: 'betalsatt', value: 'autogiro' };
         }
-        if (lowerInput.includes('kort') || lowerInput.includes('kreditkort') || lowerInput.includes('debitkort')) {
+        if (lowerInput.includes('kort') && !lowerInput.includes('autogiro')) {
+          // Make sure "kort" doesn't match "autogiro"
+          return { type: 'betalsatt', value: 'kort' };
+        }
+        if (lowerInput.includes('kreditkort') || lowerInput.includes('debitkort')) {
           return { type: 'betalsatt', value: 'kort' };
         }
         
         // Fallback: accept any reasonable input as payment method
-        if (input.trim().length > 0 && input.trim().length < 50) {
+        if (trimmedInput.length > 0 && trimmedInput.length < 50) {
           // Try to match the closest option using scoring
           const autogiroScore = (lowerInput.match(/auto|giro/g) || []).length;
           const kortScore = (lowerInput.match(/kort|card|kredit|debit/g) || []).length;
           const fakturaScore = (lowerInput.match(/faktura|invoice|bill/g) || []).length;
           
-          if (fakturaScore > 0 && fakturaScore >= autogiroScore && fakturaScore >= kortScore) {
+          // Prioritize faktura if it has any match
+          if (fakturaScore > 0) {
             return { type: 'betalsatt', value: 'faktura' };
           }
           if (autogiroScore > 0 && autogiroScore >= kortScore) {
@@ -247,8 +256,8 @@ export default function CheapEnergyChat() {
           if (kortScore > 0) {
             return { type: 'betalsatt', value: 'kort' };
           }
-          // Default to autogiro if unclear
-          return { type: 'betalsatt', value: 'autogiro' };
+          // If we have any input and we're expecting betalsatt, accept it as faktura (most common)
+          return { type: 'betalsatt', value: 'faktura' };
         }
       }
 
