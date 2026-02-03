@@ -378,7 +378,7 @@ export async function POST(req: NextRequest) {
     const { 
       sessionId, 
       action, 
-      data: _data, // Not used in Edge Runtime, but kept for API compatibility
+      // data is not used in Edge Runtime (Playwright not available)
       steps // For running multiple steps in sequence
     } = body;
 
