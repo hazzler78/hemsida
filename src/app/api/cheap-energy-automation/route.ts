@@ -112,10 +112,39 @@ async function runAutomationSteps(
   const page = await context.newPage();
 
   try {
+    // Set up navigation event listener to detect redirects
+    let finalUrl = CHEAP_ENERGY_URL;
+    page.on('response', (response) => {
+      const url = response.url();
+      if (url.includes('teckna-elavtal')) {
+        finalUrl = url;
+      }
+    });
+    
     // Navigate to Cheap Energy form
-    // Use 'networkidle' to wait for all network requests to finish
-    await page.goto(CHEAP_ENERGY_URL, { waitUntil: 'networkidle', timeout: 60000 });
-    await logStep(sessionId, 'page_navigated', { url: CHEAP_ENERGY_URL }, 'completed');
+    // Use 'domcontentloaded' first, then wait for networkidle
+    const response = await page.goto(CHEAP_ENERGY_URL, { 
+      waitUntil: 'domcontentloaded', 
+      timeout: 60000 
+    });
+    
+    finalUrl = page.url();
+    await logStep(sessionId, 'page_navigated', { 
+      url: CHEAP_ENERGY_URL, 
+      finalUrl: finalUrl,
+      status: response?.status()
+    }, 'completed');
+    
+    // Check if we were redirected
+    if (finalUrl !== CHEAP_ENERGY_URL && !finalUrl.includes('?src=Elchef')) {
+      await logStep(sessionId, 'url_redirected', { 
+        original: CHEAP_ENERGY_URL, 
+        redirected: finalUrl 
+      }, 'failed', 'URL was redirected without query parameter');
+      // Try navigating again with the query parameter
+      await page.goto(CHEAP_ENERGY_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+      finalUrl = page.url();
+    }
     
     // Take screenshot immediately after navigation
     await page.screenshot({ path: `debug-01-after-navigation-${sessionId}.png`, fullPage: true });
@@ -126,6 +155,15 @@ async function runAutomationSteps(
     } catch {
       // If networkidle times out, wait for load state instead
       await page.waitForLoadState('load', { timeout: 30000 });
+    }
+    
+    // Check URL again after load
+    const urlAfterLoad = page.url();
+    if (urlAfterLoad !== finalUrl) {
+      await logStep(sessionId, 'url_changed_after_load', { 
+        before: finalUrl, 
+        after: urlAfterLoad 
+      }, 'failed', 'URL changed after page load');
     }
     
     await page.screenshot({ path: `debug-02-after-load-${sessionId}.png`, fullPage: true });
@@ -149,7 +187,19 @@ async function runAutomationSteps(
     await page.screenshot({ path: `debug-03-after-ready-${sessionId}.png`, fullPage: true });
     
     // Additional wait for JavaScript frameworks to initialize (React, Vue, etc.)
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(5000); // Increased wait time
+    
+    // Scroll down a bit to trigger lazy loading if needed
+    await page.evaluate(() => {
+      window.scrollTo(0, 300);
+    });
+    await page.waitForTimeout(1000);
+    
+    // Scroll back up
+    await page.evaluate(() => {
+      window.scrollTo(0, 0);
+    });
+    await page.waitForTimeout(1000);
     
     // Handle cookies FIRST (form might not appear until cookies are accepted)
     let cookieClicked = false;
@@ -253,12 +303,23 @@ async function runAutomationSteps(
     // Use a more robust waiting strategy
     await logStep(sessionId, 'waiting_for_form', {}, 'in_progress');
     
-    // Wait for the form to appear - try multiple strategies
+    // Wait for the form to appear - try multiple strategies with longer timeout
     let formReady = false;
-    const maxWaitTime = 15000; // 15 seconds max
+    const maxWaitTime = 30000; // 30 seconds max (increased from 15)
     const startTime = Date.now();
     
     while (!formReady && (Date.now() - startTime) < maxWaitTime) {
+      // Check current URL - if it changed, we might have been redirected
+      const currentUrl = page.url();
+      if (!currentUrl.includes('?src=Elchef') && currentUrl.includes('teckna-elavtal')) {
+        await logStep(sessionId, 'url_lost_query_param', { url: currentUrl }, 'failed', 'Lost query parameter during wait');
+        // Try to navigate back with query parameter
+        try {
+          await page.goto(CHEAP_ENERGY_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+          await page.waitForTimeout(3000);
+        } catch {}
+      }
+      
       // Check for "Se priser" button (most reliable indicator that form is ready)
       try {
         const sePriserButton = await page.$('button:has-text("Se priser")');
@@ -278,6 +339,7 @@ async function runAutomationSteps(
           'input[name="postnummer"]',
           'input[placeholder*="postnummer" i]',
           'input[type="text"][id*="post" i]',
+          'input[type="text"]', // More generic fallback
         ];
         
         for (const selector of postnummerInputs) {
@@ -286,9 +348,19 @@ async function runAutomationSteps(
             if (input) {
               const isVisible = await input.isVisible();
               if (isVisible) {
-                await logStep(sessionId, 'form_detected_by_input', { selector }, 'completed');
-                formReady = true;
-                break;
+                // Verify it's actually a postnummer field by checking nearby text
+                const nearbyText = await page.evaluate((sel) => {
+                  const el = document.querySelector(sel);
+                  if (!el) return '';
+                  const parent = el.closest('form, div, section');
+                  return parent?.textContent?.toLowerCase() || '';
+                }, selector);
+                
+                if (nearbyText.includes('postnummer') || nearbyText.includes('post') || selector === 'input[type="text"]') {
+                  await logStep(sessionId, 'form_detected_by_input', { selector, nearbyText: nearbyText.substring(0, 100) }, 'completed');
+                  formReady = true;
+                  break;
+                }
               }
             }
           } catch {}
@@ -297,7 +369,7 @@ async function runAutomationSteps(
       } catch {}
       
       // Wait a bit before checking again
-      await page.waitForTimeout(1000);
+      await page.waitForTimeout(2000); // Check every 2 seconds instead of 1
     }
     
     if (!formReady) {
