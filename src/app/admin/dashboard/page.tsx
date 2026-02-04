@@ -80,7 +80,9 @@ export default function AdminDashboard() {
   const [authed, setAuthed] = useState(false);
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
-  const [dateRange, setDateRange] = useState<'24h' | '7d' | '30d' | '90d'>('30d');
+  const [dateRange, setDateRange] = useState<'24h' | '4d' | '7d' | '30d' | '90d'>('24h');
+  const [selectedProvider, setSelectedProvider] = useState<string>('all');
+  const [availableProviders, setAvailableProviders] = useState<string[]>([]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -101,7 +103,7 @@ export default function AdminDashboard() {
       if (dateRange === '24h') {
         fromDate.setHours(fromDate.getHours() - 24);
       } else {
-        const days = dateRange === '7d' ? 7 : dateRange === '30d' ? 30 : 90;
+        const days = dateRange === '4d' ? 4 : dateRange === '7d' ? 7 : dateRange === '30d' ? 30 : 90;
         fromDate.setDate(fromDate.getDate() - days);
       }
       const fromISO = fromDate.toISOString();
@@ -111,7 +113,7 @@ export default function AdminDashboard() {
       if (dateRange === '24h') {
         prevFromDate.setHours(prevFromDate.getHours() - 24);
       } else {
-        const days = dateRange === '7d' ? 7 : dateRange === '30d' ? 30 : 90;
+        const days = dateRange === '4d' ? 4 : dateRange === '7d' ? 7 : dateRange === '30d' ? 30 : 90;
         prevFromDate.setDate(prevFromDate.getDate() - days);
       }
       const prevFromISO = prevFromDate.toISOString();
@@ -359,11 +361,34 @@ export default function AdminDashboard() {
         .map(([date, stats]) => ({ date, ...stats }))
         .sort((a, b) => a.date.localeCompare(b.date));
 
-      // 10. Affiliate Clicks - VIKTIGT: Totalt antal affiliate-klick (alla länkar på sidan)
-      const { count: affiliateClicks, error: affiliateError } = await supabase
+      // Hämta alla unika leverantörer för dropdown (från alla tider, inte bara filtrerad period)
+      // Hämta bara första gången eller om listan är tom
+      if (availableProviders.length === 0) {
+        const { data: allProvidersData } = await supabase
+          .from('affiliate_clicks')
+          .select('provider')
+          .not('provider', 'is', null);
+        
+        const uniqueProviders = Array.from(new Set(
+          (allProvidersData || [])
+            .map(p => p.provider)
+            .filter((p): p is string => typeof p === 'string' && p.trim() !== '')
+        )).sort();
+        
+        setAvailableProviders(uniqueProviders);
+      }
+
+      // 10. Affiliate Clicks - Filtrera baserat på vald leverantör och tidsperiod
+      let affiliateClicksQuery = supabase
         .from('affiliate_clicks')
         .select('*', { count: 'exact', head: true })
         .gte('created_at', fromISO);
+      
+      if (selectedProvider !== 'all') {
+        affiliateClicksQuery = affiliateClicksQuery.eq('provider', selectedProvider);
+      }
+      
+      const { count: affiliateClicks, error: affiliateError } = await affiliateClicksQuery;
 
       if (affiliateError) {
         console.error('Affiliate clicks error:', affiliateError);
@@ -371,21 +396,33 @@ export default function AdminDashboard() {
       }
 
       // Affiliate-klick från Robin Hood (en delmängd av totala klick)
-      const { count: affiliateClicksFromRobinhood, error: robinhoodError } = await supabase
+      let robinhoodQuery = supabase
         .from('affiliate_clicks')
         .select('*', { count: 'exact', head: true })
         .eq('came_via_robinhood', true)
         .gte('created_at', fromISO);
+      
+      if (selectedProvider !== 'all') {
+        robinhoodQuery = robinhoodQuery.eq('provider', selectedProvider);
+      }
+      
+      const { count: affiliateClicksFromRobinhood, error: robinhoodError } = await robinhoodQuery;
 
       if (robinhoodError) {
         console.error('Robinhood affiliate clicks error:', robinhoodError);
       }
 
-      // Hämta lista över affiliate-klick med detaljer
-      const { data: affiliateClicksList, error: affiliateListError } = await supabase
+      // Hämta lista över affiliate-klick med detaljer (filtrerat)
+      let affiliateListQuery = supabase
         .from('affiliate_clicks')
         .select('id, provider, contract_type, url, tracking_id, created_at, came_via_robinhood')
-        .gte('created_at', fromISO)
+        .gte('created_at', fromISO);
+      
+      if (selectedProvider !== 'all') {
+        affiliateListQuery = affiliateListQuery.eq('provider', selectedProvider);
+      }
+      
+      const { data: affiliateClicksList, error: affiliateListError } = await affiliateListQuery
         .order('created_at', { ascending: false })
         .limit(100); // Visa senaste 100 klicken
 
@@ -438,7 +475,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!authed) return;
     fetchStats();
-  }, [authed, fetchStats]);
+  }, [authed, fetchStats, selectedProvider]);
 
   function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -532,10 +569,10 @@ export default function AdminDashboard() {
             Översikt över Elchef.se&apos;s prestanda
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
           <select 
             value={dateRange} 
-            onChange={(e) => setDateRange(e.target.value as '24h' | '7d' | '30d' | '90d')}
+            onChange={(e) => setDateRange(e.target.value as '24h' | '4d' | '7d' | '30d' | '90d')}
             style={{ 
               padding: '8px 16px', 
               borderRadius: 8, 
@@ -545,9 +582,27 @@ export default function AdminDashboard() {
             }}
           >
             <option value="24h">Senaste 24 timmarna</option>
+            <option value="4d">Senaste 4 dagarna</option>
             <option value="7d">Senaste 7 dagarna</option>
             <option value="30d">Senaste 30 dagarna</option>
             <option value="90d">Senaste 90 dagarna</option>
+          </select>
+          <select 
+            value={selectedProvider} 
+            onChange={(e) => setSelectedProvider(e.target.value)}
+            style={{ 
+              padding: '8px 16px', 
+              borderRadius: 8, 
+              border: '1px solid #cbd5e1',
+              fontSize: 14,
+              fontWeight: 500,
+              minWidth: '200px'
+            }}
+          >
+            <option value="all">Alla leverantörer</option>
+            {availableProviders.map(provider => (
+              <option key={provider} value={provider}>{provider}</option>
+            ))}
           </select>
           <Link href="/admin" style={{ 
             padding: '8px 16px', 
@@ -729,11 +784,32 @@ export default function AdminDashboard() {
             border: '1px solid #e5e7eb',
             boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
           }}>
-            <h2 style={{ margin: '0 0 20px 0', fontSize: '1.25rem' }}>Affiliate-klick</h2>
-            <p style={{ margin: '0 0 20px 0', fontSize: '0.875rem', color: '#6b7280' }}>
-              Totalt antal klick på affiliate-länkar (det kan finnas flera länkar per sida). 
-              En del av dessa klick kommer från användare som kom via Robin Hood-länken.
-            </p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <div>
+                <h2 style={{ margin: '0 0 8px 0', fontSize: '1.25rem' }}>Affiliate-klick</h2>
+                <p style={{ margin: 0, fontSize: '0.875rem', color: '#6b7280' }}>
+                  {selectedProvider !== 'all' 
+                    ? `Klick för ${selectedProvider} - ${dateRange === '4d' ? 'senaste 4 dagarna' : dateRange === '24h' ? 'senaste 24 timmarna' : dateRange === '7d' ? 'senaste 7 dagarna' : dateRange === '30d' ? 'senaste 30 dagarna' : 'senaste 90 dagarna'}`
+                    : `Totalt antal klick på affiliate-länkar (det kan finnas flera länkar per sida). En del av dessa klick kommer från användare som kom via Robin Hood-länken.`
+                  }
+                </p>
+              </div>
+              {selectedProvider !== 'all' && (
+                <div style={{ 
+                  padding: '12px 20px', 
+                  background: '#f0f9ff', 
+                  borderRadius: 8, 
+                  border: '1px solid #bae6fd' 
+                }}>
+                  <div style={{ fontSize: '0.875rem', color: '#0369a1', marginBottom: 4 }}>
+                    Antal klick
+                  </div>
+                  <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#0c4a6e' }}>
+                    {stats.affiliateClicks}
+                  </div>
+                </div>
+              )}
+            </div>
             <div style={{ 
               display: 'grid', 
               gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
