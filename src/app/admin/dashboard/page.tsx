@@ -470,7 +470,7 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [dateRange]);
+  }, [dateRange, selectedProvider, availableProviders.length]);
 
   useEffect(() => {
     if (!authed) return;
