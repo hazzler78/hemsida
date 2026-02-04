@@ -1276,7 +1276,7 @@ async function runAutomationSteps(
         }
       } catch (stepError) {
         const errorMsg = stepError instanceof Error ? stepError.message : 'Okänt fel';
-        await logStep(sessionId, `${action}_failed`, data, 'failed', errorMsg);
+        await logStep(sessionId, `${step.action}_failed`, step.data, 'failed', errorMsg);
         throw stepError;
       }
     }
