@@ -162,7 +162,8 @@ async function runAutomationSteps(
   try {
     // Set up navigation event listener to detect redirects
     let finalUrl = CHEAP_ENERGY_URL;
-    page.on('response', (response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    page.on('response', (response: any) => {
       const url = response.url();
       if (url.includes('teckna-elavtal')) {
         finalUrl = url;
