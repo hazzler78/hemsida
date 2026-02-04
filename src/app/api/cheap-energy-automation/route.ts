@@ -795,7 +795,8 @@ async function runAutomationSteps(
                 const isVisible = await element.isVisible();
                 
                 // Log what we found
-                const elementInfo = await page.evaluate((sel) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const elementInfo = await page.evaluate((sel: any) => {
                   const el = document.querySelector(sel);
                   if (!el) return null;
                   return {
