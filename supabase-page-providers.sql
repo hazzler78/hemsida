@@ -57,8 +57,8 @@ CREATE TRIGGER trigger_update_page_providers_updated_at
 -- OBS: Använder WHERE NOT EXISTS för att säkerställa att inga befintliga rader skrivs över
 INSERT INTO page_providers (name, type, logo_url, description, url, is_recommended, display_order, active)
 SELECT * FROM (VALUES
-  ('Cheap Energy', 'rorligt', '/cheap-logo.png', '0 kr i månadsavgift, 0 öre i påslag i 12 månader. Ingen bindningstid.', 'https://www.cheapenergy.se/teckna-elavtal-cheap-elchef/', true, 1, true),
-  ('Svekraft', 'rorligt', '/svekraft-logo.png', '0 kr i månadsavgift i 12 månader, 7,99 öre i påslag. Ingen bindningstid.', 'https://www.svekraft.com/elchef-rorligt/', false, 2, true),
+  ('Cheap Energy', 'rorligt', '/cheap-logo.png', '0 kr i månadsavgift, 0 öre i påslag i 12 månader. Ingen bindningstid.', 'https://www.cheapenergy.se/teckna-elavtal/?src=Elchef', true, 1, true),
+  ('Svekraft', 'rorligt', '/svekraft-logo.png', '0 kr i månadsavgift i 12 månader, 7,99 öre i påslag. Ingen bindningstid.', 'https://www.svekraft.com/elavtal/?src=Elchef', false, 2, true),
   ('Tibber', 'rorligt', '/tibber.png', '49 kr i månadsavgift, 8,6 öre i påslag. Ingen bindningstid.', 'https://go.adt242.com/t/t?a=1590956516&as=2012933659&t=2&tk=1', false, 3, true),
   ('Telinet Energi', 'rorligt', '/telinet.png', '59 kr i månadsavgift, 13,33 öre i påslag. Ingen bindningstid.', 'https://at.telinet.se/t/t?a=1870484942&as=2012933659&t=2&tk=1', false, 4, true),
   ('Fortum', 'rorligt', '/fortum.png', '69 kr i månadsavgift, 12,38 öre i påslag. Ingen bindningstid.', 'https://ion.fortum.com/t/t?a=1312475339&as=2012933659&t=2&tk=1', false, 5, true)
@@ -72,10 +72,12 @@ WHERE NOT EXISTS (
 -- OBS: Använder WHERE NOT EXISTS för att säkerställa att inga befintliga rader skrivs över
 INSERT INTO page_providers (name, type, logo_url, description, url, is_recommended, display_order, active)
 SELECT * FROM (VALUES
-  ('Svealands Elbolag', 'fastpris', '/svealand-logo.png', 'Om du hittar ett billigare fastprisavtal på elmarknaden matchas priset – och du får dessutom 1 öre/kWh i extra rabatt. Ett pålitligt val för dig som vill ha kontroll över elkostnaderna.', 'https://www.svealandselbolag.se/elchef-fastpris/', true, 1, true),
-  ('Cheap Energy', 'fastpris', '/cheap-logo.png', 'Konkurrenskraftiga fastpriser. Trygghet och förutsägbarhet för din elförbrukning.', 'https://www.cheapenergy.se/elchef-fastpris/', false, 2, true),
-  ('Stockholms Elbolag', 'fastpris', '/stockholms-elbolag-logo.png', 'Fast elpris med tydliga villkor. Perfekt för dig som vill ha förutsägbara elkostnader.', 'https://www.stockholmselbolag.se/elavtal-elchef-fastpris/', false, 3, true),
-  ('Svekraft', 'fastpris', '/svekraft-logo.png', 'Stabila fastpriser för din trygghet. Låsta priser som ger dig kontroll över din elbudget.', 'https://www.svekraft.com/elchef-fastpris/', false, 4, true)
+  ('Svealands Elbolag', 'fastpris', '/svealand-logo.png', 'Om du hittar ett billigare fastprisavtal på elmarknaden matchas priset – och du får dessutom 1 öre/kWh i extra rabatt. Ett pålitligt val för dig som vill ha kontroll över elkostnaderna.', 'https://www.svealandselbolag.se/teckna-avtal/?src=Elchef', true, 1, true),
+  ('Cheap Energy', 'fastpris', '/cheap-logo.png', 'Konkurrenskraftiga fastpriser. Trygghet och förutsägbarhet för din elförbrukning.', 'https://www.cheapenergy.se/teckna-elavtal/?src=Elchef', false, 2, true),
+  ('Stockholms Elbolag', 'fastpris', '/stockholms-elbolag-logo.png', 'Fast elpris med tydliga villkor. Perfekt för dig som vill ha förutsägbara elkostnader.', 'https://www.stockholmselbolag.se/elavtal/?src=Elchef', false, 3, true),
+  ('Svekraft', 'fastpris', '/svekraft-logo.png', 'Stabila fastpriser för din trygghet. Låsta priser som ger dig kontroll över din elbudget.', 'https://www.svekraft.com/elavtal/?src=Elchef', false, 4, true),
+  ('Motala', 'rorligt', '', 'Konkurrenskraftiga elavtal för privatpersoner.', 'https://motalaenergi.se/privatperson/?src=Elchef', false, 6, true),
+  ('Motala', 'fastpris', '', 'Konkurrenskraftiga elavtal för privatpersoner.', 'https://motalaenergi.se/privatperson/?src=Elchef', false, 5, true)
 ) AS v(name, type, logo_url, description, url, is_recommended, display_order, active)
 WHERE NOT EXISTS (
   SELECT 1 FROM page_providers 

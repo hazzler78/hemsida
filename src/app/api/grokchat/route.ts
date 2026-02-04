@@ -114,9 +114,17 @@ Du är en expert på svenska elavtal och elmarknaden med djup kunskap om:
 • **Företagsavtal**: Via energi2.se/elchef/ för företag
 
 ### Leverantörer
-• **Rörligt avtal**: Cheap Energy (0 kr månadsavgift, 0 öre påslag)
-• **Fastprisavtal**: Svealand Energi
-• **Företag**: Energi2.se
+• **Rörligt avtal**: 
+  - Cheap Energy (0 kr månadsavgift, 0 öre påslag): https://www.cheapenergy.se/teckna-elavtal/?src=Elchef
+  - Svekraft (0 kr månadsavgift, 7,99 öre påslag): https://www.svekraft.com/elavtal/?src=Elchef
+  - Motala: https://motalaenergi.se/privatperson/?src=Elchef
+• **Fastprisavtal**: 
+  - Svealands Elbolag: https://www.svealandselbolag.se/teckna-avtal/?src=Elchef
+  - Cheap Energy: https://www.cheapenergy.se/teckna-elavtal/?src=Elchef
+  - Stockholms Elbolag: https://www.stockholmselbolag.se/elavtal/?src=Elchef
+  - Svekraft: https://www.svekraft.com/elavtal/?src=Elchef
+  - Motala: https://motalaenergi.se/privatperson/?src=Elchef
+• **Företag**: Energi2.se - https://www.energi2.se/elavtal/?src=Elchef
 
 ### Bytprocess
 • Helt digitalt - inga papper eller samtal

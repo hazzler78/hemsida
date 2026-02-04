@@ -9,34 +9,44 @@ Kundresan har uppdaterats så att kunder som klickar på "Rörligt avtal" eller 
 ### 1. Uppdaterade sidor
 
 #### `/rorligt-avtal` - Rörligt avtal
-Visar nu två leverantörer:
+Visar nu flera leverantörer:
 - **Cheap Energy** (Rekommenderat)
   - Text: "0 kr i månadsavgift – 0 öre i påslag i 12 månader. Du betalar endast för den el du använder. Ingen bindningstid."
-  - Länk: https://www.cheapenergy.se/elchef-rorligt/
+  - Länk: https://www.cheapenergy.se/teckna-elavtal/?src=Elchef
   - Logotyp: `/cheap-logo.png` ✅
   
 - **Svekraft**
   - Text: "0 kr i månadsavgift i 12 månader – 7,99 öre i påslag. Du betalar endast för den el du använder. Ingen bindningstid."
-  - Länk: https://www.svekraft.com/elchef-rorligt/
+  - Länk: https://www.svekraft.com/elavtal/?src=Elchef
   - Logotyp: `/svekraft-logo.png` ✅
 
+- **Motala**
+  - Text: "Konkurrenskraftiga elavtal för privatpersoner."
+  - Länk: https://motalaenergi.se/privatperson/?src=Elchef
+  - Logotyp: (saknas för tillfället)
+
 #### `/fastpris-avtal` - Fastpris
-Visar nu fyra leverantörer (rekommenderad först):
+Visar nu flera leverantörer (rekommenderad först):
 - **Svealands Elbolag** (Rekommenderat) 🏷️
-  - Länk: https://www.svealandselbolag.se/elchef-fastpris/
+  - Länk: https://www.svealandselbolag.se/teckna-avtal/?src=Elchef
   - Logotyp: `/svealand-logo.png` ✅
   
 - **Cheap Energy**
-  - Länk: https://www.cheapenergy.se/elchef-fastpris/
+  - Länk: https://www.cheapenergy.se/teckna-elavtal/?src=Elchef
   - Logotyp: `/cheap-logo.png` ✅
   
 - **Stockholms Elbolag**
-  - Länk: https://www.stockholmselbolag.se/elavtal-elchef-fastpris/
+  - Länk: https://www.stockholmselbolag.se/elavtal/?src=Elchef
   - Logotyp: `/stockholms-elbolag-logo.png` ✅
   
 - **Svekraft**
-  - Länk: https://www.svekraft.com/elchef-fastpris/
+  - Länk: https://www.svekraft.com/elavtal/?src=Elchef
   - Logotyp: `/svekraft-logo.png` ✅
+
+- **Motala**
+  - Text: "Konkurrenskraftiga elavtal för privatpersoner."
+  - Länk: https://motalaenergi.se/privatperson/?src=Elchef
+  - Logotyp: (saknas för tillfället)
 
 ### 2. Ny tracking för affiliate-klick
 

@@ -72,8 +72,8 @@ INSERT INTO ai_campaigns (title, description, validFrom, validTo, active) VALUES
 
 -- Lägg till exempel leverantörer
 INSERT INTO ai_providers (name, type, features, url, active) VALUES
-('Cheap Energy', 'rorligt', ARRAY['0 kr månadsavgift', '0 öre påslag', 'Ingen bindningstid'], 'https://www.cheapenergy.se/elchef-rorligt/', true),
- ('Svealands Elbolag', 'fastpris', ARRAY['Prisgaranti', 'Valfri bindningstid', 'Inga dolda avgifter'], 'https://www.svealandselbolag.se/elchef-fastpris/', true),
+('Cheap Energy', 'rorligt', ARRAY['0 kr månadsavgift', '0 öre påslag', 'Ingen bindningstid'], 'https://www.cheapenergy.se/teckna-elavtal/?src=Elchef', true),
+ ('Svealands Elbolag', 'fastpris', ARRAY['Prisgaranti', 'Valfri bindningstid', 'Inga dolda avgifter'], 'https://www.svealandselbolag.se/teckna-avtal/?src=Elchef', true),
 ('Energi2.se', 'foretag', ARRAY['Företagsavtal', 'Skräddarsydda lösningar', 'Volymrabatter'], 'https://energi2.se/elchef/', true);
 ```
 

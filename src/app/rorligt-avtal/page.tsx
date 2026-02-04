@@ -252,6 +252,7 @@ const LOGO_MAPPING: Record<string, string> = {
   'Skellefteå': '/skelleftea.png',
   'Vattenfall': '/vattenfall.png',
   'Bixia': '/bixia.png',
+  'Motala': '',
 };
 
 // Funktion för att hitta logo_url baserat på leverantörsnamn
@@ -281,7 +282,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     type: 'rorligt',
     logo_url: '/cheap-logo.png',
     description: '0 kr i månadsavgift, 0 öre i påslag i 12 månader. Ingen bindningstid.',
-    url: 'https://www.cheapenergy.se/teckna-elavtal-cheap-elchef/',
+    url: 'https://www.cheapenergy.se/teckna-elavtal/?src=Elchef',
     is_recommended: true,
     display_order: 1,
     active: true,
@@ -292,7 +293,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     type: 'rorligt',
     logo_url: '/svekraft-logo.png',
     description: '0 kr i månadsavgift i 12 månader, 7,99 öre i påslag. Ingen bindningstid.',
-    url: 'https://www.svekraft.com/elchef-rorligt/',
+    url: 'https://www.svekraft.com/elavtal/?src=Elchef',
     is_recommended: false,
     display_order: 2,
     active: true,
@@ -328,6 +329,17 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     url: 'https://ion.fortum.com/t/t?a=1312475339&as=2012933659&t=2&tk=1',
     is_recommended: false,
     display_order: 5,
+    active: true,
+  },
+  {
+    id: 6,
+    name: 'Motala',
+    type: 'rorligt',
+    logo_url: '',
+    description: 'Konkurrenskraftiga elavtal för privatpersoner.',
+    url: 'https://motalaenergi.se/privatperson/?src=Elchef',
+    is_recommended: false,
+    display_order: 6,
     active: true,
   },
 ];

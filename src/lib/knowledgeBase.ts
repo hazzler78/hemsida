@@ -106,21 +106,63 @@ export const providers: ProviderInfo[] = [
     name: "Cheap Energy",
     type: "rorligt",
     features: ["0 kr månadsavgift", "0 öre påslag", "Ingen bindningstid"],
-    url: "https://www.cheapenergy.se/elchef-rorligt/",
+    url: "https://www.cheapenergy.se/teckna-elavtal/?src=Elchef",
+    active: true
+  },
+  {
+    name: "Svekraft",
+    type: "rorligt",
+    features: ["0 kr månadsavgift", "7,99 öre påslag", "Ingen bindningstid"],
+    url: "https://www.svekraft.com/elavtal/?src=Elchef",
+    active: true
+  },
+  {
+    name: "Motala",
+    type: "rorligt",
+    features: ["Konkurrenskraftiga elavtal", "För privatpersoner"],
+    url: "https://motalaenergi.se/privatperson/?src=Elchef",
     active: true
   },
   {
     name: "Svealands Elbolag",
     type: "fastpris",
     features: ["Prisgaranti", "Valfri bindningstid", "Inga dolda avgifter"],
-    url: "https://www.svealandselbolag.se/elchef-fastpris/",
+    url: "https://www.svealandselbolag.se/teckna-avtal/?src=Elchef",
+    active: true
+  },
+  {
+    name: "Cheap Energy",
+    type: "fastpris",
+    features: ["Konkurrenskraftiga fastpriser", "Trygghet och förutsägbarhet"],
+    url: "https://www.cheapenergy.se/teckna-elavtal/?src=Elchef",
+    active: true
+  },
+  {
+    name: "Stockholms Elbolag",
+    type: "fastpris",
+    features: ["Fast elpris", "Tydliga villkor", "Förutsägbara kostnader"],
+    url: "https://www.stockholmselbolag.se/elavtal/?src=Elchef",
+    active: true
+  },
+  {
+    name: "Svekraft",
+    type: "fastpris",
+    features: ["Stabila fastpriser", "Låsta priser", "Kontroll över elbudget"],
+    url: "https://www.svekraft.com/elavtal/?src=Elchef",
+    active: true
+  },
+  {
+    name: "Motala",
+    type: "fastpris",
+    features: ["Konkurrenskraftiga elavtal", "För privatpersoner"],
+    url: "https://motalaenergi.se/privatperson/?src=Elchef",
     active: true
   },
   {
     name: "Energi2.se",
     type: "foretag",
     features: ["Företagsavtal", "Skräddarsydda lösningar", "Volymrabatter"],
-    url: "https://energi2.se/elchef/",
+    url: "https://www.energi2.se/elavtal/?src=Elchef",
     active: true
   }
 ];
