@@ -5,7 +5,8 @@ import { createClient } from '@supabase/supabase-js';
 // For LOCAL TESTING: Comment out the line below to use Node.js runtime (Playwright will work)
 // For CLOUDFLARE PAGES: Uncomment the line below to use Edge Runtime (Playwright will return error)
 // Updated: 2026-02-03 - Playwright code restored for local testing
-// export const runtime = 'edge'; // COMMENTED OUT FOR LOCAL TESTING
+// Cloudflare Pages requires edge runtime - Playwright will not work in production
+export const runtime = 'edge';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
