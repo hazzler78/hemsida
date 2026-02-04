@@ -920,8 +920,10 @@ async function runAutomationSteps(
             await page.screenshot({ path: screenshotPath, fullPage: true });
             
             // Also log all input fields on the page for debugging
-            const allInputs = await page.$$eval('input', (inputs) => 
-              inputs.map(input => ({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const allInputs = await page.$$eval('input', (inputs: any) => 
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              inputs.map((input: any) => ({
                 name: input.getAttribute('name'),
                 id: input.id,
                 placeholder: input.getAttribute('placeholder'),
