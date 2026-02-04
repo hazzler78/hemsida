@@ -133,6 +133,7 @@ async function runAutomationSteps(
   
   const browser = await browserType.launch(launchOptions);
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const contextOptions: any = {
     viewport: { width: 1920, height: 1080 }, // Full HD viewport
     javaScriptEnabled: true,
@@ -384,7 +385,9 @@ async function runAutomationSteps(
           src: s.getAttribute('src'),
           loaded: s.hasAttribute('data-loaded')
         })),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         hasCreateWebForm: typeof (window as any).createWebForm === 'function',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         hasCookiebot: typeof (window as any).Cookiebot !== 'undefined',
         allInputs: Array.from(document.querySelectorAll('input')).map(i => ({
           name: i.getAttribute('name'),
@@ -509,7 +512,7 @@ async function runAutomationSteps(
         await logStep(sessionId, 'form_detected', { selector }, 'completed');
         formReady = true;
         break;
-      } catch (error) {
+      } catch {
         // Try next selector
         continue;
       }
