@@ -62,6 +62,7 @@ export default function CheapEnergyChat() {
   }, [messages]);
 
   // Helper to call automation API
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const callAutomation = async (action: string, data: Record<string, unknown>) => {
     try {
       const res = await fetch('/api/cheap-energy-automation', {
