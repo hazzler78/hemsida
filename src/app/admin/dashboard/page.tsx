@@ -361,21 +361,67 @@ export default function AdminDashboard() {
         .map(([date, stats]) => ({ date, ...stats }))
         .sort((a, b) => a.date.localeCompare(b.date));
 
-      // Hämta alla unika leverantörer för dropdown (från alla tider, inte bara filtrerad period)
+      // Hämta alla leverantörer från page_providers tabellen (alla aktiva leverantörer)
       // Hämta bara första gången eller om listan är tom
       if (availableProviders.length === 0) {
-        const { data: allProvidersData } = await supabase
-          .from('affiliate_clicks')
-          .select('provider')
-          .not('provider', 'is', null);
-        
-        const uniqueProviders = Array.from(new Set(
-          (allProvidersData || [])
-            .map(p => p.provider)
-            .filter((p): p is string => typeof p === 'string' && p.trim() !== '')
-        )).sort();
-        
-        setAvailableProviders(uniqueProviders);
+        try {
+          // Först försök hämta från page_providers (alla konfigurerade leverantörer)
+          const { data: pageProvidersData } = await supabase
+            .from('page_providers')
+            .select('name')
+            .eq('active', true);
+          
+          if (pageProvidersData && pageProvidersData.length > 0) {
+            const providerNames = pageProvidersData
+              .map(p => p.name)
+              .filter((p): p is string => typeof p === 'string' && p.trim() !== '');
+            
+            // Lägg också till leverantörer från affiliate_clicks som inte finns i page_providers
+            const { data: affiliateProvidersData } = await supabase
+              .from('affiliate_clicks')
+              .select('provider')
+              .not('provider', 'is', null);
+            
+            const affiliateProviderNames = Array.from(new Set(
+              (affiliateProvidersData || [])
+                .map(p => p.provider)
+                .filter((p): p is string => typeof p === 'string' && p.trim() !== '')
+            ));
+            
+            // Kombinera båda listorna och ta bort dubbletter
+            const allProviderNames = Array.from(new Set([...providerNames, ...affiliateProviderNames])).sort();
+            setAvailableProviders(allProviderNames);
+          } else {
+            // Fallback: hämta från affiliate_clicks om page_providers inte finns eller är tom
+            const { data: allProvidersData } = await supabase
+              .from('affiliate_clicks')
+              .select('provider')
+              .not('provider', 'is', null);
+            
+            const uniqueProviders = Array.from(new Set(
+              (allProvidersData || [])
+                .map(p => p.provider)
+                .filter((p): p is string => typeof p === 'string' && p.trim() !== '')
+            )).sort();
+            
+            setAvailableProviders(uniqueProviders);
+          }
+        } catch (error) {
+          console.error('Error fetching providers:', error);
+          // Fallback till affiliate_clicks vid fel
+          const { data: allProvidersData } = await supabase
+            .from('affiliate_clicks')
+            .select('provider')
+            .not('provider', 'is', null);
+          
+          const uniqueProviders = Array.from(new Set(
+            (allProvidersData || [])
+              .map(p => p.provider)
+              .filter((p): p is string => typeof p === 'string' && p.trim() !== '')
+          )).sort();
+          
+          setAvailableProviders(uniqueProviders);
+        }
       }
 
       // 10. Affiliate Clicks - Filtrera baserat på vald leverantör och tidsperiod
