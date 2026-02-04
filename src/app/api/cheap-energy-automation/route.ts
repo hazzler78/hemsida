@@ -564,7 +564,8 @@ async function runAutomationSteps(
                 const isVisible = await input.isVisible();
                 if (isVisible) {
                   // Verify it's actually a postnummer field by checking nearby text
-                  const nearbyText = await page.evaluate((sel) => {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  const nearbyText = await page.evaluate((sel: any) => {
                     const el = document.querySelector(sel);
                     if (!el) return '';
                     const parent = el.closest('form, div, section');
