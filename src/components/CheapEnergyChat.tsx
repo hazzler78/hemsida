@@ -27,10 +27,7 @@ const initialMessages: Message[] = [
 ];
 
 export default function CheapEnergyChat() {
-  // Dölj helt i produktion tills funktionen är redo
-  if (process.env.NODE_ENV !== 'development') {
-    return null;
-  }
+  const isDev = process.env.NODE_ENV === 'development';
 
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -535,6 +532,10 @@ export default function CheapEnergyChat() {
     setCurrentStep('postnummer');
     setError('');
   };
+
+  if (!isDev) {
+    return null;
+  }
 
   return (
     <>
