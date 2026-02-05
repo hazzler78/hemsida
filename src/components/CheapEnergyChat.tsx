@@ -27,6 +27,11 @@ const initialMessages: Message[] = [
 ];
 
 export default function CheapEnergyChat() {
+  // Dölj helt i produktion tills funktionen är redo
+  if (process.env.NODE_ENV !== 'development') {
+    return null;
+  }
+
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState('');
