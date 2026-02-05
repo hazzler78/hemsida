@@ -113,6 +113,10 @@ function BottomNavContent() {
         Elchef i media
         {pathname === '/media' && <ActiveIndicator />}
       </NavItem>
+      <NavItem href={withDefaultCtaUtm('/kunskap', 'bottomnav', 'knowledge')} className={pathname?.startsWith('/kunskap') ? 'active' : ''}>
+        Kunskap
+        {pathname?.startsWith('/kunskap') && <ActiveIndicator />}
+      </NavItem>
       <NavItem href={withDefaultCtaUtm('/foretag', 'bottomnav', 'b2b')} className={pathname === '/foretag' ? 'active' : ''}>
         Företag
         {pathname === '/foretag' && <ActiveIndicator />}

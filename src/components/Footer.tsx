@@ -139,6 +139,7 @@ export default function Footer() {
               <li><Link href={withDefaultCtaUtm('/vanliga-fragor', 'footer', 'info-faq')}>Vanliga frågor</Link></li>
               <li><Link href={withDefaultCtaUtm('/kontakt', 'footer', 'info-kontakt')}>Kontakt</Link></li>
               <li><Link href={withDefaultCtaUtm('/media', 'footer', 'info-media')}>Elchef i media</Link></li>
+              <li><Link href={withDefaultCtaUtm('/kunskap', 'footer', 'info-kunskap')}>Kunskapsbank</Link></li>
               <li><Link href={withDefaultCtaUtm('/partner', 'footer', 'info-partner')}>Partner</Link></li>
             </ul>
           </FooterColumn>
