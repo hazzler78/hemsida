@@ -472,8 +472,11 @@ export default function RorligtAvtalPage() {
   return (
     <PageContainer>
       <Content>
-        <Title>Välj din leverantör för rörligt avtal</Title>
-        <Subtitle>Vi har valt ut de bästa leverantörerna för rörliga elavtal. Välj den som passar dig!</Subtitle>
+        <Title>Jämför rörliga elavtal i Sverige</Title>
+        <Subtitle>
+          Vi har valt ut starka alternativ för rörliga elavtal. Jämför påslag, månadsavgifter och kampanjer
+          och hitta det rörliga elavtal som passar din förbrukning och ditt elområde bäst.
+        </Subtitle>
 
         {loading ? (
           <div style={{ textAlign: 'center', color: 'white', padding: '2rem' }}>
@@ -484,9 +487,9 @@ export default function RorligtAvtalPage() {
             {providers.map((provider) => (
               <ProviderCard key={provider.id}>
                 {provider.logo_url && provider.logo_url.trim() !== '' && !failedLogos.has(provider.id) && (
-                  <ProviderLogo 
-                    src={provider.logo_url} 
-                    alt={provider.name}
+                  <ProviderLogo
+                    src={provider.logo_url}
+                    alt={`${provider.name} logotyp – rörligt elavtal i Sverige`}
                     onError={() => {
                       setFailedLogos(prev => new Set(prev).add(provider.id));
                     }}

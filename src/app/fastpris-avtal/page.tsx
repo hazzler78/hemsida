@@ -399,8 +399,11 @@ export default function FastprisAvtalPage() {
   return (
     <PageContainer>
       <Content>
-        <Title>Välj din leverantör för fastpris</Title>
-        <Subtitle>Vi har valt ut de bästa leverantörerna för fastprisavtal. Välj den som passar dig!</Subtitle>
+        <Title>Jämför fastprisavtal för el i Sverige</Title>
+        <Subtitle>
+          Här samlar vi utvalda fastprisavtal för el. Jämför prisnivåer, kampanjer och prisgaranti och hitta
+          det fastpris elavtal 2026 som ger dig trygg och förutsägbar elkostnad.
+        </Subtitle>
 
         {loading ? (
           <div style={{ textAlign: 'center', color: 'white', padding: '2rem' }}>
@@ -411,9 +414,9 @@ export default function FastprisAvtalPage() {
             {providers.map((provider) => (
               <ProviderCard key={provider.id}>
                 {provider.logo_url && provider.logo_url.trim() !== '' && !failedLogos.has(provider.id) && (
-                  <ProviderLogo 
-                    src={provider.logo_url} 
-                    alt={provider.name}
+                  <ProviderLogo
+                    src={provider.logo_url}
+                    alt={`${provider.name} logotyp – fastpris elavtal i Sverige`}
                     onError={() => {
                       setFailedLogos(prev => new Set(prev).add(provider.id));
                     }}
