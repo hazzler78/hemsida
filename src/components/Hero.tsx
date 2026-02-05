@@ -5,6 +5,9 @@ import styled from 'styled-components';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import GlassButton from './GlassButton';
 import { withDefaultCtaUtm } from '@/lib/utm';
+import { fetchCheapEnergyPrices } from '@/lib/priceService';
+import type { CheapEnergyPrices, ElectricityArea } from '@/lib/types';
+import { getElectricityArea } from '@/lib/types';
 
 const HeroSection = styled.section`
   padding: var(--section-spacing) 0;
@@ -107,6 +110,11 @@ export default function Hero() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [videoError, setVideoError] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [postalCode, setPostalCode] = useState('');
+  const [area, setArea] = useState<ElectricityArea | null>(null);
+  const [prices, setPrices] = useState<CheapEnergyPrices | null>(null);
+  const [priceStatus, setPriceStatus] = useState<'idle' | 'loading' | 'loaded' | 'error' | 'invalid_postal'>('idle');
+  const [priceError, setPriceError] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -156,6 +164,66 @@ export default function Hero() {
 
   const heroTitle: string = variant === 'A' ? 'Elchef gör det enkelt att välja rätt elavtal!' : 'Välj rätt elavtal – utan krångel';
   const heroSub: string = variant === 'A' ? 'Vi lyfter fram avtal värda att överväga och sköter bytet åt dig.' : 'Snabbt och tryggt. Vi hjälper dig hela vägen.';
+
+  const formatFixedPrice = (value: unknown): string => {
+    if (typeof value === 'number') {
+      return `${value} öre/kWh`;
+    }
+    if (value && typeof value === 'object') {
+      const anyVal = value as any;
+      const num =
+        typeof anyVal.value === 'number'
+          ? anyVal.value
+          : typeof anyVal.price === 'number'
+          ? anyVal.price
+          : undefined;
+      if (typeof num === 'number') {
+        return `${num} öre/kWh`;
+      }
+    }
+    return '—';
+  };
+
+  const handlePostalSubmit = useCallback(
+    async (event?: React.FormEvent) => {
+      if (event) event.preventDefault();
+      const trimmed = postalCode.replace(/\s/g, '');
+      if (!/^\d{5}$/.test(trimmed)) {
+        setPriceStatus('invalid_postal');
+        setPriceError('Skriv ett giltigt postnummer med 5 siffror.');
+        setArea(null);
+        return;
+      }
+
+      try {
+        setPriceStatus('loading');
+        setPriceError(null);
+
+        const elArea = getElectricityArea(trimmed);
+        setArea(elArea);
+
+        // Hämta priser bara en gång per session och återanvänd datan
+        let data = prices;
+        if (!data) {
+          data = await fetchCheapEnergyPrices();
+          setPrices(data);
+        }
+
+        if (!data.spot_prices[elArea] && !data.variable_fixed_prices[elArea]) {
+          setPriceStatus('error');
+          setPriceError('Kunde inte hitta prisdata för ditt område just nu.');
+          return;
+        }
+
+        setPriceStatus('loaded');
+      } catch (error) {
+        console.error('Error when looking up prices by postal code:', error);
+        setPriceStatus('error');
+        setPriceError('Kunde inte hämta aktuella priser just nu. Försök igen senare eller ladda upp din elräkning för en exakt analys.');
+      }
+    },
+    [postalCode, prices]
+  );
 
   const trackHeroClick = useCallback((target: 'rorligt' | 'fastpris', href: string) => {
     try {
@@ -232,6 +300,147 @@ export default function Hero() {
           <TextContent>
             <h1>{String(heroTitle)}</h1>
             <p>{String(heroSub)}</p>
+            <div
+              style={{
+                background: 'rgba(15, 23, 42, 0.65)',
+                borderRadius: 16,
+                padding: '1.25rem 1.5rem',
+                border: '1px solid rgba(148, 163, 184, 0.6)',
+                boxShadow: '0 18px 40px rgba(15, 23, 42, 0.35)',
+                marginBottom: '1.5rem',
+              }}
+            >
+              <form
+                onSubmit={handlePostalSubmit}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem',
+                }}
+              >
+                <label
+                  htmlFor="hero-postal"
+                  style={{ fontSize: '0.9rem', color: 'rgba(226, 232, 240, 0.95)', fontWeight: 500 }}
+                >
+                  Skriv ditt postnummer så visar vi prisnivåer i ditt elområde:
+                </label>
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '0.5rem',
+                    flexWrap: 'nowrap',
+                  }}
+                >
+                  <input
+                    id="hero-postal"
+                    inputMode="numeric"
+                    pattern="\d*"
+                    maxLength={5}
+                    value={postalCode}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^\d]/g, '').slice(0, 5);
+                      setPostalCode(value);
+                      if (priceStatus !== 'idle') {
+                        setPriceStatus('idle');
+                        setPriceError(null);
+                      }
+                    }}
+                    onBlur={() => {
+                      if (postalCode.replace(/\s/g, '').length === 5) {
+                        void handlePostalSubmit();
+                      }
+                    }}
+                    placeholder="t.ex. 11122"
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      borderRadius: 9999,
+                      border: '1px solid rgba(148, 163, 184, 0.8)',
+                      padding: '0.6rem 0.9rem',
+                      fontSize: '1rem',
+                      outline: 'none',
+                    }}
+                    aria-label="Postnummer"
+                  />
+                  <button
+                    type="submit"
+                    style={{
+                      borderRadius: 9999,
+                      border: 'none',
+                      padding: '0.6rem 1.2rem',
+                      fontSize: '0.95rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
+                      color: 'white',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Visa pris
+                  </button>
+                </div>
+              </form>
+
+              <div style={{ marginTop: '0.75rem', fontSize: '0.9rem', color: 'rgba(226,232,240,0.9)' }}>
+                {priceStatus === 'idle' && (
+                  <span>Exakt pris visas efter att du har fyllt i ditt postnummer.</span>
+                )}
+                {priceStatus === 'invalid_postal' && (
+                  <span style={{ color: '#fecaca' }}>Ogiltigt postnummer. Skriv fem siffror, t.ex. 11122.</span>
+                )}
+                {priceStatus === 'loading' && <span>Hämtar aktuella priser för ditt elområde…</span>}
+                {priceStatus === 'error' && priceError && (
+                  <span style={{ color: '#fecaca' }}>{priceError}</span>
+                )}
+                {priceStatus === 'loaded' && prices && area && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                    <strong>
+                      I ditt område ({area.toUpperCase()}): ungefärliga prisnivåer just nu
+                    </strong>
+                    <span>
+                      Rörligt pris (spot):{' '}
+                      <strong>
+                        ca{' '}
+                        {Math.round((prices.spot_prices[area] ?? 0) * 10) / 10}
+                      </strong>{' '}
+                      öre/kWh
+                    </span>
+                    <span>
+                      Fastpris 6 mån:{' '}
+                      <strong>
+                        {formatFixedPrice(prices.variable_fixed_prices[area]?.['6_months'])}
+                      </strong>
+                      , 12 mån:{' '}
+                      <strong>
+                        {formatFixedPrice(prices.variable_fixed_prices[area]?.['1_year'])}
+                      </strong>
+                    </span>
+                    <span style={{ fontSize: '0.8rem', opacity: 0.9 }}>
+                      Priserna är ungefärliga och kan variera beroende på förbrukning och val av elavtal. För en mer exakt
+                      genomgång kan du{' '}
+                      <a
+                        href={withDefaultCtaUtm(
+                          `/jamfor-elpriser${postalCode ? `?postal=${postalCode}` : ''}`,
+                          'hero',
+                          'postal-prices-ai'
+                        )}
+                        style={{ color: '#bfdbfe', textDecoration: 'underline' }}
+                      >
+                        ladda upp din elräkning
+                      </a>{' '}
+                      eller gå vidare till{' '}
+                      <a
+                        href={withDefaultCtaUtm('/byt-elavtal', 'hero', 'postal-prices-switch')}
+                        style={{ color: '#bfdbfe', textDecoration: 'underline' }}
+                      >
+                        Byt elavtal
+                      </a>
+                      .
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
                          <ButtonRow>
                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: 220 }}>
                                    <div style={{
