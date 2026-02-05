@@ -11,8 +11,9 @@ export function generateStaticParams() {
   return blogPosts.map((post) => ({ slug: post.slug }));
 }
 
-export function generateMetadata({ params }: { params: Params }): Metadata {
-  const post = getBlogPostBySlug(params.slug);
+export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
+  const { slug } = await params;
+  const post = getBlogPostBySlug(slug);
 
   if (!post) {
     return {
@@ -30,11 +31,12 @@ export function generateMetadata({ params }: { params: Params }): Metadata {
       url: `https://www.elchef.se/kunskap/${post.slug}`,
       type: 'article',
     },
-  };
+};
 }
 
-export default function BlogPostPage({ params }: { params: Params }) {
-  const post = getBlogPostBySlug(params.slug);
+export default async function BlogPostPage({ params }: { params: Promise<Params> }) {
+  const { slug } = await params;
+  const post = getBlogPostBySlug(slug);
 
   if (!post) {
     return notFound();
