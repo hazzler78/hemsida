@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { FaChevronDown } from 'react-icons/fa';
+import Script from 'next/script';
 
 const FAQSection = styled.section`
   padding: 4rem 1rem;
@@ -127,7 +128,7 @@ Vilket elområde du tillhör beror på var du bor och påverkar elpriset i din r
   {
     question: "Kan jag ångra mitt elavtal?",
     answer: `Ja, enligt distansavtalslagen har du ångerrätt i 14 dagar när du tecknar ett avtal på distans, som exempelvis digitalt eller via telefon. Det innebär att du kan ångra avtalet utan kostnad inom denna period. Det finns dock undantag:
-
+        
 • Om du har betalat förbrukad el under ångerperioden kan leverantören kräva ersättning för den el du använt.
 • Ångerrätten gäller inte om du har tecknat avtalet genom ett personligt möte hos leverantören eller i en butik.
 • Vissa leverantörer kan ha egna villkor gällande uppsägning efter ångerfristen, så det är alltid bra att läsa avtalet noggrant.
@@ -142,10 +143,29 @@ export default function FAQ() {
     setOpenIndex(openIndex === index ? null : index);
   };
 
+  const faqJsonLd = useMemo(
+    () => ({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqData.map((faq) => ({
+        '@type': 'Question',
+        name: faq.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: faq.answer.replace(/\n/g, '<br />'),
+        },
+      })),
+    }),
+    []
+  );
+
   return (
     <FAQSection>
       <Container>
         <Title>Vanliga frågor</Title>
+        <Script id="faq-json-ld" type="application/ld+json">
+          {JSON.stringify(faqJsonLd)}
+        </Script>
         {faqData.map((faq, index) => (
           <AccordionItem key={index}>
             <AccordionHeader
