@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
+import Image from 'next/image';
 
 type TrustpilotCarouselProps = {
   images?: string[];
@@ -244,10 +245,13 @@ export default function TrustpilotCarousel({
           >
             {images.concat(images).map((src, idx) => (
               <Slide key={`${src}-${idx}`}>
-                <img
+                <Image
                   src={src}
                   alt="Trustpilot omdöme om Elchef – kundrecension för elavtal jämförelse i Sverige"
+                  width={600}
+                  height={600}
                   loading={idx < images.length ? 'eager' : 'lazy'}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
                 />
               </Slide>
             ))}

@@ -372,6 +372,7 @@ export default function Hero() {
               loop
               playsInline
               preload="metadata"
+              poster="/frog-hero.png"
               onLoadedData={() => { 
                 try { 
                   if (videoRef.current) {
