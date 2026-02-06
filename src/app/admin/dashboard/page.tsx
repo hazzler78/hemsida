@@ -1396,7 +1396,7 @@ export default function AdminDashboard() {
               </p>
               {stats.socialChannels.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {stats.socialChannels.map((s, i) => (
+                  {stats.socialChannels.map((s) => (
                     <div key={s.channel} style={{ 
                       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                       padding: '10px 14px', background: '#f9fafb', borderRadius: 8
