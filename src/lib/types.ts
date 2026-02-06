@@ -59,9 +59,24 @@ export interface ContactFormData {
 
 // Mapping av postnummer till elområden
 export const getElectricityArea = (postalCode: string): ElectricityArea => {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { getPriceAreaFromPostalCode } = require('./postal-to-area.js') as {
+      getPriceAreaFromPostalCode: (postalCode: string) => string;
+    };
+    const area = getPriceAreaFromPostalCode(postalCode);
+    if (area === 'se1' || area === 'se2' || area === 'se3' || area === 'se4') {
+      return area;
+    }
+  } catch {
+    // Ignorera och fall tillbaka på prefix-logik nedan
+  }
+
+  // Fallback: grov prefix-logik om exportfilen saknas eller postnumret inte finns
   const prefix = postalCode.substring(0, 2);
-  const prefixNum = parseInt(prefix);
-  
+  const prefixNum = parseInt(prefix, 10);
+
+  if (Number.isNaN(prefixNum)) return 'se3';
   if (prefixNum >= 98) return 'se1';
   if (prefixNum >= 85 && prefixNum <= 97) return 'se2';
   if (prefixNum >= 62 && prefixNum <= 84) return 'se3';
