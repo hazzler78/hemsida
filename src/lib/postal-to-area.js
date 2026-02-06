@@ -16440,12 +16440,5 @@ if (typeof module !== 'undefined' && module.exports) {
   };
 }
 
-// Export för ES6 modules
-if (typeof window !== 'undefined') {
-  window.postalToArea = {
-    POSTAL_TO_AREA,
-    PRICE_AREAS,
-    getPriceAreaFromPostalCode,
-    isValidSwedishPostalCode
-  };
-}
+// Export för ES6 modules / bundlers
+export { POSTAL_TO_AREA, PRICE_AREAS, getPriceAreaFromPostalCode, isValidSwedishPostalCode };

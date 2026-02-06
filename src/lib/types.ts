@@ -1,3 +1,5 @@
+import { getPriceAreaFromPostalCode } from './postal-to-area';
+
 export interface CheapEnergyPrices {
   variable_fixed_prices: {
     [key: string]: {
@@ -60,10 +62,6 @@ export interface ContactFormData {
 // Mapping av postnummer till elområden
 export const getElectricityArea = (postalCode: string): ElectricityArea => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { getPriceAreaFromPostalCode } = require('./postal-to-area.js') as {
-      getPriceAreaFromPostalCode: (postalCode: string) => string;
-    };
     const area = getPriceAreaFromPostalCode(postalCode);
     if (area === 'se1' || area === 'se2' || area === 'se3' || area === 'se4') {
       return area;
