@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useEffect, useState } from "react";
 import type { ElectricityArea } from "@/lib/types";
 
 interface ElectricityAreaMapProps {
@@ -10,11 +10,12 @@ interface ElectricityAreaMapProps {
   value?: ElectricityArea | null;
 }
 
+const AREA_IDS: ElectricityArea[] = ["se1", "se2", "se3", "se4"];
+
 /**
- * Enkel interaktiv karta för Sveriges elområden.
+ * Interaktiv SVG-karta för Sveriges elområden.
  *
- * Bygger på bilden `/elomraden.png` i `public/`.
- * Vi lägger klickytor (hover/click) ovanpå i ungefärliga zoner.
+ * Använder `/elomraden.svg` med path-element med id se1–se4.
  * Själva prislogiken hanteras i föräldern (Hero).
  */
 export function ElectricityAreaMap({
@@ -23,6 +24,7 @@ export function ElectricityAreaMap({
 }: ElectricityAreaMapProps) {
   const [internalSelected, setInternalSelected] =
     useState<ElectricityArea | null>(null);
+  const objectRef = useRef<HTMLObjectElement>(null);
 
   const selectedArea = value ?? internalSelected;
 
@@ -33,6 +35,56 @@ export function ElectricityAreaMap({
     },
     [onAreaSelected]
   );
+
+  const handleSelectRef = useRef(handleSelectArea);
+  handleSelectRef.current = handleSelectArea;
+  const selectedAreaRef = useRef(selectedArea);
+  selectedAreaRef.current = selectedArea;
+
+  const applyStyles = useCallback((doc: Document) => {
+    const area = selectedAreaRef.current;
+    AREA_IDS.forEach((id) => {
+      const el = doc.getElementById(id);
+      if (!el) return;
+      el.style.cursor = "pointer";
+      el.setAttribute(
+        "fill",
+        area === id ? "rgba(255,255,255,0.25)" : "transparent"
+      );
+      el.setAttribute(
+        "stroke",
+        area === id ? "rgba(255,255,255,0.9)" : "rgba(0,0,0,0.4)"
+      );
+    });
+  }, []);
+
+  useEffect(() => {
+    const obj = objectRef.current;
+    if (!obj) return;
+
+    const onLoad = () => {
+      const doc = obj.contentDocument;
+      if (!doc) return;
+      applyStyles(doc);
+      doc.addEventListener("click", (e) => {
+        const id = (e.target as Element)?.id;
+        if (id && AREA_IDS.includes(id as ElectricityArea)) {
+          handleSelectRef.current(id as ElectricityArea);
+        }
+      });
+    };
+
+    if (obj.contentDocument?.readyState === "complete") {
+      onLoad();
+    } else {
+      obj.addEventListener("load", onLoad);
+    }
+  }, [applyStyles]);
+
+  useEffect(() => {
+    const doc = objectRef.current?.contentDocument;
+    if (doc) applyStyles(doc);
+  }, [applyStyles, selectedArea]);
 
   return (
     <div
@@ -48,118 +100,26 @@ export function ElectricityAreaMap({
           width: "100%",
           maxWidth: 360,
           margin: "0 auto",
-          aspectRatio: "3 / 4",
+          aspectRatio: "1",
           borderRadius: 16,
           overflow: "hidden",
           boxShadow: "0 18px 40px rgba(15, 23, 42, 0.35)",
           backgroundColor: "#e5e7eb",
         }}
       >
-        <img
-          src="/elomraden.png"
-          alt="Sveriges elområden SE1–SE4"
+        <object
+          ref={objectRef}
+          data="/elomraden.svg"
+          type="image/svg+xml"
           style={{
             width: "100%",
             height: "100%",
-            objectFit: "cover",
             display: "block",
+            pointerEvents: "auto",
           }}
-        />
-
-        {/* Klickytor – grovt placerade rektanglar per elområde */}
-        {/* SE1 – nordligaste delen (huvud) */}
-        <button
-          type="button"
-          onClick={() => handleSelectArea("se1")}
-          aria-label="Välj elområde SE1"
-          style={{
-            position: "absolute",
-            top: "4%",
-            left: "28%",
-            width: "50%",
-            height: "20%",
-            background:
-              selectedArea === "se1"
-                ? "rgba(255,255,255,0.15)"
-                : "rgba(255,255,255,0.01)",
-            border:
-              selectedArea === "se1"
-                ? "2px solid rgba(255,255,255,0.8)"
-                : "1px solid transparent",
-            cursor: "pointer",
-          }}
-        />
-
-        {/* SE2 – strax under SE1 */}
-        <button
-          type="button"
-          onClick={() => handleSelectArea("se2")}
-          aria-label="Välj elområde SE2"
-          style={{
-            position: "absolute",
-            top: "24%",
-            left: "28%",
-            width: "50%",
-            height: "18%",
-            background:
-              selectedArea === "se2"
-                ? "rgba(255,255,255,0.15)"
-                : "rgba(255,255,255,0.01)",
-            border:
-              selectedArea === "se2"
-                ? "2px solid rgba(255,255,255,0.8)"
-                : "1px solid transparent",
-            cursor: "pointer",
-          }}
-        />
-
-        {/* SE3 – mittdelen av landet (lite större band) */}
-        <button
-          type="button"
-          onClick={() => handleSelectArea("se3")}
-          aria-label="Välj elområde SE3"
-          style={{
-            position: "absolute",
-            top: "40%",
-            left: "28%",
-            width: "50%",
-            height: "40%",
-            background:
-              selectedArea === "se3"
-                ? "rgba(255,255,255,0.15)"
-                : "rgba(255,255,255,0.01)",
-            border:
-              selectedArea === "se3"
-                ? "2px solid rgba(255,255,255,0.8)"
-                : "1px solid transparent",
-            cursor: "pointer",
-          }}
-        />
-
-        {/* SE4 – södra delen inklusive Skåne (kompaktare) */}
-        <button
-          type="button"
-          onClick={() => handleSelectArea("se4")}
-          aria-label="Välj elområde SE4"
-          style={{
-            position: "absolute",
-            top: "80%",
-            left: "28%",
-            width: "50%",
-            height: "14%",
-            background:
-              selectedArea === "se4"
-                ? "rgba(255,255,255,0.15)"
-                : "rgba(255,255,255,0.01)",
-            border:
-              selectedArea === "se4"
-                ? "2px solid rgba(255,255,255,0.8)"
-                : "1px solid transparent",
-            cursor: "pointer",
-          }}
+          aria-label="Sveriges elområden SE1–SE4. Klicka på ett område för att välja."
         />
       </div>
-
     </div>
   );
 }
