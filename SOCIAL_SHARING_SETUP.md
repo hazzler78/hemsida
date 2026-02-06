@@ -91,6 +91,35 @@ Lägg till nya plattformar i `handleShare()` funktionen.
 ### 3. **Förbättra delade kalkyler**
 Uppdatera `delad-kalkyl/page.tsx` för att visa mer detaljerad information.
 
+## 📊 Spåra trafik från sociala medier
+
+Elchef spårar trafik från **Facebook, Instagram, TikTok, Pinterest, YouTube, X, LinkedIn och Snapchat** i admin-dashboarden under "Sociala medier".
+
+### Hur det fungerar
+- **Referrer** – När någon klickar på en länk (t.ex. på Facebook) skickar webbläsaren var de kom ifrån
+- **UTM-parametrar** – När ni delar länkar med `utm_source=facebook` etc. får ni exakt attribuering
+
+### Rekommenderade länkar när ni postar
+
+**→ Se `SOCIAL_LINKS_MALL.md` för färdiga länkar att kopiera till varje plattform.**
+
+| Plattform | Exempel-länk |
+|-----------|--------------|
+| Facebook | `https://elchef.se?utm_source=facebook&utm_medium=social` |
+| Instagram | `https://elchef.se?utm_source=instagram&utm_medium=social` |
+| TikTok | `https://elchef.se?utm_source=tiktok&utm_medium=social` |
+| Pinterest | `https://elchef.se?utm_source=pinterest&utm_medium=social` |
+| YouTube | `https://elchef.se?utm_source=youtube&utm_medium=social` |
+| X (Twitter) | `https://elchef.se?utm_source=x&utm_medium=social` |
+| LinkedIn | `https://elchef.se?utm_source=linkedin&utm_medium=social` |
+| Snapchat | `https://elchef.se?utm_source=snapchat&utm_medium=social` |
+
+*Lägg till `&utm_campaign=namn` för kampanjer (t.ex. `sommar2025`). Eller använd kortlänkar: elchef.se/in, elchef.se/snap*
+
+Trafik utan UTM spåras ändå via referrer när användare klickar från plattformarna.
+
+---
+
 ## 📈 Analytics och Spårning
 
 ### Spårade data:

@@ -140,12 +140,14 @@ export default function Fakturaanalys() {
       const utmSource = params.get('utm_source') || undefined;
       const utmMedium = params.get('utm_medium') || undefined;
       const utmCampaign = params.get('utm_campaign') || undefined;
+      const landingReferrer = typeof document.referrer === 'string' ? document.referrer : '';
       const payload = JSON.stringify({ 
         path: '/fakturaanalys', 
         sessionId: sid,
         utmSource,
         utmMedium,
-        utmCampaign
+        utmCampaign,
+        referrer: landingReferrer
       });
       const url = '/api/events/page-view';
       if (navigator.sendBeacon) {

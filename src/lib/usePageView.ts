@@ -29,13 +29,16 @@ export function usePageView(path: string) {
       const utmSource = params.get('utm_source') || undefined;
       const utmMedium = params.get('utm_medium') || undefined;
       const utmCampaign = params.get('utm_campaign') || undefined;
+      // document.referrer innehåller var användaren kom ifrån (t.ex. facebook.com, instagram.com)
+      const landingReferrer = typeof document.referrer === 'string' ? document.referrer : '';
       
       const payload = JSON.stringify({ 
         path, 
         sessionId: sid,
         utmSource,
         utmMedium,
-        utmCampaign
+        utmCampaign,
+        referrer: landingReferrer
       });
       
       const url = '/api/events/page-view';

@@ -3,6 +3,15 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   async redirects() {
     return [
+      // Kortlänkar för sociala medier (UTM-spårning)
+      { source: "/yt", destination: "/?utm_source=youtube&utm_medium=social", permanent: false },
+      { source: "/fb", destination: "/?utm_source=facebook&utm_medium=social", permanent: false },
+      { source: "/ig", destination: "/?utm_source=instagram&utm_medium=social", permanent: false },
+      { source: "/tt", destination: "/?utm_source=tiktok&utm_medium=social", permanent: false },
+      { source: "/pin", destination: "/?utm_source=pinterest&utm_medium=social", permanent: false },
+      { source: "/x", destination: "/?utm_source=x&utm_medium=social", permanent: false },
+      { source: "/in", destination: "/?utm_source=linkedin&utm_medium=social", permanent: false },
+      { source: "/snap", destination: "/?utm_source=snapchat&utm_medium=social", permanent: false },
       {
         source: "/jamfor-elpriser",
         destination: "/fakturaanalys",

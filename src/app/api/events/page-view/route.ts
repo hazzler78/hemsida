@@ -63,11 +63,17 @@ export async function POST(req: NextRequest) {
     const referer = req.headers.get('referer') || '';
 
     const body = await req.json().catch(() => ({}));
-    const { path, sessionId, utmSource, utmMedium, utmCampaign } = body || {};
+    const { path, sessionId, utmSource, utmMedium, utmCampaign, referrer: clientReferrer } = body || {};
+
+    // Använd document.referrer från klient (var användaren landade ifrån) - mer korrekt än
+    // fetch:s Referer-header som blir elchef.se. Klienten skickar var de kom ifrån.
+    const effectiveReferrer = typeof clientReferrer === 'string' && clientReferrer
+      ? clientReferrer
+      : referer;
 
     // Identifiera om det är en bot eller preview-deployment
     const bot = isBot(ua);
-    const isPreview = isPreviewDeployment(referer);
+    const isPreview = isPreviewDeployment(effectiveReferrer);
 
     const { error } = await supabase.from('page_views').insert({
       path: typeof path === 'string' ? path : null,
@@ -76,7 +82,7 @@ export async function POST(req: NextRequest) {
       utm_medium: typeof utmMedium === 'string' ? utmMedium : null,
       utm_campaign: typeof utmCampaign === 'string' ? utmCampaign : null,
       user_agent: ua,
-      referer,
+      referer: effectiveReferrer,
       is_bot: bot,
       is_preview: isPreview
     });

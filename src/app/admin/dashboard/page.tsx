@@ -47,6 +47,9 @@ interface DashboardStats {
   topUtmSources: Array<{ source: string; visits: number; conversions: number }>;
   topUtmCampaigns: Array<{ campaign: string; visits: number; conversions: number }>;
   
+  // Sociala medier – trafik från Elchefs kanaler
+  socialChannels: Array<{ channel: string; visits: number }>;
+  
   // Time-based
   dailyStats: Array<{ date: string; views: number; analyses: number; clicks: number }>;
   
@@ -259,11 +262,41 @@ export default function AdminDashboard() {
         }
       }
 
-      // 8. UTM Performance
+      // 8. UTM Performance + Sociala källor
       const { data: pageViewsData } = await supabase
         .from('page_views')
-        .select('utm_source, utm_campaign, session_id')
+        .select('utm_source, utm_campaign, session_id, referer')
         .gte('created_at', fromISO);
+
+      // Hjälpfunktion: härled social kanal från utm_source eller referer
+      const getSocialChannel = (utmSource: string | null, referer: string | null): string | null => {
+        const s = (utmSource || '').toLowerCase();
+        const r = (referer || '').toLowerCase();
+        if (r.includes('facebook.com') || r.includes('l.facebook.com') || r.includes('m.facebook.com') || s === 'facebook') return 'Facebook';
+        if (r.includes('instagram.com') || r.includes('l.instagram.com') || s === 'instagram') return 'Instagram';
+        if (r.includes('tiktok.com') || r.includes('vm.tiktok.com') || s === 'tiktok') return 'TikTok';
+        if (r.includes('pinterest.com') || r.includes('pin.it') || s === 'pinterest') return 'Pinterest';
+        if (r.includes('youtube.com') || r.includes('youtu.be') || s === 'youtube') return 'YouTube';
+        if (r.includes('x.com') || r.includes('twitter.com') || s === 'x' || s === 'twitter') return 'X';
+        if (r.includes('linkedin.com') || s === 'linkedin') return 'LinkedIn';
+        if (r.includes('snapchat.com') || r.includes('t.snapchat.com') || s === 'snapchat') return 'Snapchat';
+        return null;
+      };
+
+      // Sociala källor – aggregera per kanal
+      const socialChannelMap = new Map<string, number>();
+      const CHANNELS = ['Facebook', 'Instagram', 'TikTok', 'Pinterest', 'YouTube', 'X', 'LinkedIn', 'Snapchat'];
+      CHANNELS.forEach(c => socialChannelMap.set(c, 0));
+      pageViewsData?.forEach(pv => {
+        const channel = getSocialChannel(pv.utm_source, pv.referer);
+        if (channel && socialChannelMap.has(channel)) {
+          socialChannelMap.set(channel, (socialChannelMap.get(channel) ?? 0) + 1);
+        }
+      });
+      const socialChannels = CHANNELS.map(channel => ({
+        channel,
+        visits: socialChannelMap.get(channel) ?? 0
+      })).sort((a, b) => b.visits - a.visits);
 
       // Top UTM Sources
       const sourceMap = new Map<string, { visits: number; sessions: Set<string> }>();
@@ -505,6 +538,7 @@ export default function AdminDashboard() {
         aiAnalysesGrowth,
         topUtmSources,
         topUtmCampaigns,
+        socialChannels,
         dailyStats,
         rorligtVsFastpris: { rorligt, fastpris },
         contactRequests: contactRequests || [],
@@ -1348,6 +1382,37 @@ export default function AdminDashboard() {
               </div>
             </div>
 
+            {/* Sociala medier – Elchefs kanaler */}
+            <div style={{ 
+              background: 'white',
+              borderRadius: 12,
+              padding: 24,
+              border: '1px solid #e5e7eb',
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+            }}>
+              <h2 style={{ margin: '0 0 8px 0', fontSize: '1.25rem' }}>📱 Sociala medier</h2>
+              <p style={{ margin: '0 0 20px 0', fontSize: '0.8rem', color: '#6b7280' }}>
+                Trafik från Facebook, Instagram, TikTok, Pinterest, YouTube, X, LinkedIn och Snapchat
+              </p>
+              {stats.socialChannels.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {stats.socialChannels.map((s, i) => (
+                    <div key={s.channel} style={{ 
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      padding: '10px 14px', background: '#f9fafb', borderRadius: 8
+                    }}>
+                      <span style={{ fontWeight: 600, color: '#1f2937' }}>{s.channel}</span>
+                      <span style={{ fontWeight: 600, color: '#3b82f6' }}>{s.visits} besök</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>
+                  Ingen trafik från sociala medier ännu i vald period.
+                </p>
+              )}
+            </div>
+
             {/* Top UTM Sources */}
             <div style={{ 
               background: 'white',
@@ -1356,7 +1421,7 @@ export default function AdminDashboard() {
               border: '1px solid #e5e7eb',
               boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
             }}>
-              <h2 style={{ margin: '0 0 20px 0', fontSize: '1.25rem' }}>Trafikkällor (Top 5)</h2>
+              <h2 style={{ margin: '0 0 20px 0', fontSize: '1.25rem' }}>Trafikkällor (Top 5 UTM)</h2>
               {stats.topUtmSources.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {stats.topUtmSources.map((source, index) => (
