@@ -8,6 +8,7 @@ import { withDefaultCtaUtm } from '@/lib/utm';
 import { fetchCheapEnergyPrices } from '@/lib/priceService';
 import type { CheapEnergyPrices, ElectricityArea } from '@/lib/types';
 import { getElectricityArea } from '@/lib/types';
+import { ElectricityAreaMap } from './ElectricityAreaMap';
 
 const HeroSection = styled.section`
   padding: var(--section-spacing) 0;
@@ -184,22 +185,11 @@ export default function Hero() {
     return '—';
   };
 
-  const handlePostalSubmit = useCallback(
-    async (event?: React.FormEvent) => {
-      if (event) event.preventDefault();
-      const trimmed = postalCode.replace(/\s/g, '');
-      if (!/^\d{5}$/.test(trimmed)) {
-        setPriceStatus('invalid_postal');
-        setPriceError('Skriv ett giltigt postnummer med 5 siffror.');
-        setArea(null);
-        return;
-      }
-
+  const loadPricesForArea = useCallback(
+    async (elArea: ElectricityArea) => {
       try {
         setPriceStatus('loading');
         setPriceError(null);
-
-        const elArea = getElectricityArea(trimmed);
         setArea(elArea);
 
         // Hämta priser bara en gång per session och återanvänd datan
@@ -217,12 +207,36 @@ export default function Hero() {
 
         setPriceStatus('loaded');
       } catch (error) {
-        console.error('Error when looking up prices by postal code:', error);
+        console.error('Error when looking up prices by area:', error);
         setPriceStatus('error');
         setPriceError('Kunde inte hämta aktuella priser just nu. Försök igen senare eller ladda upp din elräkning för en exakt analys.');
       }
     },
-    [postalCode, prices]
+    [prices]
+  );
+
+  const handlePostalSubmit = useCallback(
+    async (event?: React.FormEvent) => {
+      if (event) event.preventDefault();
+      const trimmed = postalCode.replace(/\s/g, '');
+      if (!/^\d{5}$/.test(trimmed)) {
+        setPriceStatus('invalid_postal');
+        setPriceError('Skriv ett giltigt postnummer med 5 siffror.');
+        setArea(null);
+        return;
+      }
+
+      const elArea = getElectricityArea(trimmed);
+      await loadPricesForArea(elArea);
+    },
+    [postalCode, loadPricesForArea]
+  );
+
+  const handleAreaClick = useCallback(
+    async (selectedArea: ElectricityArea) => {
+      await loadPricesForArea(selectedArea);
+    },
+    [loadPricesForArea]
   );
 
   const trackHeroClick = useCallback((target: 'rorligt' | 'fastpris', href: string) => {
@@ -322,7 +336,7 @@ export default function Hero() {
                   htmlFor="hero-postal"
                   style={{ fontSize: '0.9rem', color: 'rgba(226, 232, 240, 0.95)', fontWeight: 500 }}
                 >
-                  Skriv ditt postnummer så visar vi prisnivåer i ditt elområde:
+                  Skriv ditt postnummer så visar vi prisnivåer i ditt elområde – eller klicka direkt på kartan:
                 </label>
                 <div
                   style={{
@@ -381,9 +395,13 @@ export default function Hero() {
                 </div>
               </form>
 
+              <div style={{ marginTop: '1rem' }}>
+                <ElectricityAreaMap onAreaSelected={handleAreaClick} value={area} />
+              </div>
+
               <div style={{ marginTop: '0.75rem', fontSize: '0.9rem', color: 'rgba(226,232,240,0.9)' }}>
                 {priceStatus === 'idle' && (
-                  <span>Exakt pris visas efter att du har fyllt i ditt postnummer.</span>
+                  <span>Exakt pris visas efter att du har fyllt i ditt postnummer eller valt elområde.</span>
                 )}
                 {priceStatus === 'invalid_postal' && (
                   <span style={{ color: '#fecaca' }}>Ogiltigt postnummer. Skriv fem siffror, t.ex. 11122.</span>

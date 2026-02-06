@@ -781,47 +781,6 @@ export default function AdminDashboard() {
             />
           </div>
 
-          {/* Conversion Funnel */}
-          <div style={{ 
-            background: 'white',
-            borderRadius: 12,
-            padding: 24,
-            marginBottom: 24,
-            border: '1px solid #e5e7eb',
-            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
-          }}>
-            <h2 style={{ margin: '0 0 20px 0', fontSize: '1.25rem' }}>Conversion Funnel</h2>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <FunnelStep 
-                label="Besökare"
-                value={stats.pageViews}
-                percent={100}
-                color="#3b82f6"
-              />
-              <FunnelArrow />
-              <FunnelStep 
-                label="AI-analyser"
-                value={stats.aiAnalyses}
-                percent={stats.pageViews > 0 ? (stats.aiAnalyses / stats.pageViews * 100) : 0}
-                color="#8b5cf6"
-              />
-              <FunnelArrow />
-              <FunnelStep 
-                label="Kontraktsklick"
-                value={stats.contractClicks}
-                percent={stats.aiAnalyses > 0 ? (stats.contractClicks / stats.aiAnalyses * 100) : 0}
-                color="#10b981"
-              />
-              <FunnelArrow />
-              <FunnelStep 
-                label="Leads"
-                value={stats.formSubmissions}
-                percent={stats.contractClicks > 0 ? (stats.formSubmissions / stats.contractClicks * 100) : 0}
-                color="#f59e0b"
-              />
-            </div>
-          </div>
-
           {/* Affiliate Clicks Section */}
           <div style={{ 
             background: 'white',
@@ -1831,60 +1790,6 @@ function MetricCard({
           {growth > 0 ? '↑' : '↓'} {Math.abs(growth).toFixed(1)}% vs föregående period
         </div>
       )}
-    </div>
-  );
-}
-
-function FunnelStep({ 
-  label, 
-  value, 
-  percent, 
-  color 
-}: { 
-  label: string; 
-  value: number; 
-  percent: number; 
-  color: string;
-}) {
-  return (
-    <div style={{ 
-      flex: 1,
-      textAlign: 'center'
-    }}>
-      <div style={{ 
-        fontSize: '0.875rem', 
-        color: '#6b7280',
-        marginBottom: 8 
-      }}>
-        {label}
-      </div>
-      <div style={{ 
-        fontSize: '1.75rem', 
-        fontWeight: 'bold',
-        color: color,
-        marginBottom: 4
-      }}>
-        {value}
-      </div>
-      <div style={{ 
-        fontSize: '0.875rem',
-        color: '#9ca3af',
-        fontWeight: 500
-      }}>
-        {percent.toFixed(1)}%
-      </div>
-    </div>
-  );
-}
-
-function FunnelArrow() {
-  return (
-    <div style={{ 
-      fontSize: '1.5rem',
-      color: '#d1d5db',
-      marginTop: 24
-    }}>
-      →
     </div>
   );
 }
