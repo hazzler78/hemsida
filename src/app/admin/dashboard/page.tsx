@@ -769,6 +769,7 @@ export default function AdminDashboard() {
             <MetricCard 
               title="Affiliate-klick (totalt)"
               value={stats.affiliateClicks}
+              subtitle={stats.pageViews > 0 ? `CTR: ${((stats.affiliateClicks / stats.pageViews) * 100).toFixed(1)}% (besök → klick)` : 'CTR: —'}
               icon="🔗"
               color="#ec4899"
             />
@@ -876,6 +877,9 @@ export default function AdminDashboard() {
                 </div>
                 <div style={{ fontSize: '0.75rem', color: '#92400e', marginTop: 4 }}>
                   Alla klick på affiliate-länkar
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#92400e', marginTop: 6, fontWeight: 500 }}>
+                  CTR: {stats.pageViews > 0 ? `${((stats.affiliateClicks / stats.pageViews) * 100).toFixed(1)}%` : '—'} (besök → klick)
                 </div>
               </div>
               <div style={{ 
@@ -1767,12 +1771,14 @@ function MetricCard({
   title, 
   value, 
   growth, 
+  subtitle,
   icon, 
   color 
 }: { 
   title: string; 
   value: number; 
   growth?: number; 
+  subtitle?: string;
   icon: string; 
   color: string;
 }) {
@@ -1811,6 +1817,11 @@ function MetricCard({
       }}>
         {value.toLocaleString('sv-SE')}
       </div>
+      {subtitle && (
+        <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: 4 }}>
+          {subtitle}
+        </div>
+      )}
       {growth !== undefined && growth !== 0 && (
         <div style={{ 
           fontSize: '0.875rem',
