@@ -120,7 +120,7 @@ export default function RootLayout({
         <meta name="facebook-domain-verification" content="in9xjxefhkl6pbe4g33zjwrsnkliin" />
         <meta name="tiktok-developers-site-verification" content="i7h859t0QF0G6Dua8q4h9qJUXwuPQoof" />
         
-        {/* Facebook Meta Pixel Code */}
+        {/* Facebook Meta Pixel Code – respekterar Cookiebot (marketing) */}
         <Script id="facebook-pixel" strategy="afterInteractive">
           {`
             !function(f,b,e,v,n,t,s)
@@ -131,8 +131,52 @@ export default function RootLayout({
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
+            
+            fbq('consent', 'revoke');
             fbq('init', '780636244595001');
-            fbq('track', 'PageView');
+            
+            function fireFbPageView() {
+              var cb = window.cookiebot || window.Cookiebot || window.CookieControl;
+              if (cb && cb.consent) {
+                if (cb.consent.marketing) {
+                  fbq('consent', 'grant');
+                  fbq('track', 'PageView');
+                  return true;
+                }
+                return false;
+              }
+              setTimeout(function() {
+                var cb2 = window.cookiebot || window.Cookiebot || window.CookieControl;
+                if (cb2 && cb2.consent && cb2.consent.marketing) {
+                  fbq('consent', 'grant');
+                  fbq('track', 'PageView');
+                }
+              }, 3000);
+              return false;
+            }
+            fireFbPageView();
+            
+            document.addEventListener('CookiebotOnConsentReady', function() {
+              var cb = window.cookiebot || window.Cookiebot || window.CookieControl;
+              if (cb && cb.consent && cb.consent.marketing) {
+                fbq('consent', 'grant');
+                fbq('track', 'PageView');
+              }
+            });
+            
+            document.addEventListener('CookiebotOnDecline', function() {
+              fbq('consent', 'revoke');
+            });
+            
+            var fbConsentGranted = false;
+            setInterval(function() {
+              var cb = window.cookiebot || window.Cookiebot || window.CookieControl;
+              if (cb && cb.consent && cb.consent.marketing && !fbConsentGranted) {
+                fbq('consent', 'grant');
+                fbq('track', 'PageView');
+                fbConsentGranted = true;
+              }
+            }, 2000);
           `}
         </Script>
         <noscript>
