@@ -375,7 +375,7 @@ const LOGO_MAPPING: Record<string, string> = {
   'Skellefteå': '/skelleftea.png',
   'Vattenfall': '/vattenfall.png',
   'Bixia': '/bixia.png',
-  'Motala': '',
+  'Motala': '/motala.png',
 };
 
 const FALLBACK_PROVIDERS: PageProvider[] = [
@@ -438,7 +438,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     id: 6,
     name: 'Motala',
     type: 'rorligt',
-    logo_url: '',
+    logo_url: '/motala.png',
     description: 'Konkurrenskraftiga elavtal för privatpersoner.',
     url: 'https://motalaenergi.se/privatperson/?src=Elchef',
     is_recommended: false,
