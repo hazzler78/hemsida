@@ -376,6 +376,7 @@ const LOGO_MAPPING: Record<string, string> = {
   'Vattenfall': '/vattenfall.png',
   'Bixia': '/bixia.png',
   'Motala': '/motala.png',
+  'Motala Energi': '/motala.png',
 };
 
 const FALLBACK_PROVIDERS: PageProvider[] = [

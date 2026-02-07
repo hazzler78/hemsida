@@ -292,6 +292,7 @@ const LOGO_MAPPING: Record<string, string> = {
   'Vattenfall': '/vattenfall.png',
   'Bixia': '/bixia.png',
   'Motala': '/motala.png',
+  'Motala Energi': '/motala.png',
 };
 
 // Funktion för att hitta logo_url baserat på leverantörsnamn
