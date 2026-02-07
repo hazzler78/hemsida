@@ -45,6 +45,8 @@ interface PageProvider {
   manual_monthly_fee_kr?: number | null;
   /** Manuellt påslag (öre/kWh) – används för sortering och visning när leverantör saknar prisfil */
   manual_surcharge_ore_per_kwh?: number | null;
+  /** 'hourly' = Rörligt timpris, 'monthly' = Rörligt månadspris – för manuella priser */
+  manual_rate_type?: 'hourly' | 'monthly' | null;
 }
 
 // GET - Fetch providers
@@ -94,6 +96,7 @@ export async function GET(request: NextRequest) {
       best_price_badge_text?: string | null;
       manual_monthly_fee_kr?: number | null;
       manual_surcharge_ore_per_kwh?: number | null;
+      manual_rate_type?: string | null;
       created_at: number;
       updated_at: number;
     };
@@ -113,6 +116,7 @@ export async function GET(request: NextRequest) {
       best_price_badge_text: row.best_price_badge_text && row.best_price_badge_text.trim() !== '' ? row.best_price_badge_text : undefined,
       manual_monthly_fee_kr: row.manual_monthly_fee_kr != null ? Number(row.manual_monthly_fee_kr) : undefined,
       manual_surcharge_ore_per_kwh: row.manual_surcharge_ore_per_kwh != null ? Number(row.manual_surcharge_ore_per_kwh) : undefined,
+      manual_rate_type: row.manual_rate_type === 'hourly' || row.manual_rate_type === 'monthly' ? row.manual_rate_type : undefined,
       created_at: row.created_at,
       updated_at: row.updated_at,
     }));
@@ -142,8 +146,8 @@ export async function POST(request: NextRequest) {
     
     const result = await db.prepare(
       `INSERT INTO page_providers 
-       (name, type, logo_url, description, url, is_recommended, display_order, active, campaign_text, campaign_bold, campaign_italic, best_price_badge_text, manual_monthly_fee_kr, manual_surcharge_ore_per_kwh, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       (name, type, logo_url, description, url, is_recommended, display_order, active, campaign_text, campaign_bold, campaign_italic, best_price_badge_text, manual_monthly_fee_kr, manual_surcharge_ore_per_kwh, manual_rate_type, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       body.name,
       body.type,
@@ -159,6 +163,7 @@ export async function POST(request: NextRequest) {
       body.best_price_badge_text || null,
       body.manual_monthly_fee_kr ?? null,
       body.manual_surcharge_ore_per_kwh ?? null,
+      body.manual_rate_type ?? null,
       Math.floor(Date.now() / 1000),
       Math.floor(Date.now() / 1000)
     ).run();
@@ -199,7 +204,7 @@ export async function PUT(request: NextRequest) {
        SET name = ?, type = ?, logo_url = ?, description = ?, url = ?, 
            is_recommended = ?, display_order = ?, active = ?, 
            campaign_text = ?, campaign_bold = ?, campaign_italic = ?, 
-           best_price_badge_text = ?, manual_monthly_fee_kr = ?, manual_surcharge_ore_per_kwh = ?, updated_at = ?
+           best_price_badge_text = ?, manual_monthly_fee_kr = ?, manual_surcharge_ore_per_kwh = ?, manual_rate_type = ?, updated_at = ?
        WHERE id = ?`
     ).bind(
       body.name,
@@ -216,6 +221,7 @@ export async function PUT(request: NextRequest) {
       body.best_price_badge_text || null,
       body.manual_monthly_fee_kr ?? null,
       body.manual_surcharge_ore_per_kwh ?? null,
+      body.manual_rate_type ?? null,
       Math.floor(Date.now() / 1000),
       body.id
     ).run();

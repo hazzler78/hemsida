@@ -29,6 +29,7 @@ interface PageProvider {
   campaign_italic?: boolean;
   manual_monthly_fee_kr?: number | null;
   manual_surcharge_ore_per_kwh?: number | null;
+  manual_rate_type?: 'hourly' | 'monthly' | null;
 }
 
 const PageContainer = styled.div`
@@ -744,7 +745,11 @@ export default function RorligtAvtalPage() {
                   const fromApi = getProviderPriceFromApi(provider.name, providerPrices);
                   const månadKr = fromApi?.monthly_fee_kr ?? provider.manual_monthly_fee_kr ?? getMånadskostnadKr(provider.name);
                   const påslagValue = fromApi?.surcharge_ore_per_kwh ?? provider.manual_surcharge_ore_per_kwh ?? getPåslagÖrePerKwh(provider.name);
-                  const rateLabel = fromApi?.rate_type === 'monthly' ? 'Rörligt månadspris' : 'Rörligt timpris';
+                  const rateLabel = fromApi?.rate_type === 'monthly'
+                    ? 'Rörligt månadspris'
+                    : provider.manual_rate_type === 'monthly'
+                      ? 'Rörligt månadspris'
+                      : 'Rörligt timpris';
                   const påslagText =
                     påslagValue === 0
                       ? '0 öre/kWh i påslag'

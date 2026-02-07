@@ -22,6 +22,8 @@ interface PageProvider {
   manual_monthly_fee_kr?: number | null;
   /** Manuellt påslag (öre/kWh) – för leverantörer utan prisfil; används för sortering billigast först */
   manual_surcharge_ore_per_kwh?: number | null;
+  /** Rörligt timpris eller månadspris – för manuella priser */
+  manual_rate_type?: 'hourly' | 'monthly' | null;
 }
 
 export default function AdminProviders() {
@@ -273,7 +275,8 @@ export default function AdminProviders() {
               campaign_italic: false,
               best_price_badge_text: '',
               manual_monthly_fee_kr: undefined,
-              manual_surcharge_ore_per_kwh: undefined
+              manual_surcharge_ore_per_kwh: undefined,
+              manual_rate_type: undefined
             })}
             style={{ 
               padding: "8px 16px", 
@@ -349,7 +352,9 @@ export default function AdminProviders() {
                     </p>
                     {(provider.manual_monthly_fee_kr != null || provider.manual_surcharge_ore_per_kwh != null) && (
                       <p style={{ margin: "4px 0 0 0", color: "#059669", fontSize: "12px" }}>
-                        Manuellt pris: {provider.manual_monthly_fee_kr ?? 0} kr/mån, {provider.manual_surcharge_ore_per_kwh ?? 0} öre/kWh påslag
+                        Manuellt pris: {provider.manual_monthly_fee_kr ?? 0} kr/mån, {provider.manual_surcharge_ore_per_kwh ?? 0} öre/kWh
+                        {provider.manual_rate_type === 'monthly' && ' (Rörligt månadspris)'}
+                        {provider.manual_rate_type === 'hourly' && ' (Rörligt timpris)'}
                       </p>
                     )}
                     {provider.campaign_text && (
@@ -576,6 +581,18 @@ function ProviderForm({ provider, onSave, onCancel }: {
               placeholder="t.ex. 9.9"
             />
           </div>
+        </div>
+        <div style={{ marginTop: 12 }}>
+          <label style={{ display: "block", marginBottom: 4, fontWeight: "500" }}>Pristyp (rörligt):</label>
+          <select
+            value={formData.manual_rate_type ?? ''}
+            onChange={(e) => setFormData({...formData, manual_rate_type: (e.target.value === '' ? undefined : e.target.value) as 'hourly' | 'monthly' | undefined})}
+            style={{ width: "100%", maxWidth: 280, padding: 8, borderRadius: 4, border: "1px solid #d1d5db" }}
+          >
+            <option value="">— Välj om manuellt —</option>
+            <option value="hourly">Rörligt timpris</option>
+            <option value="monthly">Rörligt månadspris</option>
+          </select>
         </div>
       </div>
 
