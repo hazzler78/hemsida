@@ -3,7 +3,10 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import type { CheapEnergyPrices, ElectricityArea } from '@/lib/types';
+
+/** Månadskostnad och påslag från /api/prices/providers (prisfiler). */
+type ProviderPriceItem = { monthly_fee_kr: number; surcharge_ore_per_kwh: number };
+type ProviderPricesMap = Record<string, ProviderPriceItem>;
 
 interface PageProvider {
   id: number;
@@ -239,32 +242,59 @@ const HighlightBadge = styled.div`
   z-index: 10;
 `;
 
-const PriceBadge = styled.div`
+const PriceBlock = styled.div`
   font-size: 0.9rem;
   font-weight: 600;
   color: #059669;
   margin-bottom: 0.5rem;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.25rem;
+  gap: 0.15rem;
 `;
 
-// Påslag öre/kWh per leverantör (rörligt) – används för att räkna ut totalpris = spot + påslag
+// Fallback: månadskostnad kr när leverantör saknas i prisfilerna
+const MÅNADSAVGIFT_KR: Record<string, number> = {
+  'Cheap Energy': 0,
+  'Svekraft': 0,
+  'Tibber': 49,
+  'Telinet Energi': 59,
+  'Fortum': 69,
+  'Eon': 0,
+  'E.ON': 0,
+  'Greenely': 69,
+  'Skellefteå Kraft': 0,
+  'Skellefteå': 0,
+  'Vattenfall': 45,
+  'Bixia': 39,
+  'Motala': 20,
+  'Motala Energi': 20,
+  'Stockholms Elbolag': 32,
+};
+
+function getMånadskostnadKr(providerName: string): number {
+  if (MÅNADSAVGIFT_KR[providerName] !== undefined) return MÅNADSAVGIFT_KR[providerName];
+  const key = Object.keys(MÅNADSAVGIFT_KR).find((k) => k.toLowerCase() === providerName.toLowerCase());
+  return key !== undefined ? MÅNADSAVGIFT_KR[key] : 0;
+}
+
+// Fallback: påslag öre/kWh när leverantör saknas i prisfilerna
 const PÅSLAG_ÖRE_PER_KWH: Record<string, number> = {
   'Cheap Energy': 0,
-  'Svekraft': 7.99,
-  'Tibber': 8.6,
-  'Telinet Energi': 13.33,
-  'Fortum': 12.38,
+  'Svekraft': 6.86,
+  'Tibber': 11.6,
+  'Telinet Energi': 9.71,
+  'Fortum': 9.9,
   'Eon': 0,
   'E.ON': 0,
   'Greenely': 0,
-  'Skellefteå Kraft': 0,
-  'Skellefteå': 0,
-  'Vattenfall': 0,
-  'Bixia': 0,
-  'Motala': 0,
+  'Skellefteå Kraft': 7.5,
+  'Skellefteå': 7.5,
+  'Vattenfall': 17.58,
+  'Bixia': 5,
+  'Motala': 12.38,
+  'Motala Energi': 12.38,
 };
 
 function getPåslagÖrePerKwh(providerName: string): number {
@@ -275,6 +305,14 @@ function getPåslagÖrePerKwh(providerName: string): number {
     (k) => k.toLowerCase() === providerName.toLowerCase()
   );
   return key !== undefined ? PÅSLAG_ÖRE_PER_KWH[key] : 0;
+}
+
+/** Hämtar månadskostnad + påslag från API-svar (prisfiler). Case-insensitive match på leverantörsnamn. */
+function getProviderPriceFromApi(providerName: string, providers: ProviderPricesMap | null): ProviderPriceItem | null {
+  if (!providers) return null;
+  if (providers[providerName]) return providers[providerName];
+  const key = Object.keys(providers).find((k) => k.toLowerCase() === providerName.toLowerCase());
+  return key ? providers[key] : null;
 }
 
 // Mapping av leverantörsnamn till logotyper
@@ -384,29 +422,42 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
   },
 ];
 
-const MOMS_MULTIPLIER = 1.25;
+/** Förbrukningsintervall (kWh/år) – matchar prisfilernas segment. */
+const CONSUMPTION_OPTIONS: { value: number; label: string }[] = [
+  { value: 2500, label: 'Under 5 000 kWh/år' },
+  { value: 7500, label: '5 000–10 000 kWh/år' },
+  { value: 13500, label: '10 000–17 000 kWh/år' },
+  { value: 25000, label: 'Över 17 000 kWh/år' },
+];
 
 export default function RorligtAvtalPage() {
   const [providers, setProviders] = React.useState<PageProvider[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [failedLogos, setFailedLogos] = React.useState<Set<number>>(new Set());
-  const [prices, setPrices] = React.useState<CheapEnergyPrices | null>(null);
-  const [priceArea, setPriceArea] = React.useState<ElectricityArea>('se3');
+  const [providerPrices, setProviderPrices] = React.useState<ProviderPricesMap | null>(null);
+  const [providerPricesLoading, setProviderPricesLoading] = React.useState(false);
+  const [consumptionKwhPerYear, setConsumptionKwhPerYear] = React.useState(7500);
 
   React.useEffect(() => {
-    const fetchPrices = async () => {
+    let cancelled = false;
+    setProviderPricesLoading(true);
+    const fetchProviderPrices = async () => {
       try {
-        const res = await fetch('/api/prices');
+        const res = await fetch(`/api/prices/providers?consumption=${consumptionKwhPerYear}`);
+        if (cancelled) return;
         if (res.ok) {
           const data = await res.json();
-          setPrices(data);
+          setProviderPrices(data.providers ?? null);
         }
       } catch {
-        // Ignore – visar bara pris när API svarar
+        if (!cancelled) setProviderPrices(null);
+      } finally {
+        if (!cancelled) setProviderPricesLoading(false);
       }
     };
-    fetchPrices();
-  }, []);
+    fetchProviderPrices();
+    return () => { cancelled = true; };
+  }, [consumptionKwhPerYear]);
 
   React.useEffect(() => {
     const fetchProviders = async () => {
@@ -537,30 +588,43 @@ export default function RorligtAvtalPage() {
           och hitta det rörliga elavtal som passar din förbrukning och ditt elområde bäst.
         </Subtitle>
 
-        {prices && (
-          <div style={{ marginBottom: '1rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-            <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.9rem' }}>Prisnivå för elområde:</span>
-            <select
-              value={priceArea}
-              onChange={(e) => setPriceArea(e.target.value as ElectricityArea)}
-              style={{
-                padding: '0.35rem 0.75rem',
-                borderRadius: 8,
-                border: '1px solid rgba(255,255,255,0.3)',
-                background: 'rgba(255,255,255,0.15)',
-                color: 'white',
-                fontSize: '0.9rem',
-                cursor: 'pointer',
-              }}
-              aria-label="Välj elområde"
-            >
-              <option value="se1">SE1 (Norra Sverige)</option>
-              <option value="se2">SE2 (Norra Mellansverige)</option>
-              <option value="se3">SE3 (Södra Mellansverige)</option>
-              <option value="se4">SE4 (Södra Sverige)</option>
-            </select>
-          </div>
-        )}
+        <div style={{
+          marginBottom: '1.25rem',
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.5rem',
+        }}>
+          <label htmlFor="consumption-select" style={{ color: 'rgba(255,255,255,0.95)', fontSize: '0.95rem', fontWeight: 500 }}>
+            Ungefärlig årsförbrukning:
+          </label>
+          <select
+            id="consumption-select"
+            value={consumptionKwhPerYear}
+            onChange={(e) => setConsumptionKwhPerYear(Number(e.target.value))}
+            style={{
+              padding: '0.5rem 0.75rem',
+              borderRadius: 10,
+              border: '1px solid rgba(255,255,255,0.35)',
+              background: 'rgba(255,255,255,0.95)',
+              color: '#111827',
+              fontSize: '0.95rem',
+              cursor: 'pointer',
+              minWidth: '200px',
+            }}
+            aria-label="Välj ungefärlig årsförbrukning i kWh"
+          >
+            {CONSUMPTION_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          {providerPricesLoading && (
+            <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.85rem' }}>Uppdaterar priser…</span>
+          )}
+        </div>
 
         {loading ? (
           <div style={{ textAlign: 'center', color: 'white', padding: '2rem' }}>
@@ -581,15 +645,21 @@ export default function RorligtAvtalPage() {
                 )}
                 {provider.is_recommended && <HighlightBadge>Rekommenderat</HighlightBadge>}
                 <ProviderName>{provider.name}</ProviderName>
-                {prices?.spot_prices?.[priceArea] != null && (() => {
-                  const spot = prices.spot_prices[priceArea] ?? 0;
-                  const påslag = getPåslagÖrePerKwh(provider.name);
-                  const totalExMoms = spot + påslag;
-                  const inklMoms = Math.round(totalExMoms * MOMS_MULTIPLIER * 10) / 10;
+                {(() => {
+                  const fromApi = getProviderPriceFromApi(provider.name, providerPrices);
+                  const månadKr = fromApi?.monthly_fee_kr ?? getMånadskostnadKr(provider.name);
+                  const påslagValue = fromApi?.surcharge_ore_per_kwh ?? getPåslagÖrePerKwh(provider.name);
+                  const påslagText =
+                    påslagValue === 0
+                      ? '0 öre/kWh i påslag'
+                      : påslagValue < 0
+                        ? `${påslagValue.toLocaleString('sv-SE')} öre/kWh i påslag (minuspåslag)`
+                        : `${påslagValue.toLocaleString('sv-SE')} öre/kWh i påslag`;
                   return (
-                    <PriceBadge>
-                      Ca {inklMoms} öre/kWh inkl. moms ({priceArea.toUpperCase()})
-                    </PriceBadge>
+                    <PriceBlock>
+                      <span>{månadKr === 0 ? '0 kr/månad' : `${månadKr} kr/månad`}</span>
+                      <span>{påslagText}</span>
+                    </PriceBlock>
                   );
                 })()}
                 {provider.campaign_text && (

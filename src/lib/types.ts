@@ -1,16 +1,25 @@
 import { getPriceAreaFromPostalCode } from './postal-to-area';
 
+/** Rörligt avtal: påslag, månadskostnad och total från prisfil (t.ex. variable_hourly_rate[area][0].no_commitment) */
+export interface VariableRateNoCommitment {
+  surcharge?: number;       // öre/kWh påslag
+  price?: number;           // spot
+  total?: number;
+  total_with_vat?: number;  // öre/kWh inkl. moms
+  monthly_fee?: number;      // kr/månad
+}
+
 export interface CheapEnergyPrices {
   variable_fixed_prices: {
     [key: string]: {
-      '3_months': number;
-      '6_months': number;
-      '1_year': number;
-      '2_years': number;
-      '3_years': number;
-      '4_years': number;
-      '5_years': number;
-      '10_years': number;
+      '3_months': number | { price?: number; total?: number; total_with_vat?: number };
+      '6_months': number | { price?: number; total?: number; total_with_vat?: number };
+      '1_year': number | { price?: number; total?: number; total_with_vat?: number };
+      '2_years': number | { price?: number; total?: number; total_with_vat?: number };
+      '3_years': number | { price?: number; total?: number; total_with_vat?: number };
+      '4_years': number | { price?: number; total?: number; total_with_vat?: number };
+      '5_years': number | { price?: number; total?: number; total_with_vat?: number };
+      '10_years': number | { price?: number; total?: number; total_with_vat?: number };
     };
   };
   spot_prices: {
@@ -18,8 +27,15 @@ export interface CheapEnergyPrices {
   };
   fixed_fees: {
     all_customers: number;
-    all_customers_discount: number;
+    all_customers_discount?: number;
     green_electricity: number;
+  };
+  /** Rörligt avtal per område – påslag finns här (Stockholms Elbolag / prisfilen) */
+  variable_hourly_rate?: {
+    [area: string]: Array<{ no_commitment?: VariableRateNoCommitment }>;
+  };
+  variable_monthly_rate?: {
+    [area: string]: Array<{ no_commitment?: VariableRateNoCommitment }>;
   };
 }
 
