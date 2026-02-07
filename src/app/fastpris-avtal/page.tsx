@@ -206,22 +206,13 @@ const LOGO_MAPPING: Record<string, string> = {
   'Motala Energi': '/motala.png',
 };
 
-// Funktion för att hitta logo_url baserat på leverantörsnamn
+// Funktion för att hitta logo_url baserat på leverantörsnamn.
+// Kända leverantörer (t.ex. Motala) använder alltid mappningen så loggan visas även i produktion.
 function getLogoUrl(providerName: string, existingLogoUrl?: string): string {
-  if (existingLogoUrl && existingLogoUrl.trim() !== '') {
-    return existingLogoUrl;
-  }
-  // Matcha exakt namn först
-  if (LOGO_MAPPING[providerName]) {
-    return LOGO_MAPPING[providerName];
-  }
-  // Matcha case-insensitive
-  const normalizedName = Object.keys(LOGO_MAPPING).find(
-    key => key.toLowerCase() === providerName.toLowerCase()
-  );
-  if (normalizedName) {
-    return LOGO_MAPPING[normalizedName];
-  }
+  const mapped = LOGO_MAPPING[providerName]
+    ?? LOGO_MAPPING[Object.keys(LOGO_MAPPING).find(k => k.toLowerCase() === providerName.toLowerCase()) ?? ''];
+  if (mapped) return mapped;
+  if (existingLogoUrl && existingLogoUrl.trim() !== '') return existingLogoUrl;
   return '';
 }
 

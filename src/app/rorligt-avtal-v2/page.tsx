@@ -448,19 +448,12 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
   },
 ];
 
+// Kända leverantörer (t.ex. Motala) använder alltid mappningen så loggan visas även i produktion.
 function getLogoUrl(providerName: string, existingLogoUrl?: string): string {
-  if (existingLogoUrl && existingLogoUrl.trim() !== '') {
-    return existingLogoUrl;
-  }
-  if (LOGO_MAPPING[providerName]) {
-    return LOGO_MAPPING[providerName];
-  }
-  const normalizedName = Object.keys(LOGO_MAPPING).find(
-    key => key.toLowerCase() === providerName.toLowerCase()
-  );
-  if (normalizedName) {
-    return LOGO_MAPPING[normalizedName];
-  }
+  const mapped = LOGO_MAPPING[providerName]
+    ?? LOGO_MAPPING[Object.keys(LOGO_MAPPING).find(k => k.toLowerCase() === providerName.toLowerCase()) ?? ''];
+  if (mapped) return mapped;
+  if (existingLogoUrl && existingLogoUrl.trim() !== '') return existingLogoUrl;
   return '';
 }
 
