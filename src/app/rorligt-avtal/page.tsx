@@ -313,9 +313,17 @@ function getPåslagÖrePerKwh(providerName: string): number {
   return key !== undefined ? PÅSLAG_ÖRE_PER_KWH[key] : 0;
 }
 
-/** Hämtar månadskostnad + påslag från API-svar (prisfiler). Case-insensitive match på leverantörsnamn. */
+/** Leverantörer som inte har prisfiler – priser sätts manuellt (MÅNADSAVGIFT_KR, PÅSLAG_ÖRE_PER_KWH). */
+const PROVIDERS_MANUAL_PRICE = new Set([
+  'Skellefteå', 'Skellefteå Kraft', 'Greenely', 'Bixia', 'Vattenfall', 'Tibber', 'Telinet Energi', 'Fortum',
+]);
+
+/** Hämtar månadskostnad + påslag från API-svar (prisfiler). Returnerar null för leverantörer med manuella priser. */
 function getProviderPriceFromApi(providerName: string, providers: ProviderPricesMap | null): ProviderPriceItem | null {
   if (!providers) return null;
+  const isManual = PROVIDERS_MANUAL_PRICE.has(providerName) ||
+    [...PROVIDERS_MANUAL_PRICE].some((k) => k.toLowerCase() === providerName.toLowerCase());
+  if (isManual) return null;
   if (providers[providerName]) return providers[providerName];
   const key = Object.keys(providers).find((k) => k.toLowerCase() === providerName.toLowerCase());
   return key ? providers[key] : null;
