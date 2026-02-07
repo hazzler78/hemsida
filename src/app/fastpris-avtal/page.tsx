@@ -3,7 +3,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import type { CheapEnergyPrices, ElectricityArea } from '@/lib/types';
+import type { ElectricityArea } from '@/lib/types';
 
 interface PageProvider {
   id: number;
@@ -189,9 +189,6 @@ const PriceBadge = styled.div`
   gap: 0.25rem;
 `;
 
-// Leverantörer som vi har API-prisdata för (matchar /api/prices JSON-källor)
-const PROVIDERS_WITH_PRICE_API = new Set(['Stockholms Elbolag']);
-
 // Mapping av leverantörsnamn till logotyper
 const LOGO_MAPPING: Record<string, string> = {
   'Cheap Energy': '/cheap-logo.png',
@@ -287,29 +284,52 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
   },
 ];
 
-const MOMS_MULTIPLIER = 1.25;
+/** Avtalslängd – nycklar i prisfilernas variable_fixed_prices */
+type FixedPeriodKey = '6_months' | '1_year' | '2_years' | '3_years';
+const PERIOD_OPTIONS: { value: FixedPeriodKey; label: string }[] = [
+  { value: '6_months', label: '6 månader' },
+  { value: '1_year', label: '12 månader' },
+  { value: '2_years', label: '24 månader' },
+  { value: '3_years', label: '36 månader' },
+];
+const PERIOD_LABEL_SHORT: Record<FixedPeriodKey, string> = {
+  '6_months': '6 mån',
+  '1_year': '12 mån',
+  '2_years': '24 mån',
+  '3_years': '36 mån',
+};
 
 export default function FastprisAvtalPage() {
   const [providers, setProviders] = React.useState<PageProvider[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [failedLogos, setFailedLogos] = React.useState<Set<number>>(new Set());
-  const [prices, setPrices] = React.useState<CheapEnergyPrices | null>(null);
+  const [fixedPrices, setFixedPrices] = React.useState<Record<string, number> | null>(null);
+  const [loadingPrices, setLoadingPrices] = React.useState(true);
   const [priceArea, setPriceArea] = React.useState<ElectricityArea>('se3');
+  const [contractPeriod, setContractPeriod] = React.useState<FixedPeriodKey>('1_year');
 
   React.useEffect(() => {
-    const fetchPrices = async () => {
+    let cancelled = false;
+    setLoadingPrices(true);
+    const fetchFixedPrices = async () => {
       try {
-        const res = await fetch('/api/prices');
+        const res = await fetch(`/api/prices/providers/fixed?area=${priceArea}&period=${contractPeriod}`);
+        if (cancelled) return;
         if (res.ok) {
           const data = await res.json();
-          setPrices(data);
+          setFixedPrices(data.providers ?? null);
+        } else {
+          setFixedPrices(null);
         }
       } catch {
-        // Ignore – visar bara pris när API svarar
+        if (!cancelled) setFixedPrices(null);
+      } finally {
+        if (!cancelled) setLoadingPrices(false);
       }
     };
-    fetchPrices();
-  }, []);
+    fetchFixedPrices();
+    return () => { cancelled = true; };
+  }, [priceArea, contractPeriod]);
 
   React.useEffect(() => {
     const fetchProviders = async () => {
@@ -440,30 +460,54 @@ export default function FastprisAvtalPage() {
           det fastpris elavtal 2026 som ger dig trygg och förutsägbar elkostnad.
         </Subtitle>
 
-        {prices && (
-          <div style={{ marginBottom: '1rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-            <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.9rem' }}>Prisnivå för elområde:</span>
-            <select
-              value={priceArea}
-              onChange={(e) => setPriceArea(e.target.value as ElectricityArea)}
-              style={{
-                padding: '0.35rem 0.75rem',
-                borderRadius: 8,
-                border: '1px solid rgba(255,255,255,0.3)',
-                background: 'rgba(255,255,255,0.15)',
-                color: 'white',
-                fontSize: '0.9rem',
-                cursor: 'pointer',
-              }}
-              aria-label="Välj elområde"
-            >
-              <option value="se1">SE1 (Norra Sverige)</option>
-              <option value="se2">SE2 (Norra Mellansverige)</option>
-              <option value="se3">SE3 (Södra Mellansverige)</option>
-              <option value="se4">SE4 (Södra Sverige)</option>
-            </select>
+        <div style={{ marginBottom: '1.25rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.9rem' }}>Avtalslängd:</span>
+              <select
+                value={contractPeriod}
+                onChange={(e) => setContractPeriod(e.target.value as FixedPeriodKey)}
+                style={{
+                  padding: '0.4rem 0.75rem',
+                  borderRadius: 8,
+                  border: '1px solid rgba(255,255,255,0.35)',
+                  background: 'rgba(255,255,255,0.95)',
+                  color: '#111827',
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                }}
+                aria-label="Välj avtalslängd"
+              >
+                {PERIOD_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.9rem' }}>Elområde:</span>
+              <select
+                value={priceArea}
+                onChange={(e) => setPriceArea(e.target.value as ElectricityArea)}
+                style={{
+                  padding: '0.4rem 0.75rem',
+                  borderRadius: 8,
+                  border: '1px solid rgba(255,255,255,0.35)',
+                  background: 'rgba(255,255,255,0.95)',
+                  color: '#111827',
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                }}
+                aria-label="Välj elområde"
+              >
+                <option value="se1">SE1 (Norra Sverige)</option>
+                <option value="se2">SE2 (Norra Mellansverige)</option>
+                <option value="se3">SE3 (Södra Mellansverige)</option>
+                <option value="se4">SE4 (Södra Sverige)</option>
+              </select>
+            </div>
+            {loadingPrices && (
+              <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.9rem' }}>Laddar priser...</span>
+            )}
           </div>
-        )}
 
         {loading ? (
           <div style={{ textAlign: 'center', color: 'white', padding: '2rem' }}>
@@ -484,14 +528,13 @@ export default function FastprisAvtalPage() {
                 )}
                 {provider.is_recommended && <HighlightBadge>Rekommenderat</HighlightBadge>}
                 <ProviderName>{provider.name}</ProviderName>
-                {prices && PROVIDERS_WITH_PRICE_API.has(provider.name) && (() => {
-                  const areaPrices = prices.variable_fixed_prices?.[priceArea];
-                  const oneYear = areaPrices?.['1_year'];
-                  if (oneYear == null) return null;
-                  const inklMoms = Math.round(oneYear * MOMS_MULTIPLIER * 10) / 10;
+                {(() => {
+                  const price = fixedPrices?.[provider.name]
+                    ?? fixedPrices?.[Object.keys(fixedPrices ?? {}).find((k) => k.toLowerCase() === provider.name.toLowerCase()) ?? ''];
+                  if (price == null) return null;
                   return (
                     <PriceBadge>
-                      Från {inklMoms} öre/kWh inkl. moms (12 mån, {priceArea.toUpperCase()})
+                      Från {price} öre/kWh inkl. moms ({PERIOD_LABEL_SHORT[contractPeriod]}, {priceArea.toUpperCase()})
                     </PriceBadge>
                   );
                 })()}
