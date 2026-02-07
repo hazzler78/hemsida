@@ -27,6 +27,8 @@ interface PageProvider {
   campaign_text?: string;
   campaign_bold?: boolean;
   campaign_italic?: boolean;
+  manual_monthly_fee_kr?: number | null;
+  manual_surcharge_ore_per_kwh?: number | null;
 }
 
 const PageContainer = styled.div`
@@ -329,6 +331,18 @@ function getProviderPriceFromApi(providerName: string, providers: ProviderPrices
   return key ? providers[key] : null;
 }
 
+/** Årskostnad (SEK) för sortering – lägre = billigare. Använder API, sedan manuellt från DB, sedan fallback. */
+function getAnnualCostForSort(
+  provider: PageProvider,
+  providerPrices: ProviderPricesMap | null,
+  consumptionKwhPerYear: number
+): number {
+  const fromApi = getProviderPriceFromApi(provider.name, providerPrices);
+  const monthly = fromApi?.monthly_fee_kr ?? provider.manual_monthly_fee_kr ?? getMånadskostnadKr(provider.name);
+  const surcharge = fromApi?.surcharge_ore_per_kwh ?? provider.manual_surcharge_ore_per_kwh ?? getPåslagÖrePerKwh(provider.name);
+  return monthly * 12 + (surcharge * consumptionKwhPerYear) / 100;
+}
+
 // Mapping av leverantörsnamn till logotyper
 const LOGO_MAPPING: Record<string, string> = {
   'Cheap Energy': '/cheap-logo.png',
@@ -547,6 +561,13 @@ export default function RorligtAvtalPage() {
     } catch { /* no-op */ }
   }, []);
 
+  const sortedProviders = React.useMemo(
+    () => [...providers].sort((a, b) =>
+      getAnnualCostForSort(a, providerPrices, consumptionKwhPerYear) - getAnnualCostForSort(b, providerPrices, consumptionKwhPerYear)
+    ),
+    [providers, providerPrices, consumptionKwhPerYear]
+  );
+
   const handleProviderClick = (providerName: string, url: string) => {
     try {
       // Generera unikt tracking-ID för att koppla försäljningar till klick
@@ -706,7 +727,7 @@ export default function RorligtAvtalPage() {
           </div>
         ) : (
           <ProvidersGrid>
-            {providers.map((provider) => (
+            {sortedProviders.map((provider) => (
               <ProviderCard key={provider.id}>
                 {provider.logo_url && provider.logo_url.trim() !== '' && !failedLogos.has(provider.id) && (
                   <ProviderLogo
@@ -721,8 +742,8 @@ export default function RorligtAvtalPage() {
                 <ProviderName>{provider.name}</ProviderName>
                 {(() => {
                   const fromApi = getProviderPriceFromApi(provider.name, providerPrices);
-                  const månadKr = fromApi?.monthly_fee_kr ?? getMånadskostnadKr(provider.name);
-                  const påslagValue = fromApi?.surcharge_ore_per_kwh ?? getPåslagÖrePerKwh(provider.name);
+                  const månadKr = fromApi?.monthly_fee_kr ?? provider.manual_monthly_fee_kr ?? getMånadskostnadKr(provider.name);
+                  const påslagValue = fromApi?.surcharge_ore_per_kwh ?? provider.manual_surcharge_ore_per_kwh ?? getPåslagÖrePerKwh(provider.name);
                   const rateLabel = fromApi?.rate_type === 'monthly' ? 'Rörligt månadspris' : 'Rörligt timpris';
                   const påslagText =
                     påslagValue === 0

@@ -18,6 +18,10 @@ interface PageProvider {
   campaign_bold?: boolean;
   campaign_italic?: boolean;
   best_price_badge_text?: string;
+  /** Manuell månadskostnad (kr) – för leverantörer utan prisfil; används för sortering billigast först */
+  manual_monthly_fee_kr?: number | null;
+  /** Manuellt påslag (öre/kWh) – för leverantörer utan prisfil; används för sortering billigast först */
+  manual_surcharge_ore_per_kwh?: number | null;
 }
 
 export default function AdminProviders() {
@@ -267,7 +271,9 @@ export default function AdminProviders() {
               campaign_text: '',
               campaign_bold: false,
               campaign_italic: false,
-              best_price_badge_text: ''
+              best_price_badge_text: '',
+              manual_monthly_fee_kr: undefined,
+              manual_surcharge_ore_per_kwh: undefined
             })}
             style={{ 
               padding: "8px 16px", 
@@ -341,6 +347,11 @@ export default function AdminProviders() {
                     <p style={{ margin: 0, color: "#6b7280", fontSize: "12px" }}>
                       Ordning: {provider.display_order}
                     </p>
+                    {(provider.manual_monthly_fee_kr != null || provider.manual_surcharge_ore_per_kwh != null) && (
+                      <p style={{ margin: "4px 0 0 0", color: "#059669", fontSize: "12px" }}>
+                        Manuellt pris: {provider.manual_monthly_fee_kr ?? 0} kr/mån, {provider.manual_surcharge_ore_per_kwh ?? 0} öre/kWh påslag
+                      </p>
+                    )}
                     {provider.campaign_text && (
                       <p style={{ 
                         margin: "8px 0 0 0", 
@@ -534,6 +545,37 @@ function ProviderForm({ provider, onSave, onCancel }: {
             min="0"
             required
           />
+        </div>
+      </div>
+
+      <div style={{ marginBottom: 16, padding: "12px", background: "#f0fdf4", borderRadius: 6, border: "1px solid #bbf7d0" }}>
+        <div style={{ fontWeight: "600", marginBottom: 8, color: "#166534" }}>Manuellt pris (rörligt)</div>
+        <p style={{ margin: "0 0 12px 0", fontSize: "13px", color: "#15803d" }}>
+          Används för leverantörer utan prisfil (t.ex. Tibber, Vattenfall). Sidan /rorligt-avtal sorterar billigast först utifrån detta eller automatiska priser.
+        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+          <div>
+            <label style={{ display: "block", marginBottom: 4, fontWeight: "500" }}>Månadskostnad (kr):</label>
+            <input
+              type="number"
+              step="any"
+              value={formData.manual_monthly_fee_kr ?? ''}
+              onChange={(e) => setFormData({...formData, manual_monthly_fee_kr: e.target.value === '' ? undefined : Number(e.target.value)})}
+              style={{ width: "100%", padding: 8, borderRadius: 4, border: "1px solid #d1d5db" }}
+              placeholder="t.ex. 49"
+            />
+          </div>
+          <div>
+            <label style={{ display: "block", marginBottom: 4, fontWeight: "500" }}>Påslag (öre/kWh):</label>
+            <input
+              type="number"
+              step="any"
+              value={formData.manual_surcharge_ore_per_kwh ?? ''}
+              onChange={(e) => setFormData({...formData, manual_surcharge_ore_per_kwh: e.target.value === '' ? undefined : Number(e.target.value)})}
+              style={{ width: "100%", padding: 8, borderRadius: 4, border: "1px solid #d1d5db" }}
+              placeholder="t.ex. 9.9"
+            />
+          </div>
         </div>
       </div>
 
