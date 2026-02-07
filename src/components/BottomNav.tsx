@@ -121,10 +121,6 @@ function BottomNavContent() {
         Företag
         {pathname === '/foretag' && <ActiveIndicator />}
       </NavItem>
-      <NavItem href={withDefaultCtaUtm('/om-oss', 'bottomnav', 'about')} className={pathname === '/om-oss' ? 'active' : ''}>
-        Om oss
-        {pathname === '/om-oss' && <ActiveIndicator />}
-      </NavItem>
     </Nav>
   );
 }
