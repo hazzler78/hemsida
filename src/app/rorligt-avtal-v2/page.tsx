@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { MOTALA_LOGO_SRC } from '@/lib/providerLogos';
 
 interface PageProvider {
   id: number;
@@ -375,8 +376,8 @@ const LOGO_MAPPING: Record<string, string> = {
   'Skellefteå': '/skelleftea.png',
   'Vattenfall': '/vattenfall.png',
   'Bixia': '/bixia.png',
-  'Motala': '/motala.png',
-  'Motala Energi': '/motala.png',
+  'Motala': MOTALA_LOGO_SRC,
+  'Motala Energi': MOTALA_LOGO_SRC,
 };
 
 const FALLBACK_PROVIDERS: PageProvider[] = [
@@ -439,7 +440,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     id: 6,
     name: 'Motala',
     type: 'rorligt',
-    logo_url: '/motala.png',
+    logo_url: MOTALA_LOGO_SRC,
     description: 'Konkurrenskraftiga elavtal för privatpersoner.',
     url: 'https://motalaenergi.se/privatperson/?src=Elchef',
     is_recommended: false,

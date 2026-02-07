@@ -4,6 +4,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import type { ElectricityArea } from '@/lib/types';
+import { MOTALA_LOGO_SRC } from '@/lib/providerLogos';
 
 interface PageProvider {
   id: number;
@@ -202,8 +203,8 @@ const LOGO_MAPPING: Record<string, string> = {
   'Skellefteå': '/skelleftea.png',
   'Vattenfall': '/vattenfall.png',
   'Bixia': '/bixia.png',
-  'Motala': '/motala.png',
-  'Motala Energi': '/motala.png',
+  'Motala': MOTALA_LOGO_SRC,
+  'Motala Energi': MOTALA_LOGO_SRC,
 };
 
 // Funktion för att hitta logo_url baserat på leverantörsnamn.
@@ -266,7 +267,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     id: 5,
     name: 'Motala',
     type: 'fastpris',
-    logo_url: '/motala.png',
+    logo_url: MOTALA_LOGO_SRC,
     description: 'Konkurrenskraftiga elavtal för privatpersoner.',
     url: 'https://motalaenergi.se/privatperson/?src=Elchef',
     is_recommended: false,
