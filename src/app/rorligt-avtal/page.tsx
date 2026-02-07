@@ -29,7 +29,7 @@ interface PageProvider {
   campaign_italic?: boolean;
   manual_monthly_fee_kr?: number | null;
   manual_surcharge_ore_per_kwh?: number | null;
-  manual_rate_type?: 'hourly' | 'monthly' | null;
+  manual_rate_type?: 'hourly' | 'monthly' | 'quarterly' | null;
 }
 
 const PageContainer = styled.div`
@@ -749,7 +749,9 @@ export default function RorligtAvtalPage() {
                     ? 'Rörligt månadspris'
                     : provider.manual_rate_type === 'monthly'
                       ? 'Rörligt månadspris'
-                      : 'Rörligt timpris';
+                      : provider.manual_rate_type === 'quarterly'
+                        ? 'Rörligt kvartspris'
+                        : 'Rörligt timpris';
                   const påslagText =
                     påslagValue === 0
                       ? '0 öre/kWh i påslag'

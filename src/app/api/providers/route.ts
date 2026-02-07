@@ -45,8 +45,8 @@ interface PageProvider {
   manual_monthly_fee_kr?: number | null;
   /** Manuellt påslag (öre/kWh) – används för sortering och visning när leverantör saknar prisfil */
   manual_surcharge_ore_per_kwh?: number | null;
-  /** 'hourly' = Rörligt timpris, 'monthly' = Rörligt månadspris – för manuella priser */
-  manual_rate_type?: 'hourly' | 'monthly' | null;
+  /** 'hourly' = Rörligt timpris, 'monthly' = Rörligt månadspris, 'quarterly' = Rörligt kvartspris – för manuella priser */
+  manual_rate_type?: 'hourly' | 'monthly' | 'quarterly' | null;
 }
 
 // GET - Fetch providers
@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
       best_price_badge_text: row.best_price_badge_text && row.best_price_badge_text.trim() !== '' ? row.best_price_badge_text : undefined,
       manual_monthly_fee_kr: row.manual_monthly_fee_kr != null ? Number(row.manual_monthly_fee_kr) : undefined,
       manual_surcharge_ore_per_kwh: row.manual_surcharge_ore_per_kwh != null ? Number(row.manual_surcharge_ore_per_kwh) : undefined,
-      manual_rate_type: row.manual_rate_type === 'hourly' || row.manual_rate_type === 'monthly' ? row.manual_rate_type : undefined,
+      manual_rate_type: row.manual_rate_type === 'hourly' || row.manual_rate_type === 'monthly' || row.manual_rate_type === 'quarterly' ? row.manual_rate_type : undefined,
       created_at: row.created_at,
       updated_at: row.updated_at,
     }));

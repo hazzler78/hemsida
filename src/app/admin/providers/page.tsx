@@ -22,8 +22,8 @@ interface PageProvider {
   manual_monthly_fee_kr?: number | null;
   /** Manuellt påslag (öre/kWh) – för leverantörer utan prisfil; används för sortering billigast först */
   manual_surcharge_ore_per_kwh?: number | null;
-  /** Rörligt timpris eller månadspris – för manuella priser */
-  manual_rate_type?: 'hourly' | 'monthly' | null;
+  /** Rörligt timpris, månadspris eller kvartspris – för manuella priser */
+  manual_rate_type?: 'hourly' | 'monthly' | 'quarterly' | null;
 }
 
 export default function AdminProviders() {
@@ -355,6 +355,7 @@ export default function AdminProviders() {
                         Manuellt pris: {provider.manual_monthly_fee_kr ?? 0} kr/mån, {provider.manual_surcharge_ore_per_kwh ?? 0} öre/kWh
                         {provider.manual_rate_type === 'monthly' && ' (Rörligt månadspris)'}
                         {provider.manual_rate_type === 'hourly' && ' (Rörligt timpris)'}
+                        {provider.manual_rate_type === 'quarterly' && ' (Rörligt kvartspris)'}
                       </p>
                     )}
                     {provider.campaign_text && (
@@ -586,12 +587,13 @@ function ProviderForm({ provider, onSave, onCancel }: {
           <label style={{ display: "block", marginBottom: 4, fontWeight: "500" }}>Pristyp (rörligt):</label>
           <select
             value={formData.manual_rate_type ?? ''}
-            onChange={(e) => setFormData({...formData, manual_rate_type: (e.target.value === '' ? undefined : e.target.value) as 'hourly' | 'monthly' | undefined})}
+            onChange={(e) => setFormData({...formData, manual_rate_type: (e.target.value === '' ? undefined : e.target.value) as 'hourly' | 'monthly' | 'quarterly' | undefined})}
             style={{ width: "100%", maxWidth: 280, padding: 8, borderRadius: 4, border: "1px solid #d1d5db" }}
           >
             <option value="">— Välj om manuellt —</option>
             <option value="hourly">Rörligt timpris</option>
             <option value="monthly">Rörligt månadspris</option>
+            <option value="quarterly">Rörligt kvartspris</option>
           </select>
         </div>
       </div>
