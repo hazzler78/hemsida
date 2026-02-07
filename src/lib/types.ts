@@ -2,11 +2,15 @@ import { getPriceAreaFromPostalCode } from './postal-to-area';
 
 /** Rörligt avtal: påslag, månadskostnad och total från prisfil (t.ex. variable_hourly_rate[area][0].no_commitment) */
 export interface VariableRateNoCommitment {
-  surcharge?: number;       // öre/kWh påslag
-  price?: number;           // spot
+  surcharge?: number;           // öre/kWh
+  variable_costs?: number;     // öre/kWh
+  el_certificate_fee?: number; // öre/kWh
+  '12_month_discount'?: number; // öre/kWh rabatt
+  /** Visat påslag = surcharge + variable_costs + el_certificate_fee - 12_month_discount */
+  price?: number;              // spot
   total?: number;
-  total_with_vat?: number;  // öre/kWh inkl. moms
-  monthly_fee?: number;      // kr/månad
+  total_with_vat?: number;     // öre/kWh inkl. moms
+  monthly_fee?: number;        // kr/månad
 }
 
 export interface CheapEnergyPrices {

@@ -13,6 +13,10 @@ const PRICE_SOURCES: { name: string; url: string; aliases?: string[] }[] = [
 type NoCommitment = {
   surcharge?: number;
   monthly_fee?: number;
+  variable_costs?: number;
+  el_certificate_fee?: number;
+  /** Rabatt 12-månadersavtal (öre/kWh) */
+  '12_month_discount'?: number;
 };
 
 type FixedFees = {
@@ -35,12 +39,63 @@ function findSegmentForConsumption(segments: ConsumptionSegment[] | undefined, c
   return match ?? withRange[withRange.length - 1];
 }
 
-/** Extraherar månadskostnad (kr) och påslag (öre/kWh) från en prisfils-JSON. Påslag kan vara negativt. */
+type ExtractedOption = { monthly_fee_kr: number; surcharge_ore_per_kwh: number };
+export type RateType = 'hourly' | 'monthly';
+type ExtractedWithRate = ExtractedOption & { rate_type: RateType };
+
+/**
+ * Påslag (öre/kWh). Om prisfilen har både total och price (spot) används total - price
+ * (stämmer t.ex. för Cheap Energy). Annars: surcharge + variable_costs + el_certificate_fee - 12_month_discount.
+ */
+function extractOptionFromSegment(
+  segment: ConsumptionSegment | undefined,
+  fixedFees: FixedFees | undefined
+): ExtractedOption | null {
+  const nc = segment?.no_commitment as (NoCommitment & { total?: number; price?: number }) | undefined;
+  if (!nc) return null;
+  let surchargeOrePerKwh: number;
+  if (typeof nc.total === 'number' && typeof nc.price === 'number') {
+    surchargeOrePerKwh = nc.total - nc.price;
+  } else {
+    const surcharge = nc.surcharge ?? 0;
+    const variable_costs = nc.variable_costs ?? 0;
+    const el_certificate_fee = nc.el_certificate_fee ?? 0;
+    const twelveMonthDiscount = nc['12_month_discount'] ?? 0;
+    const hasAnyComponent =
+      nc.surcharge !== undefined ||
+      nc.variable_costs !== undefined ||
+      nc.el_certificate_fee !== undefined ||
+      nc['12_month_discount'] !== undefined;
+    if (!hasAnyComponent) return null;
+    surchargeOrePerKwh = surcharge + variable_costs + el_certificate_fee - twelveMonthDiscount;
+  }
+  let monthly_fee: number | undefined = nc.monthly_fee;
+  if (monthly_fee === undefined && fixedFees) {
+    const base = fixedFees.all_customers ?? 0;
+    const discount = fixedFees.all_customers_discount ?? 0;
+    monthly_fee = Math.max(0, base + discount);
+  }
+  return {
+    monthly_fee_kr: monthly_fee !== undefined ? Math.round(monthly_fee) : 0,
+    surcharge_ore_per_kwh: Math.round(surchargeOrePerKwh * 100) / 100,
+  };
+}
+
+/** Årskostnad (SEK) för rörligt avtal: 12 * månad + påslag * kWh/år / 100. */
+function annualCostKr(opt: ExtractedOption, consumptionKwhPerYear: number): number {
+  return opt.monthly_fee_kr * 12 + (opt.surcharge_ore_per_kwh * consumptionKwhPerYear) / 100;
+}
+
+/**
+ * Extraherar månadskostnad och påslag från prisfil. Tar alltid det billigaste av
+ * variable_hourly_rate och variable_monthly_rate (lägst årskostnad för vald förbrukning).
+ * Vid lika årskostnad väljs alltid Rörligt timpris (hourly).
+ */
 function extractFromPriceFile(
   data: unknown,
   area: string = 'se3',
   consumptionKwhPerYear: number = 5000
-): { monthly_fee_kr: number; surcharge_ore_per_kwh: number } | null {
+): ExtractedWithRate | null {
   try {
     const d = data as {
       variable_hourly_rate?: Record<string, ConsumptionSegment[]>;
@@ -49,20 +104,22 @@ function extractFromPriceFile(
     };
     const segmentsHourly = d?.variable_hourly_rate?.[area];
     const segmentsMonthly = d?.variable_monthly_rate?.[area];
-    const segment = findSegmentForConsumption(segmentsHourly ?? segmentsMonthly, consumptionKwhPerYear);
-    const nc = segment?.no_commitment;
-    const surcharge = nc?.surcharge;
-    let monthly_fee: number | undefined = nc?.monthly_fee;
-    if (monthly_fee === undefined && d?.fixed_fees) {
-      const base = d.fixed_fees.all_customers ?? 0;
-      const discount = d.fixed_fees.all_customers_discount ?? 0;
-      monthly_fee = Math.max(0, base + discount);
+    const segmentHourly = findSegmentForConsumption(segmentsHourly, consumptionKwhPerYear);
+    const segmentMonthly = findSegmentForConsumption(segmentsMonthly, consumptionKwhPerYear);
+    const optHourly = extractOptionFromSegment(segmentHourly, d?.fixed_fees);
+    const optMonthly = extractOptionFromSegment(segmentMonthly, d?.fixed_fees);
+    if (optHourly && optMonthly) {
+      const costH = annualCostKr(optHourly, consumptionKwhPerYear);
+      const costM = annualCostKr(optMonthly, consumptionKwhPerYear);
+      const useHourly = costH <= costM;
+      return {
+        ...(useHourly ? optHourly : optMonthly),
+        rate_type: useHourly ? 'hourly' : 'monthly',
+      };
     }
-    if (surcharge === undefined) return null;
-    return {
-      monthly_fee_kr: monthly_fee !== undefined ? Math.round(monthly_fee) : 0,
-      surcharge_ore_per_kwh: Math.round(surcharge * 100) / 100,
-    };
+    if (optHourly) return { ...optHourly, rate_type: 'hourly' };
+    if (optMonthly) return { ...optMonthly, rate_type: 'monthly' };
+    return null;
   } catch {
     return null;
   }
@@ -71,6 +128,8 @@ function extractFromPriceFile(
 export interface ProviderPriceItem {
   monthly_fee_kr: number;
   surcharge_ore_per_kwh: number;
+  /** 'hourly' = Rörligt timpris, 'monthly' = Rörligt månadspris */
+  rate_type: RateType;
 }
 
 export type ProviderPricesResponse = {
@@ -88,11 +147,17 @@ function normalizeConsumption(kwhPerYear: number): number {
   return 25000;
 }
 
+const VALID_AREAS = ['se1', 'se2', 'se3', 'se4'] as const;
+function normalizeArea(area: string | null): (typeof VALID_AREAS)[number] {
+  const a = (area || 'se3').toLowerCase();
+  return VALID_AREAS.includes(a as (typeof VALID_AREAS)[number]) ? (a as (typeof VALID_AREAS)[number]) : 'se3';
+}
+
 export async function GET(request: Request) {
-  const area = 'se3';
   const { searchParams } = new URL(request.url);
+  const area = normalizeArea(searchParams.get('area'));
   const consumptionParam = searchParams.get('consumption');
-  const consumptionKwhPerYear = consumptionParam ? normalizeConsumption(Number(consumptionParam)) : 5000;
+  const consumptionKwhPerYear = consumptionParam ? normalizeConsumption(Number(consumptionParam)) : 13500;
 
   const results = await Promise.all(
     PRICE_SOURCES.map(async (source) => {

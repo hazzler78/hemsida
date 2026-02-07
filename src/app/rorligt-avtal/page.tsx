@@ -4,9 +4,14 @@
 import React from 'react';
 import styled from 'styled-components';
 import { MOTALA_LOGO_SRC } from '@/lib/providerLogos';
+import { getElectricityArea, type ElectricityArea } from '@/lib/types';
 
-/** Månadskostnad och påslag från /api/prices/providers (prisfiler). */
-type ProviderPriceItem = { monthly_fee_kr: number; surcharge_ore_per_kwh: number };
+/** Månadskostnad, påslag och pristyp från /api/prices/providers (prisfiler). */
+type ProviderPriceItem = {
+  monthly_fee_kr: number;
+  surcharge_ore_per_kwh: number;
+  rate_type: 'hourly' | 'monthly';
+};
 type ProviderPricesMap = Record<string, ProviderPriceItem>;
 
 interface PageProvider {
@@ -422,20 +427,29 @@ const CONSUMPTION_OPTIONS: { value: number; label: string }[] = [
   { value: 25000, label: 'Över 17 000 kWh/år' },
 ];
 
+const AREA_OPTIONS: { value: ElectricityArea; label: string }[] = [
+  { value: 'se1', label: 'SE1 (Norra Sverige)' },
+  { value: 'se2', label: 'SE2 (Norra Mellansverige)' },
+  { value: 'se3', label: 'SE3 (Södra Mellansverige)' },
+  { value: 'se4', label: 'SE4 (Södra Sverige)' },
+];
+
 export default function RorligtAvtalPage() {
   const [providers, setProviders] = React.useState<PageProvider[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [failedLogos, setFailedLogos] = React.useState<Set<number>>(new Set());
   const [providerPrices, setProviderPrices] = React.useState<ProviderPricesMap | null>(null);
   const [providerPricesLoading, setProviderPricesLoading] = React.useState(false);
-  const [consumptionKwhPerYear, setConsumptionKwhPerYear] = React.useState(7500);
+  const [priceArea, setPriceArea] = React.useState<ElectricityArea>('se3');
+  const [consumptionKwhPerYear, setConsumptionKwhPerYear] = React.useState(13500);
+  const [postalInput, setPostalInput] = React.useState('');
 
   React.useEffect(() => {
     let cancelled = false;
     setProviderPricesLoading(true);
     const fetchProviderPrices = async () => {
       try {
-        const res = await fetch(`/api/prices/providers?consumption=${consumptionKwhPerYear}`);
+        const res = await fetch(`/api/prices/providers?area=${priceArea}&consumption=${consumptionKwhPerYear}`);
         if (cancelled) return;
         if (res.ok) {
           const data = await res.json();
@@ -449,7 +463,20 @@ export default function RorligtAvtalPage() {
     };
     fetchProviderPrices();
     return () => { cancelled = true; };
-  }, [consumptionKwhPerYear]);
+  }, [priceArea, consumptionKwhPerYear]);
+
+  const handlePostalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, '').slice(0, 5);
+    setPostalInput(raw === '' ? '' : raw);
+    if (raw.length === 5) {
+      try {
+        const area = getElectricityArea(raw);
+        setPriceArea(area);
+      } catch {
+        // behåll nuvarande area
+      }
+    }
+  };
 
   React.useEffect(() => {
     const fetchProviders = async () => {
@@ -576,43 +603,90 @@ export default function RorligtAvtalPage() {
       <Content>
         <Title>Jämför rörliga elavtal i Sverige</Title>
         <Subtitle>
-          Vi har valt ut starka alternativ för rörliga elavtal. Jämför påslag, månadsavgifter och kampanjer
-          och hitta det rörliga elavtal som passar din förbrukning och ditt elområde bäst.
+          Vi har valt ut starka alternativ för rörliga elavtal. Ange elområde och förbrukning så visar vi det billigaste priset – standard är SE3 och ca 12 000 kWh/år (vanligt för många hushåll). Ändra nedan om det inte stämmer.
         </Subtitle>
 
         <div style={{
           marginBottom: '1.25rem',
           display: 'flex',
-          flexWrap: 'wrap',
+          flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.5rem',
+          gap: '1rem',
         }}>
-          <label htmlFor="consumption-select" style={{ color: 'rgba(255,255,255,0.95)', fontSize: '0.95rem', fontWeight: 500 }}>
-            Ungefärlig årsförbrukning:
-          </label>
-          <select
-            id="consumption-select"
-            value={consumptionKwhPerYear}
-            onChange={(e) => setConsumptionKwhPerYear(Number(e.target.value))}
-            style={{
-              padding: '0.5rem 0.75rem',
-              borderRadius: 10,
-              border: '1px solid rgba(255,255,255,0.35)',
-              background: 'rgba(255,255,255,0.95)',
-              color: '#111827',
-              fontSize: '0.95rem',
-              cursor: 'pointer',
-              minWidth: '200px',
-            }}
-            aria-label="Välj ungefärlig årsförbrukning i kWh"
-          >
-            {CONSUMPTION_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+            <label htmlFor="area-select" style={{ color: 'rgba(255,255,255,0.95)', fontSize: '0.95rem', fontWeight: 500 }}>
+              Elområde:
+            </label>
+            <select
+              id="area-select"
+              value={priceArea}
+              onChange={(e) => setPriceArea(e.target.value as ElectricityArea)}
+              style={{
+                padding: '0.5rem 0.75rem',
+                borderRadius: 10,
+                border: '1px solid rgba(255,255,255,0.35)',
+                background: 'rgba(255,255,255,0.95)',
+                color: '#111827',
+                fontSize: '0.95rem',
+                cursor: 'pointer',
+                minWidth: '220px',
+              }}
+              aria-label="Välj elområde"
+            >
+              {AREA_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+            <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>eller postnummer:</span>
+            <input
+              type="text"
+              inputMode="numeric"
+              placeholder="t.ex. 111 22"
+              value={postalInput === '' ? '' : postalInput.replace(/(\d{3})(\d{2})/, '$1 $2')}
+              onChange={handlePostalChange}
+              maxLength={6}
+              style={{
+                padding: '0.5rem 0.75rem',
+                borderRadius: 10,
+                border: '1px solid rgba(255,255,255,0.35)',
+                background: 'rgba(255,255,255,0.95)',
+                color: '#111827',
+                fontSize: '0.95rem',
+                width: '100px',
+              }}
+              aria-label="Postnummer för att sätt elområde automatiskt"
+            />
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+            <label htmlFor="consumption-select" style={{ color: 'rgba(255,255,255,0.95)', fontSize: '0.95rem', fontWeight: 500 }}>
+              Ungefärlig årsförbrukning:
+            </label>
+            <select
+              id="consumption-select"
+              value={consumptionKwhPerYear}
+              onChange={(e) => setConsumptionKwhPerYear(Number(e.target.value))}
+              style={{
+                padding: '0.5rem 0.75rem',
+                borderRadius: 10,
+                border: '1px solid rgba(255,255,255,0.35)',
+                background: 'rgba(255,255,255,0.95)',
+                color: '#111827',
+                fontSize: '0.95rem',
+                cursor: 'pointer',
+                minWidth: '200px',
+              }}
+              aria-label="Välj ungefärlig årsförbrukning i kWh"
+            >
+              {CONSUMPTION_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block', width: '100%', textAlign: 'center' }}>
+              Ungefär: lägenhet ofta 5 000–10 000 kWh/år, villa ofta 10 000–17 000 eller mer.
+            </span>
+          </div>
           {providerPricesLoading && (
             <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.85rem' }}>Uppdaterar priser…</span>
           )}
@@ -641,6 +715,7 @@ export default function RorligtAvtalPage() {
                   const fromApi = getProviderPriceFromApi(provider.name, providerPrices);
                   const månadKr = fromApi?.monthly_fee_kr ?? getMånadskostnadKr(provider.name);
                   const påslagValue = fromApi?.surcharge_ore_per_kwh ?? getPåslagÖrePerKwh(provider.name);
+                  const rateLabel = fromApi?.rate_type === 'monthly' ? 'Rörligt månadspris' : 'Rörligt timpris';
                   const påslagText =
                     påslagValue === 0
                       ? '0 öre/kWh i påslag'
@@ -649,6 +724,7 @@ export default function RorligtAvtalPage() {
                         : `${påslagValue.toLocaleString('sv-SE')} öre/kWh i påslag`;
                   return (
                     <PriceBlock>
+                      <span style={{ fontWeight: 600, fontSize: '0.85rem', color: '#374151' }}>{rateLabel}</span>
                       <span>{månadKr === 0 ? '0 kr/månad' : `${månadKr} kr/månad`}</span>
                       <span>{påslagText}</span>
                     </PriceBlock>
