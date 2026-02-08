@@ -18,11 +18,16 @@ export interface CheapEnergyPrices {
     [key: string]: {
       '3_months': number | { price?: number; total?: number; total_with_vat?: number };
       '6_months': number | { price?: number; total?: number; total_with_vat?: number };
+      '9_months': number | { price?: number; total?: number; total_with_vat?: number };
       '1_year': number | { price?: number; total?: number; total_with_vat?: number };
       '2_years': number | { price?: number; total?: number; total_with_vat?: number };
       '3_years': number | { price?: number; total?: number; total_with_vat?: number };
       '4_years': number | { price?: number; total?: number; total_with_vat?: number };
       '5_years': number | { price?: number; total?: number; total_with_vat?: number };
+      '6_years': number | { price?: number; total?: number; total_with_vat?: number };
+      '7_years': number | { price?: number; total?: number; total_with_vat?: number };
+      '8_years': number | { price?: number; total?: number; total_with_vat?: number };
+      '9_years': number | { price?: number; total?: number; total_with_vat?: number };
       '10_years': number | { price?: number; total?: number; total_with_vat?: number };
     };
   };

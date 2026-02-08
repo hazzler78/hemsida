@@ -276,19 +276,37 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
   },
 ];
 
-/** Avtalslängd – nycklar i prisfilernas variable_fixed_prices */
-type FixedPeriodKey = '6_months' | '1_year' | '2_years' | '3_years';
+/** Avtalslängd – nycklar i prisfilernas variable_fixed_prices. Upp till 1 år i månader, därefter 1–10 år. */
+type FixedPeriodKey = '3_months' | '6_months' | '9_months' | '1_year' | '2_years' | '3_years' | '4_years' | '5_years' | '6_years' | '7_years' | '8_years' | '9_years' | '10_years';
 const PERIOD_OPTIONS: { value: FixedPeriodKey; label: string }[] = [
+  { value: '3_months', label: '3 månader' },
   { value: '6_months', label: '6 månader' },
-  { value: '1_year', label: '12 månader' },
-  { value: '2_years', label: '24 månader' },
-  { value: '3_years', label: '36 månader' },
+  { value: '9_months', label: '9 månader' },
+  { value: '1_year', label: '1 år' },
+  { value: '2_years', label: '2 år' },
+  { value: '3_years', label: '3 år' },
+  { value: '4_years', label: '4 år' },
+  { value: '5_years', label: '5 år' },
+  { value: '6_years', label: '6 år' },
+  { value: '7_years', label: '7 år' },
+  { value: '8_years', label: '8 år' },
+  { value: '9_years', label: '9 år' },
+  { value: '10_years', label: '10 år' },
 ];
 const PERIOD_LABEL_SHORT: Record<FixedPeriodKey, string> = {
+  '3_months': '3 mån',
   '6_months': '6 mån',
-  '1_year': '12 mån',
-  '2_years': '24 mån',
-  '3_years': '36 mån',
+  '9_months': '9 mån',
+  '1_year': '1 år',
+  '2_years': '2 år',
+  '3_years': '3 år',
+  '4_years': '4 år',
+  '5_years': '5 år',
+  '6_years': '6 år',
+  '7_years': '7 år',
+  '8_years': '8 år',
+  '9_years': '9 år',
+  '10_years': '10 år',
 };
 
 export default function FastprisAvtalPage() {

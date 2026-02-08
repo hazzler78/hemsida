@@ -9,8 +9,8 @@ const PRICE_SOURCES: { name: string; url: string; aliases?: string[] }[] = [
   { name: 'Motala', url: 'https://elify.se/Site_Priser_Motala_de2.json', aliases: ['Motala Energi'] },
 ];
 
-type FixedPeriodKey = '3_months' | '6_months' | '1_year' | '2_years' | '3_years' | '4_years' | '5_years' | '10_years';
-const VALID_PERIODS: FixedPeriodKey[] = ['6_months', '1_year', '2_years', '3_years'];
+type FixedPeriodKey = '3_months' | '6_months' | '9_months' | '1_year' | '2_years' | '3_years' | '4_years' | '5_years' | '6_years' | '7_years' | '8_years' | '9_years' | '10_years';
+const VALID_PERIODS: FixedPeriodKey[] = ['3_months', '6_months', '9_months', '1_year', '2_years', '3_years', '4_years', '5_years', '6_years', '7_years', '8_years', '9_years', '10_years'];
 const REVALIDATE_SECONDS = 900;
 
 function extractFixedPrice(
