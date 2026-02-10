@@ -95,6 +95,87 @@ const Subtitle = styled.p`
   }
 `;
 
+const ControlsCard = styled.div`
+  max-width: 720px;
+  margin: 0 auto 1.5rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 22px;
+  background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.06));
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  @media (min-width: 768px) {
+    padding: 1.5rem 2rem;
+    gap: 1.5rem;
+  }
+`;
+
+const ControlsRow = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  @media (min-width: 640px) {
+    flex-direction: row;
+  }
+`;
+
+const FieldGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 0;
+`;
+
+const FieldLabel = styled.label`
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.9rem;
+  font-weight: 500;
+`;
+
+const Select = styled.select`
+  padding: 0.6rem 0.85rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.96);
+  color: #111827;
+  font-size: 0.95rem;
+  cursor: pointer;
+  min-width: 0;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.18);
+  appearance: none;
+`;
+
+const TextInput = styled.input`
+  padding: 0.6rem 0.85rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.96);
+  color: #111827;
+  font-size: 0.95rem;
+  max-width: 120px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.18);
+  text-align: center;
+  margin: 0 auto;
+`;
+
+const HelperText = styled.span`
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.8rem;
+  line-height: 1.4;
+`;
+
+const LoadingText = styled.span`
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.85rem;
+`;
+
 const ProvidersGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
@@ -636,75 +717,43 @@ export default function RorligtAvtalPage() {
           Vi har valt ut starka alternativ för rörliga elavtal. Ange elområde och förbrukning så visar vi det billigaste priset – standard är SE3 och ca 12 000 kWh/år (vanligt för många hushåll). Ändra nedan om det inte stämmer.
         </Subtitle>
 
-        <div style={{
-          marginBottom: '1.25rem',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '1rem',
-        }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-            <label htmlFor="area-select" style={{ color: 'rgba(255,255,255,0.95)', fontSize: '0.95rem', fontWeight: 500 }}>
-              Elområde:
-            </label>
-            <select
-              id="area-select"
-              value={priceArea}
-              onChange={(e) => setPriceArea(e.target.value as ElectricityArea)}
-              style={{
-                padding: '0.5rem 0.75rem',
-                borderRadius: 10,
-                border: '1px solid rgba(255,255,255,0.35)',
-                background: 'rgba(255,255,255,0.95)',
-                color: '#111827',
-                fontSize: '0.95rem',
-                cursor: 'pointer',
-                minWidth: '220px',
-              }}
-              aria-label="Välj elområde"
-            >
-              {AREA_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-            <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>eller postnummer:</span>
-            <input
-              type="text"
-              inputMode="numeric"
-              placeholder="t.ex. 111 22"
-              value={postalInput === '' ? '' : postalInput.replace(/(\d{3})(\d{2})/, '$1 $2')}
-              onChange={handlePostalChange}
-              maxLength={6}
-              style={{
-                padding: '0.5rem 0.75rem',
-                borderRadius: 10,
-                border: '1px solid rgba(255,255,255,0.35)',
-                background: 'rgba(255,255,255,0.95)',
-                color: '#111827',
-                fontSize: '0.95rem',
-                width: '100px',
-              }}
-              aria-label="Postnummer för att sätt elområde automatiskt"
-            />
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-            <label htmlFor="consumption-select" style={{ color: 'rgba(255,255,255,0.95)', fontSize: '0.95rem', fontWeight: 500 }}>
-              Ungefärlig årsförbrukning:
-            </label>
-            <select
+        <ControlsCard>
+          <ControlsRow>
+            <FieldGroup>
+              <FieldLabel htmlFor="area-select">Elområde</FieldLabel>
+              <Select
+                id="area-select"
+                value={priceArea}
+                onChange={(e) => setPriceArea(e.target.value as ElectricityArea)}
+                aria-label="Välj elområde"
+              >
+                {AREA_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </Select>
+            </FieldGroup>
+            <FieldGroup>
+              <FieldLabel htmlFor="postal-input">eller postnummer</FieldLabel>
+              <TextInput
+                id="postal-input"
+                type="text"
+                inputMode="numeric"
+                placeholder="t.ex. 111 22"
+                value={postalInput === '' ? '' : postalInput.replace(/(\d{3})(\d{2})/, '$1 $2')}
+                onChange={handlePostalChange}
+                maxLength={6}
+                aria-label="Postnummer för att sätt elområde automatiskt"
+              />
+            </FieldGroup>
+          </ControlsRow>
+          <FieldGroup>
+            <FieldLabel htmlFor="consumption-select">Ungefärlig årsförbrukning</FieldLabel>
+            <Select
               id="consumption-select"
               value={consumptionKwhPerYear}
               onChange={(e) => setConsumptionKwhPerYear(Number(e.target.value))}
-              style={{
-                padding: '0.5rem 0.75rem',
-                borderRadius: 10,
-                border: '1px solid rgba(255,255,255,0.35)',
-                background: 'rgba(255,255,255,0.95)',
-                color: '#111827',
-                fontSize: '0.95rem',
-                cursor: 'pointer',
-                minWidth: '200px',
-              }}
               aria-label="Välj ungefärlig årsförbrukning i kWh"
             >
               {CONSUMPTION_OPTIONS.map((opt) => (
@@ -712,15 +761,13 @@ export default function RorligtAvtalPage() {
                   {opt.label}
                 </option>
               ))}
-            </select>
-            <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block', width: '100%', textAlign: 'center' }}>
+            </Select>
+            <HelperText>
               Ungefär: lägenhet ofta 5 000–10 000 kWh/år, villa ofta 10 000–17 000 eller mer.
-            </span>
-          </div>
-          {providerPricesLoading && (
-            <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.85rem' }}>Uppdaterar priser…</span>
-          )}
-        </div>
+            </HelperText>
+          </FieldGroup>
+          {providerPricesLoading && <LoadingText>Uppdaterar priser…</LoadingText>}
+        </ControlsCard>
 
         {loading ? (
           <div style={{ textAlign: 'center', color: 'white', padding: '2rem' }}>
