@@ -5,6 +5,10 @@ import GlassButton from '@/components/GlassButton';
 import ContactForm from '@/components/ContactForm';
 import ShareResults from '@/components/ShareResults';
 import { withDefaultCtaUtm } from '@/lib/utm';
+import Script from 'next/script';
+import { fetchCheapEnergyPrices } from '@/lib/priceService';
+import type { CheapEnergyPrices, ElectricityArea } from '@/lib/types';
+import { getElectricityArea } from '@/lib/types';
 
 // SVG Ikoner i glassmorphism-stil
 const AnalysisIcon = () => (
@@ -117,6 +121,11 @@ export default function Fakturaanalys() {
   const [logId, setLogId] = useState<number | null>(null);
   const sessionIdRef = useRef<string>('');
   const [consentToStore, setConsentToStore] = useState(false);
+  const [postalCode, setPostalCode] = useState('');
+  const [area, setArea] = useState<ElectricityArea | null>(null);
+  const [prices, setPrices] = useState<CheapEnergyPrices | null>(null);
+  const [priceStatus, setPriceStatus] = useState<'idle' | 'loading' | 'loaded' | 'error' | 'invalid_postal'>('idle');
+  const [priceError, setPriceError] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -292,6 +301,64 @@ export default function Fakturaanalys() {
     return text.includes('Slutsats');
   }
 
+  const formatFixedPrice = (value: unknown): string => {
+    if (typeof value === 'number') {
+      return `${value} öre/kWh`;
+    }
+    if (value && typeof value === 'object') {
+      const anyVal = value as any;
+      const num =
+        typeof anyVal.value === 'number'
+          ? anyVal.value
+          : typeof anyVal.price === 'number'
+          ? anyVal.price
+          : undefined;
+      if (typeof num === 'number') {
+        return `${num} öre/kWh`;
+      }
+    }
+    return '—';
+  };
+
+  const handlePostalSubmit = async (event?: React.FormEvent) => {
+    if (event) event.preventDefault();
+    const trimmed = postalCode.replace(/\s/g, '');
+    if (!/^\d{5}$/.test(trimmed)) {
+      setPriceStatus('invalid_postal');
+      setPriceError('Skriv ett giltigt postnummer med 5 siffror.');
+      setArea(null);
+      return;
+    }
+
+    try {
+      setPriceStatus('loading');
+      setPriceError(null);
+
+      const elArea = getElectricityArea(trimmed);
+      setArea(elArea);
+
+      let data = prices;
+      if (!data) {
+        data = await fetchCheapEnergyPrices();
+        setPrices(data);
+      }
+
+      if (!data.spot_prices[elArea] && !data.variable_fixed_prices[elArea]) {
+        setPriceStatus('error');
+        setPriceError('Kunde inte hitta prisdata för ditt område just nu.');
+        return;
+      }
+
+      setPriceStatus('loaded');
+    } catch (error) {
+      console.error('Error when looking up prices by postal code on fakturaanalys:', error);
+      setPriceStatus('error');
+      setPriceError(
+        'Kunde inte hämta aktuella priser just nu. Fortsätt gärna med fakturaanalysen så räknar vi på dina faktiska kostnader.'
+      );
+    }
+  };
+
   function validateCalculations(text: string) {
     if (!text) return { isValid: true, warnings: [] } as { isValid: boolean; warnings: string[] };
     const warnings: string[] = [];
@@ -310,6 +377,32 @@ export default function Fakturaanalys() {
 
   return (
     <>
+      <Script id="howto-fakturaanalys-json-ld" type="application/ld+json">
+        {JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'HowTo',
+          name: 'Så fungerar fakturaanalys av elräkning med AI hos Elchef',
+          description:
+            'En steg-för-steg-guide till hur du laddar upp din elräkning hos Elchef och får en tydlig AI-analys av dina elkostnader.',
+          step: [
+            {
+              '@type': 'HowToStep',
+              name: 'Ladda upp din elräkning',
+              text: 'Ta en tydlig bild eller PDF av din elräkning och ladda upp den via formuläret på sidan.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Låt AI läsa av alla kostnader',
+              text: 'Vår AI analyserar dina fasta avgifter, påslag och elpris och letar efter dolda kostnader.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Se din besparingspotential och välj elavtal',
+              text: 'Du får en tydlig sammanfattning av vad du betalar idag, hur mycket du kan spara och förslag på passande elavtal.',
+            },
+          ],
+        })}
+      </Script>
       <main className="container" style={{ maxWidth: 800, margin: '0 auto', padding: 'var(--section-spacing) 0' }}>
         <div style={{ 
           background: 'var(--glass-bg)', 
@@ -340,6 +433,122 @@ export default function Fakturaanalys() {
           }}>
             Ladda upp en bild på din elräkning och få en smart, tydlig analys direkt!
           </p>
+          <div
+            style={{
+              background: 'rgba(15, 23, 42, 0.65)',
+              borderRadius: 16,
+              padding: '1.25rem 1.5rem',
+              border: '1px solid rgba(148, 163, 184, 0.6)',
+              boxShadow: '0 18px 40px rgba(15, 23, 42, 0.35)',
+              marginBottom: '2rem',
+            }}
+          >
+            <form
+              onSubmit={handlePostalSubmit}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem',
+              }}
+            >
+              <label
+                htmlFor="faktura-postal"
+                style={{ fontSize: '0.9rem', color: 'rgba(226, 232, 240, 0.95)', fontWeight: 500 }}
+              >
+                Vill du få en snabb prisbild innan du laddar upp fakturan? Skriv ditt postnummer:
+              </label>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '0.5rem',
+                  flexWrap: 'nowrap',
+                }}
+              >
+                <input
+                  id="faktura-postal"
+                  inputMode="numeric"
+                  pattern="\d*"
+                  maxLength={5}
+                  value={postalCode}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^\d]/g, '').slice(0, 5);
+                    setPostalCode(value);
+                    if (priceStatus !== 'idle') {
+                      setPriceStatus('idle');
+                      setPriceError(null);
+                    }
+                  }}
+                  onBlur={() => {
+                    if (postalCode.replace(/\s/g, '').length === 5) {
+                      void handlePostalSubmit();
+                    }
+                  }}
+                  placeholder="t.ex. 11122"
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    borderRadius: 9999,
+                    border: '1px solid rgba(148, 163, 184, 0.8)',
+                    padding: '0.6rem 0.9rem',
+                    fontSize: '1rem',
+                    outline: 'none',
+                  }}
+                  aria-label="Postnummer"
+                />
+                <button
+                  type="submit"
+                  style={{
+                    borderRadius: 9999,
+                    border: 'none',
+                    padding: '0.6rem 1.2rem',
+                    fontSize: '0.95rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
+                    color: 'white',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Visa pris
+                </button>
+              </div>
+            </form>
+            <div style={{ marginTop: '0.75rem', fontSize: '0.9rem', color: 'rgba(226,232,240,0.9)' }}>
+              {priceStatus === 'idle' && (
+                <span>Vi använder ditt postnummer för att tolka dina kostnader i rätt elområde (SE1–SE4).</span>
+              )}
+              {priceStatus === 'invalid_postal' && (
+                <span style={{ color: '#fecaca' }}>Ogiltigt postnummer. Skriv fem siffror, t.ex. 11122.</span>
+              )}
+              {priceStatus === 'loading' && <span>Hämtar aktuella priser för ditt elområde…</span>}
+              {priceStatus === 'error' && priceError && (
+                <span style={{ color: '#fecaca' }}>{priceError}</span>
+              )}
+              {priceStatus === 'loaded' && prices && area && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                  <strong>
+                    I ditt område ({area.toUpperCase()}): ungefärliga prisnivåer just nu
+                  </strong>
+                  <span>
+                    Rörligt pris (spot):{' '}
+                    <strong>
+                      ca {Math.round((prices.spot_prices[area] ?? 0) * 10) / 10} öre/kWh
+                    </strong>
+                  </span>
+                  <span>
+                    Fastpris 6 mån:{' '}
+                    <strong>{formatFixedPrice(prices.variable_fixed_prices[area]?.['6_months'])}</strong>, 12
+                    mån:{' '}
+                    <strong>{formatFixedPrice(prices.variable_fixed_prices[area]?.['1_year'])}</strong>
+                  </span>
+                  <span style={{ fontSize: '0.8rem', opacity: 0.9 }}>
+                    Dessa nivåer använder vi som referens när AI:n räknar på dina faktiska kostnader och
+                    besparingar i nästa steg.
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
           {!loading && !gptResult && (
             <div style={{ 
               display: 'flex', 

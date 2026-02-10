@@ -92,7 +92,7 @@ const faqData = [
   },
   {
     question: "Vad ska jag välja? Fastpris eller Rörligt pris?",
-    answer: "Det beror på din livsstil och vad du känner dig bekväm med. Med ett fastprisavtal har du förutsägbarhet under hela avtalsperioden. Med ett rörligt pris följer ditt elpris marknadens svängningar men kan eventuellt spara pengar i längden. Fråga dig själv: Tror du att elpriserna kommer att bli billigare eller dyrare framöver?"
+    answer: "Det beror på din livsstil och vad du känner dig bekväm med. Med ett fastprisavtal har du förutsägbarhet under hela avtalsperioden. Med ett rörligt pris följer ditt elpris marknadens svängningar men kan eventuellt spara pengar i längden. Fråga dig själv: Tror du att elpriserna kommer att bli billigare eller dyrare framöver?<br /><br />Vill du fördjupa dig kan du läsa vår guide <a href=\"/kunskap/basta-elavtal-2026-rorligt-vs-fastpris-se3-se4\" style=\"color: #bfdbfe; text-decoration: underline;\">Bästa elavtal 2026 – rörligt vs fastpris i SE3 och SE4</a>."
   },
   {
     question: "Vad är en Elchef?",

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import Script from 'next/script';
 import { blogPosts, getBlogPostBySlug } from '@/lib/blogPosts';
 
 type Params = {
@@ -42,6 +43,31 @@ export default async function BlogPostPage({ params }: { params: Promise<Params>
     return notFound();
   }
 
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.description,
+    datePublished: post.date,
+    author: {
+      '@type': 'Organization',
+      name: 'Elchef',
+      url: 'https://www.elchef.se',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Elchef',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://www.elchef.se/elchef-logo.png',
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://www.elchef.se/kunskap/${post.slug}`,
+    },
+  };
+
   return (
     <main className="container" style={{ maxWidth: 900, margin: '0 auto', padding: 'var(--section-spacing) 0' }}>
       <article
@@ -53,6 +79,9 @@ export default async function BlogPostPage({ params }: { params: Promise<Params>
           padding: '2.5rem 2rem',
         }}
       >
+        <Script id={`article-json-ld-${post.slug}`} type="application/ld+json">
+          {JSON.stringify(articleJsonLd)}
+        </Script>
         <header style={{ marginBottom: '1.5rem' }}>
           <p
             style={{
