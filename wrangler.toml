@@ -8,7 +8,7 @@ compatibility_flags = ["nodejs_compat"]
 ## [pages] table is not supported by this runner; using pages_build_output_dir instead
 
 [vars]
-MAILERLITE_GROUP_ID = "169680723602572313"
+MAILERLITE_GROUP_ID = "179020940837914110"
 
 # Note: Pages config does not support account_id, triggers, or build/observability blocks
 
