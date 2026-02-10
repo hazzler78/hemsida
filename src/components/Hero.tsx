@@ -314,6 +314,137 @@ export default function Hero() {
           <TextContent>
             <h1>{String(heroTitle)}</h1>
             <p>{String(heroSub)}</p>
+            <ButtonRow>
+               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: 220 }}>
+                                   <div style={{
+                    cursor: 'pointer',
+                    position: 'relative',
+                    zIndex: 10,
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+                    e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+                    e.currentTarget.style.filter = 'brightness(1.1)';
+                  }, [])}
+                  onMouseLeave={useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+                    e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                    e.currentTarget.style.filter = 'brightness(1)';
+                  }, [])}
+                  onClick={() => {
+                    trackHeroClick('rorligt', '/rorligt-avtal');
+                    // TikTok InitiateCheckout-style event when we send user to Salesys flow
+                    try {
+                      const ttq: any = (window as any).ttq;
+                      const cookiebot: any = (window as any).cookiebot || (window as any).Cookiebot || (window as any).CookieControl;
+                      if (ttq && (!cookiebot || cookiebot?.consent?.marketing)) {
+                        ttq.track('InitiateCheckout', {
+                          content_name: 'rorligt_avtal_click'
+                        });
+                        if ((window as any).__ttq_capi) {
+                          (window as any).__ttq_capi('InitiateCheckout', { content_name: 'rorligt_avtal_click' });
+                        }
+                      }
+                    } catch { /* no-op */ }
+                    const sid = (typeof window !== 'undefined') ? (window.localStorage.getItem('invoice_session_id') || '') : '';
+                    const url = '/rorligt-avtal' + (sid ? `?sid=${encodeURIComponent(sid)}` : '');
+                    window.location.href = url;
+                  }}
+                  >
+                                                                               <GlassButton 
+                       variant="primary" 
+                       size="lg"
+                       background="linear-gradient(135deg, var(--primary), var(--secondary))"
+                       aria-label="Rörligt avtal - 0 kr i månadsavgift första året – utan bindningstid"
+                       disableScrollEffect={true}
+                       disableHoverEffect={true}
+                     >
+                     Rörligt avtal
+                   </GlassButton>
+                 </div>
+                 <div style={{ 
+                  fontSize: '0.85rem', 
+                  color: 'var(--foreground)', 
+                  background: 'rgba(255, 255, 255, 0.95)', 
+                  border: '1px solid rgba(0,0,0,0.06)', 
+                  padding: '0.35rem 0.6rem', 
+                  borderRadius: 9999, 
+                  textAlign: 'center',
+                  backdropFilter: 'blur(8px)',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                  position: 'relative',
+                  zIndex: 10,
+                  whiteSpace: 'nowrap'
+                }}>
+                   0 kr i månadsavgift första året – utan bindningstid
+                 </div>
+               </div>
+                               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: 220 }}>
+                                     <div style={{
+                     cursor: 'pointer',
+                     position: 'relative',
+                     zIndex: 10,
+                     transition: 'all 0.3s ease'
+                   }}
+                   onMouseEnter={useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+                     e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+                     e.currentTarget.style.filter = 'brightness(1.1)';
+                   }, [])}
+                   onMouseLeave={useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+                     e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                     e.currentTarget.style.filter = 'brightness(1)';
+                   }, [])}
+                                       onClick={() => {
+                      trackHeroClick('fastpris', '/fastpris-avtal');
+                      try {
+                        const ttq: any = (window as any).ttq;
+                        const cookiebot: any = (window as any).cookiebot || (window as any).Cookiebot || (window as any).CookieControl;
+                        if (ttq && (!cookiebot || cookiebot?.consent?.marketing)) {
+                          ttq.track('InitiateCheckout', {
+                            content_name: 'fastpris_avtal_click'
+                          });
+                          if ((window as any).__ttq_capi) {
+                            (window as any).__ttq_capi('InitiateCheckout', { content_name: 'fastpris_avtal_click' });
+                          }
+                        }
+                      } catch { /* no-op */ }
+                      const sid = (typeof window !== 'undefined') ? (window.localStorage.getItem('invoice_session_id') || '') : '';
+                      const url = '/fastpris-avtal' + (sid ? `?sid=${encodeURIComponent(sid)}` : '');
+                      window.location.href = url;
+                    }}
+                   >
+                      <GlassButton 
+                        variant="secondary" 
+                        size="lg"
+                        background="linear-gradient(135deg, var(--secondary), var(--primary))"
+                        aria-label="Fastpris - samma elpris under hela avtalstiden"
+                        disableScrollEffect={true}
+                        disableHoverEffect={true}
+                      >
+                        Fastpris
+                      </GlassButton>
+                    </div>
+                 <div style={{ 
+                  fontSize: '0.9rem', 
+                  color: 'var(--foreground)', 
+                  background: 'rgba(255, 255, 255, 0.95)', 
+                  border: '1px solid rgba(0,0,0,0.06)', 
+                  padding: '0.35rem 0.6rem', 
+                  borderRadius: 9999, 
+                  textAlign: 'center',
+                  backdropFilter: 'blur(8px)',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                  position: 'relative',
+                  zIndex: 10
+                }}>
+                  Samma elpris under hela avtalstiden
+                </div>
+               </div>
+            </ButtonRow>
+            <USPList>
+              <li>✔️ Vi lyfter fram elavtal som är värda att överväga.</li>
+              <li>✔️ Din gamla avtal sägs upp automatiskt.</li>
+              <li>✔️ Full valfrihet – välj mellan rörligt elpris eller fastpris med avtalad period.</li>
+            </USPList>
             <div
               style={{
                 background: 'rgba(15, 23, 42, 0.65)',
@@ -321,7 +452,7 @@ export default function Hero() {
                 padding: '1.25rem 1.5rem',
                 border: '1px solid rgba(148, 163, 184, 0.6)',
                 boxShadow: '0 18px 40px rgba(15, 23, 42, 0.35)',
-                marginBottom: '1.5rem',
+                marginTop: '1.75rem',
               }}
             >
               <form
@@ -459,137 +590,6 @@ export default function Hero() {
                 )}
               </div>
             </div>
-                         <ButtonRow>
-               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: 220 }}>
-                                   <div style={{
-                    cursor: 'pointer',
-                    position: 'relative',
-                    zIndex: 10,
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseEnter={useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-                    e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
-                    e.currentTarget.style.filter = 'brightness(1.1)';
-                  }, [])}
-                  onMouseLeave={useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-                    e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                    e.currentTarget.style.filter = 'brightness(1)';
-                  }, [])}
-                  onClick={() => {
-                    trackHeroClick('rorligt', '/rorligt-avtal');
-                    // TikTok InitiateCheckout-style event when we send user to Salesys flow
-                    try {
-                      const ttq: any = (window as any).ttq;
-                      const cookiebot: any = (window as any).cookiebot || (window as any).Cookiebot || (window as any).CookieControl;
-                      if (ttq && (!cookiebot || cookiebot?.consent?.marketing)) {
-                        ttq.track('InitiateCheckout', {
-                          content_name: 'rorligt_avtal_click'
-                        });
-                        if ((window as any).__ttq_capi) {
-                          (window as any).__ttq_capi('InitiateCheckout', { content_name: 'rorligt_avtal_click' });
-                        }
-                      }
-                    } catch { /* no-op */ }
-                    const sid = (typeof window !== 'undefined') ? (window.localStorage.getItem('invoice_session_id') || '') : '';
-                    const url = '/rorligt-avtal' + (sid ? `?sid=${encodeURIComponent(sid)}` : '');
-                    window.location.href = url;
-                  }}
-                  >
-                                                                               <GlassButton 
-                       variant="primary" 
-                       size="lg"
-                       background="linear-gradient(135deg, var(--primary), var(--secondary))"
-                       aria-label="Rörligt avtal - 0 kr i månadsavgift första året – utan bindningstid"
-                       disableScrollEffect={true}
-                       disableHoverEffect={true}
-                     >
-                     Rörligt avtal
-                   </GlassButton>
-                 </div>
-                 <div style={{ 
-                  fontSize: '0.85rem', 
-                  color: 'var(--foreground)', 
-                  background: 'rgba(255, 255, 255, 0.95)', 
-                  border: '1px solid rgba(0,0,0,0.06)', 
-                  padding: '0.35rem 0.6rem', 
-                  borderRadius: 9999, 
-                  textAlign: 'center',
-                  backdropFilter: 'blur(8px)',
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-                  position: 'relative',
-                  zIndex: 10,
-                  whiteSpace: 'nowrap'
-                }}>
-                   0 kr i månadsavgift första året – utan bindningstid
-                 </div>
-               </div>
-                               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: 220 }}>
-                                     <div style={{
-                     cursor: 'pointer',
-                     position: 'relative',
-                     zIndex: 10,
-                     transition: 'all 0.3s ease'
-                   }}
-                   onMouseEnter={useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-                     e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
-                     e.currentTarget.style.filter = 'brightness(1.1)';
-                   }, [])}
-                   onMouseLeave={useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-                     e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                     e.currentTarget.style.filter = 'brightness(1)';
-                   }, [])}
-                                       onClick={() => {
-                      trackHeroClick('fastpris', '/fastpris-avtal');
-                      try {
-                        const ttq: any = (window as any).ttq;
-                        const cookiebot: any = (window as any).cookiebot || (window as any).Cookiebot || (window as any).CookieControl;
-                        if (ttq && (!cookiebot || cookiebot?.consent?.marketing)) {
-                          ttq.track('InitiateCheckout', {
-                            content_name: 'fastpris_avtal_click'
-                          });
-                          if ((window as any).__ttq_capi) {
-                            (window as any).__ttq_capi('InitiateCheckout', { content_name: 'fastpris_avtal_click' });
-                          }
-                        }
-                      } catch { /* no-op */ }
-                      const sid = (typeof window !== 'undefined') ? (window.localStorage.getItem('invoice_session_id') || '') : '';
-                      const url = '/fastpris-avtal' + (sid ? `?sid=${encodeURIComponent(sid)}` : '');
-                      window.location.href = url;
-                    }}
-                   >
-                      <GlassButton 
-                        variant="secondary" 
-                        size="lg"
-                        background="linear-gradient(135deg, var(--secondary), var(--primary))"
-                        aria-label="Fastpris - samma elpris under hela avtalstiden"
-                        disableScrollEffect={true}
-                        disableHoverEffect={true}
-                      >
-                        Fastpris
-                      </GlassButton>
-                    </div>
-                 <div style={{ 
-                  fontSize: '0.9rem', 
-                  color: 'var(--foreground)', 
-                  background: 'rgba(255, 255, 255, 0.95)', 
-                  border: '1px solid rgba(0,0,0,0.06)', 
-                  padding: '0.35rem 0.6rem', 
-                  borderRadius: 9999, 
-                  textAlign: 'center',
-                  backdropFilter: 'blur(8px)',
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-                  position: 'relative',
-                  zIndex: 10
-                }}>
-                  Samma elpris under hela avtalstiden
-                </div>
-               </div>
-            </ButtonRow>
-            <USPList>
-              <li>✔️ Vi lyfter fram elavtal som är värda att överväga.</li>
-              <li>✔️ Din gamla avtal sägs upp automatiskt.</li>
-              <li>✔️ Full valfrihet – välj mellan rörligt elpris eller fastpris med avtalad period.</li>
-            </USPList>
           </TextContent>
           <VideoWrapper>
             <video 
