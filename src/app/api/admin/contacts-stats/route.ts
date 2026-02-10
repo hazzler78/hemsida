@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServerClient } from '@/lib/supabaseServer';
 
+export const runtime = 'edge';
+
 const ADMIN_PASSWORD = process.env.ADMIN_DASHBOARD_PASSWORD || 'grodan2025';
 
 export async function GET(req: NextRequest) {
