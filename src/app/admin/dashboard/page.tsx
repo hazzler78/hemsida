@@ -170,35 +170,26 @@ export default function AdminDashboard() {
       const totalSavings = savingsAmounts.reduce((sum, amount) => sum + amount, 0);
       const averageSavings = savingsAmounts.length > 0 ? totalSavings / savingsAmounts.length : 0;
 
-      // 4. Form Submissions
-      const { count: formSubmissions } = await supabase
-        .from('contacts')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', fromISO);
-
-      const { data: contactsData } = await supabase
-        .from('contacts')
-        .select('subscribe_newsletter')
-        .gte('created_at', fromISO);
-      
-      const newsletterSubs = contactsData?.filter(c => c.subscribe_newsletter).length || 0;
-
-      // Fetch contact requests (all contacts, ordered by date)
-      const { data: contactRequests } = await supabase
-        .from('contacts')
-        .select('id, name, email, phone, message, form_type, ref, campaign_code, created_at')
-        .gte('created_at', fromISO)
-        .order('created_at', { ascending: false })
-        .limit(100);
-
-      // Fetch newsletter subscriptions (contacts with subscribe_newsletter = true)
-      const { data: newsletterSubscriptions } = await supabase
-        .from('contacts')
-        .select('id, email, ref, campaign_code, created_at')
-        .eq('subscribe_newsletter', true)
-        .gte('created_at', fromISO)
-        .order('created_at', { ascending: false })
-        .limit(100);
+      // 4. Form Submissions + Contact requests + Newsletter (via admin API – RLS blocks anon read on contacts)
+      let formSubmissions = 0;
+      let newsletterSubs = 0;
+      let contactRequests: DashboardStats['contactRequests'] = [];
+      let newsletterSubscriptions: DashboardStats['newsletterSubscriptions'] = [];
+      try {
+        const contactsRes = await fetch(
+          `/api/admin/contacts-stats?from=${encodeURIComponent(fromISO)}`,
+          { headers: { 'x-admin-password': ADMIN_PASSWORD } }
+        );
+        if (contactsRes.ok) {
+          const contactsJson = await contactsRes.json();
+          formSubmissions = contactsJson.formSubmissions ?? 0;
+          newsletterSubs = contactsJson.newsletterSubs ?? 0;
+          contactRequests = contactsJson.contactRequests ?? [];
+          newsletterSubscriptions = contactsJson.newsletterSubscriptions ?? [];
+        }
+      } catch (contactsErr) {
+        console.warn('Admin contacts-stats API failed, using zeros:', contactsErr);
+      }
 
       // 5. Social Shares
       const { count: socialShares } = await supabase
