@@ -43,6 +43,8 @@ export default async function BlogPostPage({ params }: { params: Promise<Params>
     return notFound();
   }
 
+  const otherPosts = blogPosts.filter((p) => p.slug !== slug);
+
   const articleJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -82,6 +84,34 @@ export default async function BlogPostPage({ params }: { params: Promise<Params>
         <Script id={`article-json-ld-${post.slug}`} type="application/ld+json">
           {JSON.stringify(articleJsonLd)}
         </Script>
+        <nav
+          aria-label="Brödsmulor för kunskapsbanken"
+          style={{
+            marginBottom: '1rem',
+            display: 'flex',
+            justifyContent: 'flex-start',
+          }}
+        >
+          <Link
+            href="/kunskap"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              padding: '0.35rem 0.85rem',
+              borderRadius: 999,
+              border: '1px solid rgba(15,23,42,0.08)',
+              background: 'rgba(255,255,255,0.9)',
+              boxShadow: '0 8px 24px rgba(15,23,42,0.1)',
+              fontSize: '0.85rem',
+              color: '#0f172a',
+              textDecoration: 'none',
+            }}
+          >
+            <span style={{ fontSize: '1rem' }}>←</span>
+            <span>Tillbaka till kunskapsbanken</span>
+          </Link>
+        </nav>
         <header style={{ marginBottom: '1.5rem' }}>
           <p
             style={{
@@ -161,6 +191,80 @@ export default async function BlogPostPage({ params }: { params: Promise<Params>
               <Link href="/byt-elavtal">Byt elavtal</Link> om du vill byta till ett mer fördelaktigt avtal.
             </p>
           </section>
+
+          {otherPosts.length > 0 && (
+            <section
+              aria-label="Fler guider i kunskapsbanken"
+              style={{
+                marginTop: '2.5rem',
+                paddingTop: '1.75rem',
+                borderTop: '1px solid rgba(0,0,0,0.06)',
+              }}
+            >
+              <h2
+                style={{
+                  fontSize: '1.3rem',
+                  marginBottom: '1rem',
+                  color: '#0f172a',
+                }}
+              >
+                Fler guider att läsa
+              </h2>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'minmax(0, 1fr)',
+                  gap: '1rem',
+                }}
+              >
+                {otherPosts.map((p) => (
+                  <Link
+                    key={p.slug}
+                    href={`/kunskap/${p.slug}`}
+                    style={{
+                      display: 'block',
+                      padding: '0.9rem 1rem',
+                      borderRadius: 12,
+                      border: '1px solid rgba(15,23,42,0.06)',
+                      background: 'rgba(255,255,255,0.96)',
+                      boxShadow: '0 10px 30px rgba(15,23,42,0.08)',
+                      textDecoration: 'none',
+                      color: '#111827',
+                      transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: '0.85rem',
+                        color: '#6b7280',
+                        marginBottom: '0.15rem',
+                      }}
+                    >
+                      {new Date(p.date).toLocaleDateString('sv-SE')}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '0.98rem',
+                        fontWeight: 600,
+                        color: '#0f172a',
+                        marginBottom: '0.15rem',
+                      }}
+                    >
+                      {p.title}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '0.9rem',
+                        color: '#4b5563',
+                      }}
+                    >
+                      {p.description}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </article>
     </main>

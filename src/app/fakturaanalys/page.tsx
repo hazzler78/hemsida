@@ -306,7 +306,7 @@ export default function Fakturaanalys() {
       return `${value} öre/kWh`;
     }
     if (value && typeof value === 'object') {
-      const anyVal = value as any;
+      const anyVal = value as { value?: number; price?: number };
       const num =
         typeof anyVal.value === 'number'
           ? anyVal.value
