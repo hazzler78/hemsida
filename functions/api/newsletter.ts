@@ -1,6 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 
-export const onRequestPost: PagesFunction = async (context) => {
+// Note: we avoid importing Cloudflare-specific types here so that Next.js type
+// checking during build does not fail. The runtime environment still receives
+// the correct context object from Cloudflare Pages.
+export const onRequestPost = async (context: any) => {
   const { request, env } = context;
 
   try {
