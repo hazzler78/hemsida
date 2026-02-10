@@ -1,6 +1,6 @@
 import { useEffect, useRef, ElementType } from 'react';
 
-interface GlassButtonProps {
+export interface GlassButtonProps {
   children: React.ReactNode;
   variant?: 'primary' | 'secondary' | 'outline';
   size?: 'sm' | 'md' | 'lg';
