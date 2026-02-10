@@ -52,10 +52,11 @@ export async function POST(request: NextRequest) {
       email: email,
       status: 'active',
     };
-    if (MAILERLITE_GROUP_ID && !isNaN(Number(MAILERLITE_GROUP_ID))) {
-      body.groups = [Number(MAILERLITE_GROUP_ID)];
+    // Hantera grupp-ID som sträng för att undvika precisionstapp för stora tal
+    if (MAILERLITE_GROUP_ID) {
+      body.groups = [MAILERLITE_GROUP_ID];
     }
-    // Om grupp-ID saknas eller är ogiltigt, skicka inte 'groups' alls (prenumerant hamnar i "All subscribers")
+    // Om grupp-ID saknas, skicka inte 'groups' alls (prenumerant hamnar i "All subscribers")
 
     // Lägg till prenumerant i Mailerlite
     const response = await fetch('https://connect.mailerlite.com/api/subscribers', {

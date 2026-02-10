@@ -56,10 +56,12 @@ export const onRequestPost = async (context: any) => {
       status: 'active',
     };
 
-    if (MAILERLITE_GROUP_ID && !isNaN(Number(MAILERLITE_GROUP_ID))) {
-      body.groups = [Number(MAILERLITE_GROUP_ID)];
+    // Viktigt: behandla grupp-ID som sträng för att undvika att stora tal
+    // avrundas när de konverteras till Number (JavaScript precision).
+    if (MAILERLITE_GROUP_ID) {
+      body.groups = [MAILERLITE_GROUP_ID];
     }
-    // Om grupp-ID saknas eller är ogiltigt, skicka inte 'groups' alls (prenumerant hamnar i "All subscribers")
+    // Om grupp-ID saknas, skicka inte 'groups' alls (prenumerant hamnar i "All subscribers")
 
     // Lägg till prenumerant i Mailerlite
     const mlResponse = await fetch('https://connect.mailerlite.com/api/subscribers', {
