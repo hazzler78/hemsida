@@ -1083,7 +1083,7 @@ export default function JamforElpriser() {
                         trackContractClick('fastpris');
                         window.location.href = withDefaultCtaUtm('/fastpris-avtal', 'jamfor', 'cta-fastpris');
                       }}
-                      aria-label="Fastpris - Fastpris med prisgaranti"
+                      aria-label="Fastpris - samma elpris under hela avtalstiden"
                     >
                       Fastpris
                     </GlassButton>
@@ -1099,7 +1099,7 @@ export default function JamforElpriser() {
                     backdropFilter: 'blur(8px)',
                     boxShadow: '0 4px 16px rgba(0,0,0,0.08)'
                   }}>
-                    Fastpris med prisgaranti
+                    Samma elpris under hela avtalstiden
                   </div>
                 </div>
               </div>

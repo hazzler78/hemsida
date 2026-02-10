@@ -557,17 +557,17 @@ export default function Hero() {
                       window.location.href = url;
                     }}
                    >
-                                                                                                                                                                       <GlassButton 
-                         variant="secondary" 
-                         size="lg"
-                         background="linear-gradient(135deg, var(--secondary), var(--primary))"
-                         aria-label="Fastpris - Fastpris med prisgaranti"
-                         disableScrollEffect={true}
-                         disableHoverEffect={true}
-                       >
-                      Fastpris
-                    </GlassButton>
-                  </div>
+                      <GlassButton 
+                        variant="secondary" 
+                        size="lg"
+                        background="linear-gradient(135deg, var(--secondary), var(--primary))"
+                        aria-label="Fastpris - samma elpris under hela avtalstiden"
+                        disableScrollEffect={true}
+                        disableHoverEffect={true}
+                      >
+                        Fastpris
+                      </GlassButton>
+                    </div>
                  <div style={{ 
                   fontSize: '0.9rem', 
                   color: 'var(--foreground)', 
@@ -581,8 +581,8 @@ export default function Hero() {
                   position: 'relative',
                   zIndex: 10
                 }}>
-                   Fastpris med prisgaranti
-                 </div>
+                  Samma elpris under hela avtalstiden
+                </div>
                </div>
             </ButtonRow>
             <USPList>

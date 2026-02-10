@@ -318,7 +318,7 @@ export default function BytElavtal() {
                 variant="secondary" 
                 size="lg"
                 background="linear-gradient(135deg, var(--secondary), var(--primary))"
-                aria-label="Fastpris - Fastpris med prisgaranti"
+                aria-label="Fastpris - samma elpris under hela avtalstiden"
                 disableScrollEffect={true}
                 disableHoverEffect={true}
               >
@@ -326,7 +326,7 @@ export default function BytElavtal() {
               </GlassButton>
             </div>
             <FastprisLabel>
-              Fastpris med prisgaranti
+              Samma elpris under hela avtalstiden
             </FastprisLabel>
           </ButtonWrapper>
         </ButtonContainer>
