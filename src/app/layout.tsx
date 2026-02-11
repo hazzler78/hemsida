@@ -73,6 +73,7 @@ export default function RootLayout({
             }, 3000);
           `}
         </Script>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <script type="application/ld+json" suppressHydrationWarning>{`
           {
