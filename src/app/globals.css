@@ -52,6 +52,13 @@
   --transition-slow: 0.5s;
 }
 
+/* Extra små mobiler (iPhone SE 320px, budgettelefoner) – mindre padding */
+@media (max-width: 359px) {
+  :root {
+    --container-padding: 0.75rem;
+  }
+}
+
 @media (min-width: 768px) {
   :root {
     --container-padding: 2rem;
@@ -59,10 +66,20 @@
   }
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
+}
+
+/* Alla bilder skalar på mobil – förhindrar horisontell scroll */
+img {
+  max-width: 100%;
+  height: auto;
 }
 
 body {
@@ -75,6 +92,8 @@ body {
   line-height: 1.5;
   min-height: 100vh;
   padding-top: 5.5rem; /* Account for fixed banner height with extra space for mobile */
+  padding-left: env(safe-area-inset-left, 0);
+  padding-right: env(safe-area-inset-right, 0);
 }
 
 * {
@@ -95,11 +114,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-  font-size: 2.5rem;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
 }
 
 h2 {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 4vw, 2rem);
 }
 
 h3 {

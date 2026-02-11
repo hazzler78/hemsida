@@ -11,6 +11,13 @@ import Footer from '@/components/Footer';
 
 const inter = Inter({ subsets: ["latin"] });
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover" as const,
+};
+
 export const metadata: Metadata = {
   title: "Elchef – jämför elavtal i Sverige och hitta bästa elavtal 2026",
   description:

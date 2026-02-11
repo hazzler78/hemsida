@@ -11,6 +11,9 @@ const Nav = styled.nav<{ offset?: number }>`
   bottom: ${(props) => (props.offset ? `${props.offset}px` : '0')};
   left: 0;
   right: 0;
+  padding-left: env(safe-area-inset-left, 0);
+  padding-right: env(safe-area-inset-right, 0);
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
@@ -18,7 +21,7 @@ const Nav = styled.nav<{ offset?: number }>`
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 0.5rem 0;
+  padding-top: 0.5rem;
   box-shadow: var(--glass-shadow-light);
   z-index: 9999 !important;
 `;
@@ -31,6 +34,9 @@ const NavItem = styled(Link)`
   color: #64748b;
   font-size: 0.75rem;
   padding: 0.5rem;
+  min-height: 44px;
+  min-width: 44px;
+  justify-content: center;
   position: relative;
   transition: color 0.3s ease;
   
