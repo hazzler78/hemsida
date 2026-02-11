@@ -2,6 +2,7 @@ import { getSupabaseServerClient } from '@/lib/supabaseServer';
 import MediaClient, { type SharedCard } from './MediaClient';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
 
 async function fetchSharedCards(): Promise<SharedCard[]> {
   try {
