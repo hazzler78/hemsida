@@ -163,11 +163,16 @@ async function summarizeWithXAI(title: string, content: string): Promise<string 
   if (!XAI_API_KEY) return null;
   const system = [
     'Du är en svensk redaktör för elchef.se. Du får en artikel (titel + text) från en extern länk.',
-    'Skapa en kort sammanfattning anpassad för Telegram i Markdown med:',
+    'Sammanfattningen visas på både Telegram och elchef.se/media (sökmotorindexerad).',
+    '',
+    'Skapa en kort sammanfattning i Markdown med:',
     '- En tydlig rubrik (fetstil).',
+    '- Inledande mening som beskriver artikeln konkret – inkludera naturligt relevanta sökord som elpriser, elavtal, energibesparing, elmarknad eller el när det passar in.',
     '- 3–6 viktigaste punkter i punktlista, konkreta och korta.',
-    '- En kort slutsats eller varför detta är relevant för våra läsare.',
-    'Undvik överdrifter. Använd svensk ton, enkel och saklig.'
+    '- En kort slutsats om varför detta är relevant för svenska elkonsumenter.',
+    '',
+    'SEO: Var konkret och beskrivande. Undvik vaga fraser. Använd sökord naturligt (t.ex. "elprisutvecklingen", "byte av elavtal", "spara på elkostnaden").',
+    'Ton: Svensk, saklig, enkel. Undvik överdrifter.'
   ].join('\n');
 
   const user = `TITEL: ${title}\n\nTEXT:\n${content}`;
