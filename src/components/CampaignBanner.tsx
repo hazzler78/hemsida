@@ -6,14 +6,16 @@ import { withDefaultCtaUtm } from '@/lib/utm';
 
 const Banner = styled.div<{ $isCollapsed: boolean }>`
   width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
   text-align: center;
-  padding: ${props => props.$isCollapsed ? '0.8rem 0.5rem' : '1.2rem 0.5rem'};
-  font-size: ${props => props.$isCollapsed ? '1rem' : '1.15rem'};
+  padding: ${props => props.$isCollapsed ? '0.8rem 0.75rem' : '1.2rem 0.75rem'};
+  font-size: ${props => props.$isCollapsed ? '1rem' : 'clamp(0.95rem, 2.5vw, 1.15rem)'};
   font-weight: 700;
   letter-spacing: 0.02em;
   box-shadow: var(--glass-shadow-light);
@@ -23,6 +25,8 @@ const Banner = styled.div<{ $isCollapsed: boolean }>`
   left: 0;
   right: 0;
   transition: all 0.3s ease-in-out;
+  overflow-wrap: break-word;
+  word-break: break-word;
 `;
 
 const Highlight = styled.span`
@@ -54,6 +58,8 @@ const CollapsedText = styled.div`
   justify-content: center;
   gap: 0.5rem;
   flex-wrap: wrap;
+  max-width: 100%;
+  min-width: 0;
 `;
 
 export default function CampaignBanner() {

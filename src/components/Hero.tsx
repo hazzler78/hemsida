@@ -23,6 +23,8 @@ const HeroContent = styled.div`
   align-items: center;
   text-align: center;
   gap: 2rem;
+  width: 100%;
+  min-width: 0;
 
   @media (min-width: 768px) {
     flex-direction: row;
@@ -34,10 +36,14 @@ const HeroContent = styled.div`
 
 const TextContent = styled.div`
   flex: 1;
+  min-width: 0;
+  width: 100%;
   max-width: 600px;
+  overflow-wrap: break-word;
+  word-break: break-word;
   
   h1 {
-    font-size: 2.5rem;
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
     margin-bottom: 1.5rem;
     color: white;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -48,7 +54,7 @@ const TextContent = styled.div`
   }
   
   p {
-    font-size: 1.25rem;
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
     color: rgba(255, 255, 255, 0.9);
     margin-bottom: 2rem;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
@@ -57,13 +63,16 @@ const TextContent = styled.div`
 
 const ButtonRow = styled.div`
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
   margin-top: 2rem;
   flex-wrap: wrap;
   justify-content: center;
+  width: 100%;
+  max-width: 100%;
   
   @media (min-width: 768px) {
     justify-content: flex-start;
+    gap: 1.5rem;
   }
 `;
 
@@ -104,7 +113,10 @@ const USPList = styled.ul`
   padding: 0;
   margin: 1.5rem 0 2rem 0;
   color: #fff;
-  font-size: 1.1rem;
+  font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+  width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
   li {
     display: flex;
     align-items: flex-start;
@@ -293,7 +305,7 @@ export default function Hero() {
             <h1>{String(heroTitle)}</h1>
             <p>{String(heroSub)}</p>
             <ButtonRow>
-               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: 220 }}>
+               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: 0, width: '100%', maxWidth: 280 }}>
                                    <div style={{
                     cursor: 'pointer',
                     position: 'relative',
@@ -339,7 +351,7 @@ export default function Hero() {
                      Rörligt avtal
                    </GlassButton>
                  </div>
-                 <div style={{ 
+                <div style={{ 
                   fontSize: '0.85rem', 
                   color: 'var(--foreground)', 
                   background: 'rgba(255, 255, 255, 0.95)', 
@@ -351,12 +363,13 @@ export default function Hero() {
                   boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                   position: 'relative',
                   zIndex: 10,
-                  whiteSpace: 'nowrap'
+                  wordBreak: 'break-word',
+                  overflowWrap: 'break-word'
                 }}>
-                   0 kr i månadsavgift första året – utan bindningstid
+                  0 kr i månadsavgift första året – utan bindningstid
                  </div>
                </div>
-                               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: 220 }}>
+                               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: 0, width: '100%', maxWidth: 280 }}>
                                      <div style={{
                      cursor: 'pointer',
                      position: 'relative',
@@ -412,7 +425,9 @@ export default function Hero() {
                   backdropFilter: 'blur(8px)',
                   boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                   position: 'relative',
-                  zIndex: 10
+                  zIndex: 10,
+                  wordBreak: 'break-word',
+                  overflowWrap: 'break-word'
                 }}>
                   Samma elpris under hela avtalstiden
                 </div>
@@ -451,7 +466,7 @@ export default function Hero() {
                   style={{
                     display: 'flex',
                     gap: '0.5rem',
-                    flexWrap: 'nowrap',
+                    flexWrap: 'wrap',
                   }}
                 >
                   <input
