@@ -77,6 +77,7 @@ export default function AdminFormAnalytics() {
           case 'newsletter': form = 'Nyhetsbrev'; break;
           case 'affiliate': form = 'Affiliate'; break;
           case 'partner': form = 'Partner'; break;
+          case 'sol_laddbox': form = 'Sol/Laddbox'; break;
           default: form = contact.form_type.charAt(0).toUpperCase() + contact.form_type.slice(1);
         }
       } else {

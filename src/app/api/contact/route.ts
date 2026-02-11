@@ -25,7 +25,7 @@ function getSupabaseClient() {
   return createClient(url, key);
 }
 
-async function sendTelegramNotification(data: ContactFormData) {
+async function sendTelegramNotification(data: ContactFormData & { formType?: string }) {
   if (!TELEGRAM_BOT_TOKEN || TELEGRAM_CHAT_IDS.length === 0) {
     console.warn('Telegram credentials not configured');
     return;
@@ -52,12 +52,13 @@ async function sendTelegramNotification(data: ContactFormData) {
     return;
   }
 
+  const formType = data.formType || 'contact';
+  const formLabel = formType === 'sol_laddbox' ? '☀️ *Solceller/Laddbox-offert*' : '🔔 *Ny kontaktförfrågan*';
   const message = `
-🔔 *Ny kontaktförfrågan*
+${formLabel}
 
 ${data.name ? `🙍‍♂️ *Namn:* ${data.name}\n` : ''}📧 *E-post:* ${data.email}
-${data.phone ? `📞 *Telefon:* ${data.phone}\n` : ''}📰 *Nyhetsbrev:* ${data.subscribeNewsletter ? 'Ja' : 'Nej'}
-${data.message ? `\n📝 *Meddelande:* ${data.message}` : ''}
+${data.phone ? `📞 *Telefon:* ${data.phone}\n` : ''}${formType !== 'sol_laddbox' ? `📰 *Nyhetsbrev:* ${data.subscribeNewsletter ? 'Ja' : 'Nej'}\n` : ''}${data.message ? `\n📝 *Meddelande:* ${data.message}` : ''}
 
 ⏰ *Tidpunkt:* ${new Date().toLocaleString('sv-SE')}
 🌐 *Källa:* Elchef.se kontaktformulär
