@@ -2,7 +2,7 @@
 "use client";
 
 import styled from 'styled-components';
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import GlassButton from './GlassButton';
 import { withDefaultCtaUtm } from '@/lib/utm';
 import { fetchCheapEnergyPrices } from '@/lib/priceService';
@@ -83,7 +83,15 @@ const VideoWrapper = styled.div`
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid rgba(255, 255, 255, 0.2);
 
-  video {
+  video, iframe {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    border: none;
+  }
+
+  img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -108,9 +116,7 @@ const USPList = styled.ul`
 
 export default function Hero() {
   const [variant, setVariant] = useState<'A' | 'B'>('A');
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [videoError, setVideoError] = useState<string | null>(null);
-  const [isMounted, setIsMounted] = useState(false);
+  const [videoStarted, setVideoStarted] = useState(false);
   const [postalCode, setPostalCode] = useState('');
   const [area, setArea] = useState<ElectricityArea | null>(null);
   const [prices, setPrices] = useState<CheapEnergyPrices | null>(null);
@@ -135,10 +141,6 @@ export default function Hero() {
       }
       setVariant(newVariant);
     } catch {}
-  }, []);
-
-  useEffect(() => {
-    setIsMounted(true);
   }, []);
 
   useEffect(() => {
@@ -280,32 +282,8 @@ export default function Hero() {
     }
   }, [variant]);
   
-  const handleVideoClick = useCallback((event: React.MouseEvent<HTMLVideoElement>) => {
-    const video = event.currentTarget;
-    video.muted = !video.muted; // Växla mellan muted och unmuted
-    if (!video.muted) {
-      video.play().catch(() => {/* ignore */});
-    }
-  }, []);
-
-  useEffect(() => {
-    // Nudge autoplay on some browsers that require an explicit play() after attach
-    const v = videoRef.current;
-    if (!v) return;
-    
-    // Add a small delay to prevent blocking the main thread
-    const timeoutId = setTimeout(() => {
-      try {
-        v.muted = true;
-        const playPromise = v.play();
-        if (playPromise && typeof (playPromise as Promise<void>).catch === 'function') {
-          (playPromise as Promise<void>).catch(() => {/* ignore */});
-        }
-      } catch {/* ignore */}
-    }, 100);
-    
-    return () => clearTimeout(timeoutId);
-  }, []);
+  const YOUTUBE_VIDEO_ID = '9qwwv5kwHYM';
+  const youtubeEmbedUrl = `https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${YOUTUBE_VIDEO_ID}`;
 
   return (
     <HeroSection>
@@ -592,47 +570,59 @@ export default function Hero() {
             </div>
           </TextContent>
           <VideoWrapper>
-            <video 
-              ref={videoRef}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              poster="/frog-hero.png"
-              onLoadedData={() => { 
-                try { 
-                  if (videoRef.current) {
-                    videoRef.current.play().catch(() => {/* ignore */});
-                  }
-                  setVideoError(null);
-                } catch {} 
-              }}
-              onError={(e) => {
-                console.error('Video loading error:', e);
-                setVideoError('Video kunde inte laddas');
-              }}
-              onClick={handleVideoClick}
-              style={{ cursor: 'pointer' }}
-              title="Klicka för att växla ljud av/på"
-            >
-              <source src="/grodan-presentation.mp4" type="video/mp4" />
-              Din webbläsare stöder inte video-elementet.
-            </video>
-            {isMounted && videoError && typeof videoError === 'string' && (
-              <div style={{ 
-                position: 'absolute', 
-                top: '50%', 
-                left: '50%', 
-                transform: 'translate(-50%, -50%)',
-                color: 'white',
-                textAlign: 'center',
-                padding: '1rem',
-                background: 'rgba(0,0,0,0.7)',
-                borderRadius: '8px'
-              }}>
-                {String(videoError)}
-              </div>
+            {!videoStarted ? (
+              <button
+                type="button"
+                onClick={() => setVideoStarted(true)}
+                style={{
+                  all: 'unset',
+                  cursor: 'pointer',
+                  display: 'block',
+                  width: '100%',
+                  height: '100%',
+                  position: 'relative',
+                }}
+                aria-label="Spela video"
+              >
+                <img
+                  src={`https://img.youtube.com/vi/${YOUTUBE_VIDEO_ID}/maxresdefault.jpg`}
+                  alt="Klicka för att spela video"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${YOUTUBE_VIDEO_ID}/hqdefault.jpg`;
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: 68,
+                    height: 48,
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    borderRadius: 12,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'background 0.2s',
+                  }}
+                  aria-hidden
+                >
+                  <svg viewBox="0 0 68 48" width="68" height="48">
+                    <path fill="#fff" d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.31 1.55c-2.93.78-4.63 3.26-5.42 6.19C.06 13.05 0 24 0 24s.06 10.95 1.61 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.69-1.55c2.93-.78 4.63-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.61-16.26z" />
+                    <path fill="#f00" d="M45 24L27 14v20" />
+                  </svg>
+                </div>
+              </button>
+            ) : (
+              <iframe
+                src={youtubeEmbedUrl}
+                title="Elchef presentationsvideo"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+              />
             )}
           </VideoWrapper>
         </HeroContent>
