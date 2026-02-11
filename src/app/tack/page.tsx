@@ -1,12 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function TackPage() {
-  const params = useMemo(() => new URLSearchParams(typeof window !== 'undefined' ? window.location.search : ''), []);
-  const sid = params.get('sid') || '';
-  const status = params.get('status') || '';
+  // Avoid hydration mismatch: server has no window; read search params only after mount
+  const [sid, setSid] = useState('');
+  const [status, setStatus] = useState('');
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setSid(params.get('sid') || '');
+    setStatus(params.get('status') || '');
+  }, []);
 
   useEffect(() => {
     try {
