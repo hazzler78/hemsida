@@ -349,8 +349,8 @@ export default function Hero() {
             </ButtonRow>
             <USPList>
               <li>✔️ Vi lyfter fram rörliga elavtal som är värda att överväga.</li>
-              <li>✔️ Vi sköter bytet och uppsägningen av ditt gamla avtal.</li>
-              <li>✔️ Svensk support när du behöver hjälp.</li>
+              <li>✔️ Vi guidar dig så att bytet från ditt nuvarande avtal blir tryggt.</li>
+              <li>✔️ Mänsklig support när du behöver det.</li>
             </USPList>
           </TextContent>
           <VideoWrapper>

@@ -142,10 +142,10 @@ export default function AdminHeroAnalytics() {
   const bCtr = bImp ? fmtPct((bClk / bImp) * 100) : '—';
   const winner: 'A'|'B'|null = aImp && bImp ? ((aClk / aImp) >= (bClk / bImp) ? 'A' : 'B') : null;
 
-  // Variant descriptions
+  // Variant descriptions – match current hero A/B
   const variantNames = {
-    'A': 'Elchef gör det enkelt att välja rätt elavtal!',
-    'B': 'Välj rätt elavtal – utan krångel'
+    A: 'Variant A – blå CTA-knapp (brandfärger)',
+    B: 'Variant B – gul/ljus CTA-knapp med mörk text',
   };
 
   function quickRange(days: number) {
