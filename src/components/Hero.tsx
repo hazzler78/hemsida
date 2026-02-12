@@ -175,17 +175,20 @@ export default function Hero() {
   }, [variant]);
 
   const heroTitle: string =
-    variant === 'A' ? 'Trött på elräkningar som rusar?' : 'Stoppa onödigt dyra elräkningar.';
+    variant === 'A'
+      ? 'Sluta betala för dyra elräkningar – byt nu!'
+      : 'Trött på elräkningar som rusar?';
   const heroSub: string =
     variant === 'A'
-      ? 'Vi lyfter fram rörliga elavtal som är värda att överväga och sköter bytet åt dig – utan telefonköer eller papperskrångel.'
-      : 'Välj ett rörligt elavtal vi själva skulle rekommendera till familj och vänner.';
+      ? 'Välj ett elavtal vi själva skulle rekommendera till familj och vänner.'
+      : 'Billigare el väntar – se avtal som lönar sig just nu!';
 
+  // A/B-test: gul CTA-knapp vs grön CTA-knapp
   const buttonBackground =
     variant === 'A'
-      ? 'linear-gradient(135deg, var(--primary), var(--secondary))'
-      : 'linear-gradient(135deg, #fbbf24, #fde68a)';
-  const buttonTextColor = variant === 'A' ? 'white' : '#1f2937';
+      ? 'linear-gradient(135deg, #fbbf24, #fde68a)' // gul
+      : 'linear-gradient(135deg, #22c55e, #16a34a)'; // grön
+  const buttonTextColor = variant === 'A' ? '#1f2937' : 'white';
 
   const trackHeroClick = useCallback((target: 'rorligt' | 'fastpris', href: string) => {
     try {
@@ -332,11 +335,11 @@ export default function Hero() {
                   <GlassButton
                     variant="secondary"
                     size="md"
-                    aria-label="Se fastprisavtal om du vill ha ett mer förutsägbart elpris"
+                    aria-label="Se fastprisavtal för mitt hem"
                     disableScrollEffect={true}
                     disableHoverEffect={true}
                   >
-                    Jag vill hellre se fastpris
+                    Se fastprisavtal för mitt hem
                   </GlassButton>
                 </div>
                 <button
@@ -362,11 +365,6 @@ export default function Hero() {
                 </button>
               </div>
             </ButtonRow>
-            <USPList>
-              <li>✔️ Vi lyfter fram rörliga elavtal som är värda att överväga.</li>
-              <li>✔️ Vi guidar dig så att bytet från ditt nuvarande avtal blir tryggt.</li>
-              <li>✔️ Mänsklig support när du behöver det.</li>
-            </USPList>
           </TextContent>
           <VideoWrapper>
             {!videoStarted ? (
@@ -429,3 +427,17 @@ export default function Hero() {
     </HeroSection>
   );
 } 
+
+export function HeroUSPs() {
+  return (
+    <section style={{ padding: '2rem 0' }}>
+      <div className="container">
+        <USPList>
+          <li>✔️ Hitta elavtal som faktiskt kan sänka din elkostnad.</li>
+          <li>✔️ Byt elavtal på bara några minuter.</li>
+          <li>✔️ Mänsklig support när du behöver det.</li>
+        </USPList>
+      </div>
+    </section>
+  );
+}

@@ -1,5 +1,5 @@
 'use client';
-import Hero from '@/components/Hero';
+import Hero, { HeroUSPs } from '@/components/Hero';
 import HeroPriceWidget from '@/components/HeroPriceWidget';
 import Testimonials from '@/components/Testimonials';
 import ContactForm from '@/components/ContactForm';
@@ -16,6 +16,7 @@ export default function Home() {
     <main>
       <Hero />
       <HeroPriceWidget />
+      <HeroUSPs />
       {/* <PriceCalculator /> */}
       <Testimonials />
       <ContactForm />
