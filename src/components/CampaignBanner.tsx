@@ -4,7 +4,7 @@ import styled from "styled-components";
 import Image from "next/image";
 import { withDefaultCtaUtm } from '@/lib/utm';
 
-const Banner = styled.div<{ $isCollapsed: boolean }>`
+const Banner = styled.div`
   width: 100%;
   max-width: 100vw;
   box-sizing: border-box;
@@ -52,19 +52,8 @@ const StyledLink = styled.a`
   }
 `;
 
-const CollapsedText = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  max-width: 100%;
-  min-width: 0;
-`;
-
 export default function CampaignBanner() {
   const [variant, setVariant] = useState<'A' | 'B'>('A');
-  const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
     try {
@@ -88,15 +77,6 @@ export default function CampaignBanner() {
     } catch {
       // no-op
     }
-  }, []);
-
-  // Auto-collapse after 4 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsCollapsed(true);
-    }, 4000);
-
-    return () => clearTimeout(timer);
   }, []);
 
   // Impression tracking: 1 per 24h per variant
@@ -141,46 +121,21 @@ export default function CampaignBanner() {
   // Expanded text variants
   const textA = (
     <>
-      Nyhet! Låt vår <Highlight>AI</Highlight> analysera din elräkning och räkna ut din möjliga besparing.
+      Låt vår <Highlight>AI</Highlight> analysera din elräkning.
     </>
   );
 
   const textB = (
     <>
-      Testa vår <Highlight>AI</Highlight> – ladda upp din faktura och se hur mycket du kan spara.
+      Ladda upp faktura – få AI-analys direkt.
     </>
   );
 
-  // Collapsed text variants
-  const collapsedTextA = (
-    <CollapsedText>
-      <Image src="/favicon.svg" alt="Elchef" width={16} height={16} style={{ verticalAlign: 'middle' }} />
-      <Highlight>AI</Highlight>analys av din elräkning
-      <StyledLink href={href} onClick={handleClick}>Prova nu</StyledLink>
-    </CollapsedText>
-  );
-
-  const collapsedTextB = (
-    <CollapsedText>
-      <Image src="/favicon.svg" alt="Elchef" width={16} height={16} style={{ verticalAlign: 'middle' }} />
-      Ladda upp faktura med <Highlight>AI</Highlight>
-      <StyledLink href={href} onClick={handleClick}>Prova nu</StyledLink>
-    </CollapsedText>
-  );
-
   return (
-    <Banner $isCollapsed={isCollapsed}>
-      {isCollapsed ? (
-        variant === 'A' ? collapsedTextA : collapsedTextB
-      ) : (
-        <>
-          <Image src="/favicon.svg" alt="Elchef" width={20} height={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
-          {variant === 'A' ? textA : textB}
-          <br />
-          Ladda upp din faktura och få en tydlig genomgång –
-          <StyledLink href={href} onClick={handleClick}>Prova nu</StyledLink>
-        </>
-      )}
+    <Banner>
+      <Image src="/favicon.svg" alt="Elchef" width={20} height={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+      {variant === 'A' ? textA : textB}
+      <StyledLink href={href} onClick={handleClick}>Prova nu</StyledLink>
     </Banner>
   );
 } 

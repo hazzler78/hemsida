@@ -307,22 +307,37 @@ export default function Hero() {
                 </div>
                 <div
                   style={{
-                    fontSize: '0.9rem',
-                    color: 'var(--foreground)',
-                    background: 'rgba(255, 255, 255, 0.95)',
-                    border: '1px solid rgba(0,0,0,0.06)',
-                    padding: '0.4rem 0.8rem',
-                    borderRadius: 9999,
-                    textAlign: 'center',
-                    backdropFilter: 'blur(8px)',
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                    cursor: 'pointer',
                     position: 'relative',
                     zIndex: 10,
-                    wordBreak: 'break-word',
-                    overflowWrap: 'break-word',
+                    transition: 'all 0.3s ease',
+                    width: '100%',
+                  }}
+                  onMouseEnter={useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+                    e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+                    e.currentTarget.style.filter = 'brightness(1.02)';
+                  }, [])}
+                  onMouseLeave={useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+                    e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                    e.currentTarget.style.filter = 'brightness(1)';
+                  }, [])}
+                  onClick={() => {
+                    trackHeroClick('fastpris', '/fastpris-avtal');
+                    const sid =
+                      typeof window !== 'undefined' ? window.localStorage.getItem('invoice_session_id') || '' : '';
+                    const url = '/fastpris-avtal' + (sid ? `?sid=${encodeURIComponent(sid)}` : '');
+                    window.location.href = url;
                   }}
                 >
-                  0 kr i månadsavgift första året – utan bindningstid
+                  <GlassButton
+                    variant="secondary"
+                    size="md"
+                    aria-label="Se fastprisavtal om du vill ha ett mer förutsägbart elpris"
+                    disableScrollEffect={true}
+                    disableHoverEffect={true}
+                  >
+                    Jag vill hellre se fastpris
+                  </GlassButton>
                 </div>
                 <button
                   type="button"
