@@ -14,8 +14,8 @@ const Banner = styled.div`
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
   text-align: center;
-  padding: ${props => props.$isCollapsed ? '0.8rem 0.75rem' : '1.2rem 0.75rem'};
-  font-size: ${props => props.$isCollapsed ? '1rem' : 'clamp(0.95rem, 2.5vw, 1.15rem)'};
+  padding: 1rem 0.75rem;
+  font-size: clamp(0.95rem, 2.5vw, 1.1rem);
   font-weight: 700;
   letter-spacing: 0.02em;
   box-shadow: var(--glass-shadow-light);
