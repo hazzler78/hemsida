@@ -561,6 +561,7 @@ export default function RorligtAvtalV2Page() {
       const trackingId = `elchef_${Date.now()}_${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
       
       const sessionId = typeof window !== 'undefined' ? (window.localStorage.getItem('invoice_session_id') || '') : '';
+      const heroVariant = typeof window !== 'undefined' ? window.localStorage.getItem('hero_variant_v1') || null : null;
       const cameViaRobinhood = typeof window !== 'undefined' ? (() => {
         const flag = localStorage.getItem('came_via_robinhood');
         const time = localStorage.getItem('came_via_robinhood_time');
@@ -583,6 +584,7 @@ export default function RorligtAvtalV2Page() {
           url,
           sessionId,
           cameViaRobinhood,
+          heroVariant,
           source: 'rorligt-avtal-v2',
           preferences: preferences,
           trackingId

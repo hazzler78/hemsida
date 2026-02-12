@@ -15,7 +15,8 @@ export async function POST(request: NextRequest) {
       source = 'jamfor-elpriser',
       utmSource,
       utmMedium,
-      utmCampaign
+      utmCampaign,
+      heroVariant,
     } = body;
 
     // Validera att logId finns i invoice_ocr om det är angivet
@@ -48,6 +49,7 @@ export async function POST(request: NextRequest) {
       utm_source: typeof utmSource === 'string' ? utmSource : null,
       utm_medium: typeof utmMedium === 'string' ? utmMedium : null,
       utm_campaign: typeof utmCampaign === 'string' ? utmCampaign : null,
+      hero_variant: typeof heroVariant === 'string' ? heroVariant : null,
       user_agent: ua,
       referer,
       created_at: new Date().toISOString()

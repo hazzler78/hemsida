@@ -409,6 +409,7 @@ export default function FastprisAvtalPage() {
       
       // Track affiliate link click
       const sessionId = typeof window !== 'undefined' ? (window.localStorage.getItem('invoice_session_id') || '') : '';
+      const heroVariant = typeof window !== 'undefined' ? window.localStorage.getItem('hero_variant_v1') || null : null;
       // Check if user came via robinhood link (within 24 hours)
       const cameViaRobinhood = typeof window !== 'undefined' ? (() => {
         const flag = localStorage.getItem('came_via_robinhood');
@@ -433,6 +434,7 @@ export default function FastprisAvtalPage() {
           url,
           sessionId,
           cameViaRobinhood,
+          heroVariant,
           trackingId
         }),
         keepalive: true,

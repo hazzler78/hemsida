@@ -189,7 +189,10 @@ export default function JamforElpriser() {
       };
 
       const savingsAmount = gptResult ? extractSavings(gptResult) : 0;
-      
+
+      const heroVariant =
+        typeof window !== 'undefined' ? window.localStorage.getItem('hero_variant_v1') || null : null;
+
       // Debug: Logga extraktionsresultat
       console.log('GPT Result:', gptResult);
       console.log('Extracted savings amount:', savingsAmount);
@@ -202,7 +205,8 @@ export default function JamforElpriser() {
         source: 'jamfor-elpriser',
         utmSource: 'jamfor',
         utmMedium: 'cta',
-        utmCampaign: `cta-${contractType}`
+        utmCampaign: `cta-${contractType}`,
+        heroVariant,
       });
 
       // Använd sendBeacon för bättre tillförlitlighet

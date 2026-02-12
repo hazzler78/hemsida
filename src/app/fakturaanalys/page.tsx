@@ -191,6 +191,9 @@ export default function Fakturaanalys() {
 
       const savingsAmount = gptResult ? extractSavings(gptResult) : 0;
 
+      const heroVariant =
+        typeof window !== 'undefined' ? window.localStorage.getItem('hero_variant_v1') || null : null;
+
       const payload = JSON.stringify({
         contractType,
         logId,
@@ -199,7 +202,8 @@ export default function Fakturaanalys() {
         source: 'fakturaanalys',
         utmSource: 'fakturaanalys',
         utmMedium: 'cta',
-        utmCampaign: `cta-${contractType}`
+        utmCampaign: `cta-${contractType}`,
+        heroVariant,
       });
 
       if (navigator.sendBeacon) {
