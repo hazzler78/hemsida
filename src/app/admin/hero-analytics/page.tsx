@@ -142,10 +142,18 @@ export default function AdminHeroAnalytics() {
   const bCtr = bImp ? fmtPct((bClk / bImp) * 100) : '—';
   const winner: 'A'|'B'|null = aImp && bImp ? ((aClk / aImp) >= (bClk / bImp) ? 'A' : 'B') : null;
 
-  // Variant descriptions – match current hero A/B
+  // Variant descriptions – match current hero A/B (rubrik + knapp)
   const variantNames = {
-    A: 'Variant A – blå CTA-knapp (brandfärger)',
-    B: 'Variant B – gul/ljus CTA-knapp med mörk text',
+    A: [
+      'Variant A – gul CTA-knapp',
+      'Rubrik: "Sluta betala för dyra elräkningar – byt nu!"',
+      'Underrad: "Välj ett elavtal vi själva skulle rekommendera till familj och vänner."',
+    ].join(' • '),
+    B: [
+      'Variant B – grön CTA-knapp',
+      'Rubrik: "Trött på elräkningar som rusar?"',
+      'Underrad: "Billigare el väntar – se avtal som lönar sig just nu!"',
+    ].join(' • '),
   };
 
   function quickRange(days: number) {
