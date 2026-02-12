@@ -183,9 +183,20 @@ export default function AdminHeroAnalytics() {
   }
 
   return (
-    <div style={{ maxWidth: 1200, margin: '2rem auto', padding: 24 }}>
-      <h1>Hero A/B (Admin)</h1>
-      <p style={{ color: '#64748b', marginTop: 4, marginBottom: 12 }}>
+    <div
+      style={{
+        maxWidth: 1200,
+        margin: '2rem auto',
+        padding: 24,
+        backgroundColor: '#ffffff',
+        color: '#0f172a',
+        lineHeight: 1.6,
+        borderRadius: 12,
+        boxShadow: '0 10px 30px rgba(15, 23, 42, 0.08)',
+      }}
+    >
+      <h1 style={{ fontSize: 22, marginBottom: 4 }}>Hero A/B (Admin)</h1>
+      <p style={{ color: '#64748b', marginTop: 4, marginBottom: 16, fontSize: 14 }}>
         CTR = klick / visningar per variant
       </p>
 
