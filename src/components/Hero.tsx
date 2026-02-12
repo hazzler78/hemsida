@@ -104,6 +104,47 @@ const VideoWrapper = styled.div`
   }
 `;
 
+const VideoOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  z-index: 10000;
+`;
+
+const VideoOverlayContent = styled.div`
+  width: 100%;
+  max-width: 800px;
+  aspect-ratio: 16/9;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--glass-shadow-heavy);
+  position: relative;
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  button.close-overlay {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    z-index: 2;
+  }
+`;
+
 const USPList = styled.ul`
   list-style: none;
   padding: 0;
@@ -147,23 +188,18 @@ function getInitialHeroVariant(): 'A' | 'B' {
 export default function Hero() {
   const [variant] = useState<'A' | 'B'>(getInitialHeroVariant);
   const [videoStarted, setVideoStarted] = useState(false);
-  const videoRef = useRef<HTMLDivElement | null>(null);
+  const videoContainerRef = useRef<HTMLDivElement | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Säkerställ att videon hamnar i bild, särskilt på mobil, när användaren startar den
   useEffect(() => {
-    if (!videoStarted) return;
-    try {
-      if (typeof window === 'undefined') return;
-      const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-      const behavior: ScrollBehavior = prefersReducedMotion ? 'auto' : 'smooth';
-      const node = videoRef.current;
-      if (node) {
-        node.scrollIntoView({ behavior, block: 'center' });
-      }
-    } catch {
-      // no-op
-    }
-  }, [videoStarted]);
+    if (typeof window === 'undefined') return;
+    const update = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
 
   useEffect(() => {
     try {
@@ -251,8 +287,13 @@ export default function Hero() {
     }
   }, [variant]);
   
+  const handleStartVideo = useCallback(() => {
+    setVideoStarted(true);
+  }, []);
+  
   const YOUTUBE_VIDEO_ID = '9qwwv5kwHYM';
-  const youtubeEmbedUrl = `https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${YOUTUBE_VIDEO_ID}`;
+  // Play with sound when user explicitly starts the video
+  const youtubeEmbedUrl = `https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&loop=1&playlist=${YOUTUBE_VIDEO_ID}`;
 
   return (
     <HeroSection>
@@ -383,11 +424,11 @@ export default function Hero() {
               </div>
             </ButtonRow>
           </TextContent>
-          <VideoWrapper ref={videoRef}>
-            {!videoStarted ? (
+          <VideoWrapper ref={videoContainerRef}>
+            {!videoStarted || isMobile ? (
               <button
                 type="button"
-                onClick={() => setVideoStarted(true)}
+                onClick={handleStartVideo}
                 style={{
                   all: 'unset',
                   cursor: 'pointer',
@@ -441,6 +482,35 @@ export default function Hero() {
           </VideoWrapper>
         </HeroContent>
       </div>
+      {videoStarted && isMobile && (
+        <VideoOverlay
+          onClick={() => {
+            setVideoStarted(false);
+          }}
+        >
+          <VideoOverlayContent
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <button
+              type="button"
+              className="close-overlay"
+              onClick={() => {
+                setVideoStarted(false);
+              }}
+            >
+              Stäng
+            </button>
+            <iframe
+              src={youtubeEmbedUrl}
+              title="Elchef presentationsvideo"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          </VideoOverlayContent>
+        </VideoOverlay>
+      )}
     </HeroSection>
   );
 } 
