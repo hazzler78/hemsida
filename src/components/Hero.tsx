@@ -2,7 +2,7 @@
 "use client";
 
 import styled from 'styled-components';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import GlassButton from './GlassButton';
 import { withDefaultCtaUtm } from '@/lib/utm';
 
@@ -125,6 +125,7 @@ const USPList = styled.ul`
 export default function Hero() {
   const [variant, setVariant] = useState<'A' | 'B'>('A');
   const [videoStarted, setVideoStarted] = useState(false);
+  const videoRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     try {
@@ -147,6 +148,22 @@ export default function Hero() {
       // no-op
     }
   }, []);
+
+  // Säkerställ att videon hamnar i bild, särskilt på mobil, när användaren startar den
+  useEffect(() => {
+    if (!videoStarted) return;
+    try {
+      if (typeof window === 'undefined') return;
+      const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      const behavior: ScrollBehavior = prefersReducedMotion ? 'auto' : 'smooth';
+      const node = videoRef.current;
+      if (node) {
+        node.scrollIntoView({ behavior, block: 'center' });
+      }
+    } catch {
+      // no-op
+    }
+  }, [videoStarted]);
 
   useEffect(() => {
     try {
@@ -366,7 +383,7 @@ export default function Hero() {
               </div>
             </ButtonRow>
           </TextContent>
-          <VideoWrapper>
+          <VideoWrapper ref={videoRef}>
             {!videoStarted ? (
               <button
                 type="button"
