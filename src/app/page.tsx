@@ -1,5 +1,6 @@
 'use client';
 import Hero from '@/components/Hero';
+import HeroPriceWidget from '@/components/HeroPriceWidget';
 import Testimonials from '@/components/Testimonials';
 import ContactForm from '@/components/ContactForm';
 import FAQ from '@/components/FAQ';
@@ -14,6 +15,7 @@ export default function Home() {
   return (
     <main>
       <Hero />
+      <HeroPriceWidget />
       {/* <PriceCalculator /> */}
       <Testimonials />
       <ContactForm />

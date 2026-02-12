@@ -8,6 +8,7 @@ export interface GlassButtonProps {
   onClick?: () => void;
   disabled?: boolean;
   background?: string;
+  color?: string;
   disableScrollEffect?: boolean;
   disableHoverEffect?: boolean;
   as?: ElementType;
@@ -21,6 +22,7 @@ export default function GlassButton({
   onClick,
   disabled = false,
   background,
+  color,
   disableScrollEffect = false,
   disableHoverEffect = false,
   as = 'button',
@@ -144,6 +146,7 @@ export default function GlassButton({
       style={{
         ...variantStyles,
         ...sizeStyles,
+        color: color ?? variantStyles.color,
         borderRadius: 'var(--radius-full)',
         fontWeight: 600,
         cursor: disabled ? 'not-allowed' : 'pointer',

@@ -235,9 +235,10 @@ export default function SolarQuoteForm() {
   return (
     <Section>
       <Container>
-        <Title>Få gratis offert på solceller via våra partners</Title>
+        <Title>Ta nästa steg mot total energibesparing</Title>
         <Subtitle>
-          Fyll i formuläret så kopplar vi dig till en pålitlig partner för solceller och laddbox. Ingen förpliktelse.
+          När elavtalet är på plats kan solceller, batteri och laddbox sänka din elräkning ytterligare. 
+          Lämna en intresseanmälan så kopplar vi dig till en pålitlig partner. Ingen förpliktelse.
         </Subtitle>
 
         <Form onSubmit={handleSubmit}>
