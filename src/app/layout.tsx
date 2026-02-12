@@ -19,11 +19,11 @@ export const viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Elchef – jämför elavtal i Sverige och hitta bästa elavtal 2026",
+  title: "Elchef – sänk elräkningen med rätt rörligt elavtal 2026",
   description:
-    "Jämför elavtal i Sverige och byt enkelt. Elchef.se hjälper dig hitta bästa elavtal 2026 med fokus på lägre elkostnad, tydlig elavtal jämförelse och trygg rådgivning.",
+    "Trött på elräkningar som rusar? Elchef.se hjälper dig välja rätt rörligt elavtal, analysera din elräkning med AI och ta nästa steg mot total energibesparing med solceller och batteri.",
   keywords:
-    "elavtal jämförelse Sverige, bästa elavtal 2026, elavtal, elpriser, byta elavtal, jämför elpriser, elbolag, elhandelsbolag",
+    "rörligt elavtal, sänka elräkning, bästa elavtal 2026, elavtal, elpriser, byta elavtal, jämför elpriser, solceller, batteri",
 };
 
 export default function RootLayout({
@@ -68,11 +68,11 @@ export default function RootLayout({
         {/* Open Graph metadata */}
         <meta
           property="og:title"
-          content="Elchef – jämför elavtal i Sverige och hitta bästa elavtal 2026"
+          content="Elchef – sänk elräkningen med rätt rörligt elavtal 2026"
         />
         <meta
           property="og:description"
-          content="Jämför elavtal i Sverige och byt enkelt. Elchef.se hjälper dig hitta bästa elavtal 2026 med fokus på lägre elkostnad, tydlig elavtal jämförelse och trygg rådgivning."
+          content="Trött på elräkningar som rusar? Elchef.se hjälper dig välja rätt rörligt elavtal, analysera din elräkning med AI och ta nästa steg mot total energibesparing med solceller och batteri."
         />
         <meta property="og:image" content="https://elchef.se/elchef-logo.png" />
         <meta property="og:url" content="https://elchef.se" />
@@ -81,11 +81,11 @@ export default function RootLayout({
         <meta name="twitter:card" content="summary_large_image" />
         <meta
           name="twitter:title"
-          content="Elchef – jämför elavtal i Sverige och hitta bästa elavtal 2026"
+          content="Elchef – sänk elräkningen med rätt rörligt elavtal 2026"
         />
         <meta
           name="twitter:description"
-          content="Jämför elavtal i Sverige och byt enkelt. Elchef.se hjälper dig hitta bästa elavtal 2026 med fokus på lägre elkostnad, tydlig elavtal jämförelse och trygg rådgivning."
+          content="Trött på elräkningar som rusar? Elchef.se hjälper dig välja rätt rörligt elavtal, analysera din elräkning med AI och ta nästa steg mot total energibesparing med solceller och batteri."
         />
         <meta name="twitter:image" content="https://elchef.se/elchef-logo.png" />
         <meta name="facebook-domain-verification" content="in9xjxefhkl6pbe4g33zjwrsnkliin" />
