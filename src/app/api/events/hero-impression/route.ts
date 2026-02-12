@@ -9,45 +9,27 @@ function sanitizeEnv(value: string | undefined): string | undefined {
 
 export async function POST(req: NextRequest) {
   try {
-    const rawSUPABASE_URL = process.env.SUPABASE_URL;
-    const rawSUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    
-    const SUPABASE_URL = sanitizeEnv(rawSUPABASE_URL);
-    const SUPABASE_SERVICE_ROLE_KEY = sanitizeEnv(rawSUPABASE_SERVICE_ROLE_KEY);
-    
-    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('Supabase env saknas', { 
-        hasUrl: !!rawSUPABASE_URL, 
-        hasKey: !!rawSUPABASE_SERVICE_ROLE_KEY 
+    const rawServiceUrl = process.env.SUPABASE_URL;
+    const rawServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const rawPublicUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const rawAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    const SUPABASE_URL = sanitizeEnv(rawServiceUrl || rawPublicUrl);
+    const SUPABASE_KEY = sanitizeEnv(rawServiceKey || rawAnonKey);
+
+    if (!SUPABASE_URL || !SUPABASE_KEY) {
+      console.error('Supabase env saknas för hero-impression', {
+        hasServiceUrl: !!rawServiceUrl,
+        hasServiceKey: !!rawServiceKey,
+        hasPublicUrl: !!rawPublicUrl,
+        hasAnonKey: !!rawAnonKey,
       });
       return NextResponse.json({ error: 'Supabase env saknas' }, { status: 500 });
     }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: {
         persistSession: false,
-      },
-      global: {
-        fetch: async (url, options) => {
-          // Create a new timeout controller for each request
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 sekunder timeout
-          
-          try {
-            const response = await fetch(url, {
-              ...options,
-              signal: controller.signal,
-            });
-            clearTimeout(timeoutId);
-            return response;
-          } catch (error) {
-            clearTimeout(timeoutId);
-            if (error instanceof Error && error.name === 'AbortError') {
-              throw new Error('Request timeout - Supabase connection took too long');
-            }
-            throw error;
-          }
-        },
       },
     });
 
@@ -65,19 +47,17 @@ export async function POST(req: NextRequest) {
     }).select();
 
     if (error) {
-      console.error('Supabase insert error:', error);
+      console.error('Supabase hero_impressions insert error:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
-    
+
     return NextResponse.json({ ok: true, data });
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : 'Okänt fel';
-    const errorDetails = e instanceof Error ? { name: e.name, stack: e.stack } : {};
-    console.error('Hero impression endpoint error:', message, errorDetails);
+    console.error('Hero impression endpoint error:', message, e);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
 export const runtime = 'edge';
-
 

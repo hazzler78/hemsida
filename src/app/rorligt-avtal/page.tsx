@@ -830,11 +830,12 @@ export default function RorligtAvtalPage() {
                 <ProviderDescription>
                   {provider.description}
                 </ProviderDescription>
-                <ProviderButton 
+                <ProviderButton
                   href={provider.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
                     handleProviderClick(provider.name, provider.url);
                   }}
                 >
