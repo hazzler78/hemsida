@@ -205,9 +205,8 @@ export default function SolarQuoteForm() {
           name: formData.name || undefined,
           email: formData.email,
           phone: formData.phone || undefined,
-          message: formData.message
-            ? `[Solceller/Laddbox] ${formData.message}`
-            : undefined,
+          // Håll meddelandet rent – Telegram Markdown kan strula på [ ]
+          message: formData.message || undefined,
           subscribeNewsletter: false,
           ref: ref || 'sol_laddbox',
           campaignCode: campaignCode || undefined,

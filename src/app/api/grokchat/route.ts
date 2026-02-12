@@ -3,7 +3,43 @@ import { createClient } from '@supabase/supabase-js';
 import { 
   generateKnowledgeSummary 
 } from '@/lib/knowledgeBase';
-// import { CheapEnergyPrices } from '@/lib/types'; // Temporärt inaktiverat
+
+// Typer för pris-API:t (hämtas via våra egna endpoints, inte direkt från leverantörer)
+type ProviderRateType = 'hourly' | 'monthly';
+
+interface ProviderPriceItem {
+  monthly_fee_kr: number;
+  surcharge_ore_per_kwh: number;
+  rate_type: ProviderRateType;
+}
+
+interface ProviderVariablePricesResponse {
+  providers: Record<string, ProviderPriceItem>;
+}
+
+interface ProviderFixedPricesResponse {
+  providers: Record<string, number>;
+}
+
+// Typ för leverantör från /api/providers
+interface PageProviderApi {
+  id?: number;
+  name: string;
+  type: 'rorligt' | 'fastpris';
+  logo_url: string;
+  description: string;
+  url: string;
+  is_recommended: boolean;
+  display_order: number;
+  active: boolean;
+  campaign_text?: string | null;
+  campaign_bold?: boolean | null;
+  campaign_italic?: boolean | null;
+  best_price_badge_text?: string | null;
+  manual_monthly_fee_kr?: number | null;
+  manual_surcharge_ore_per_kwh?: number | null;
+  manual_rate_type?: 'hourly' | 'monthly' | 'quarterly' | null;
+}
 
 const XAI_API_KEY = process.env.XAI_API_KEY;
 const XAI_API_URL = 'https://api.x.ai/v1/chat/completions';
@@ -11,32 +47,138 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// Funktion för att hämta aktuella elpriser (temporärt inaktiverad)
-// async function getCurrentPrices(): Promise<CheapEnergyPrices | null> {
-//   try {
-//     // Hämta direkt från Stockholms Elbolag
-//     console.log('🔍 getCurrentPrices: Hämtar direkt från Stockholms Elbolag...');
-//     
-//     const response = await fetch('https://www.stockholmselbolag.se/Site_Priser_SthlmsEL_de2.json', {
-//       headers: {
-//         'Accept': 'application/json',
-//         'User-Agent': 'Elchef-Price-Checker/1.0'
-//       }
-//     });
-//     
-//     if (!response.ok) {
-//       console.error('Failed to fetch prices:', response.status);
-//       return null;
-//     }
-//     
-//     const prices = await response.json();
-//     console.log('✅ getCurrentPrices: Hämtade priser:', prices.spot_prices);
-//     return prices;
-//   } catch (error) {
-//     console.error('Error fetching current prices:', error);
-//     return null;
-//   }
-// }
+// Hjälpfunktion: format med svensk decimal (1,2)
+function formatSwedishDecimal(value: number, decimals: number = 1): string {
+  return value.toFixed(decimals).replace('.', ',');
+}
+
+// Funktion för att hämta sammanfattade leverantörspriser via våra interna pris-API:er
+async function getLiveProviderPriceSummary(req: NextRequest): Promise<string | null> {
+  try {
+    const origin = req.nextUrl.origin;
+    // Standardantagande: SE3 och 13 500 kWh/år – samma default som /api/prices/providers
+    const variableUrl = `${origin}/api/prices/providers?area=se3&consumption=13500`;
+    const fixedUrl = `${origin}/api/prices/providers/fixed?area=se3&period=1_year`;
+
+    const [variableRes, fixedRes] = await Promise.all([
+      fetch(variableUrl, { headers: { Accept: 'application/json' } }),
+      fetch(fixedUrl, { headers: { Accept: 'application/json' } }),
+    ]);
+
+    if (!variableRes.ok && !fixedRes.ok) {
+      return null;
+    }
+
+    let variableData: ProviderVariablePricesResponse | null = null;
+    let fixedData: ProviderFixedPricesResponse | null = null;
+
+    try {
+      if (variableRes.ok) {
+        variableData = await variableRes.json() as ProviderVariablePricesResponse;
+      }
+    } catch {
+      variableData = null;
+    }
+
+    try {
+      if (fixedRes.ok) {
+        fixedData = await fixedRes.json() as ProviderFixedPricesResponse;
+      }
+    } catch {
+      fixedData = null;
+    }
+
+    const lines: string[] = [];
+    lines.push('## AKTUELLA ELPRISER (automatisk hämtning, ungefärliga)');
+    lines.push('> Priserna är uppskattningar baserade på leverantörernas egna prisfiler. Exakta villkor visas alltid på respektive avtalssida.');
+    lines.push('');
+
+    if (variableData && Object.keys(variableData.providers).length > 0) {
+      lines.push('### Rörligt pris – SE3, ca 13 500 kWh/år');
+      Object.entries(variableData.providers).forEach(([name, p]) => {
+        if (!p) return;
+        const monthly = formatSwedishDecimal(p.monthly_fee_kr, 0);
+        const surcharge = formatSwedishDecimal(p.surcharge_ore_per_kwh, 1);
+        const rateLabel = p.rate_type === 'hourly' ? 'rörligt timpris' : 'rörligt månadspris';
+        lines.push(`• **${name}**: ca ${monthly} kr/mån + ~${surcharge} öre/kWh (${rateLabel})`);
+      });
+      lines.push('');
+    }
+
+    if (fixedData && Object.keys(fixedData.providers).length > 0) {
+      lines.push('### Fastpris 1 år – SE3 (ungefärliga totalpriser inkl. moms)');
+      Object.entries(fixedData.providers).forEach(([name, price]) => {
+        if (price == null) return;
+        const priceStr = formatSwedishDecimal(price, 1);
+        lines.push(`• **${name}**: ca ${priceStr} öre/kWh`);
+      });
+      lines.push('');
+    }
+
+    const summary = lines.join('\n').trim();
+    return summary.length > 0 ? summary : null;
+  } catch {
+    // Om pris-API:t fallerar ska chatten fortfarande fungera – hoppa bara över prisdelen
+    return null;
+  }
+}
+
+// Funktion för att hämta aktuella leverantörer från /api/providers (admin-sidan)
+async function getProvidersFromAdmin(req: NextRequest): Promise<string | null> {
+  try {
+    const origin = req.nextUrl.origin;
+
+    const [rorligtRes, fastprisRes] = await Promise.all([
+      fetch(`${origin}/api/providers?type=rorligt&active=true`, { headers: { Accept: 'application/json' } }),
+      fetch(`${origin}/api/providers?type=fastpris&active=true`, { headers: { Accept: 'application/json' } }),
+    ]);
+
+    if (!rorligtRes.ok && !fastprisRes.ok) {
+      return null;
+    }
+
+    const lines: string[] = [];
+    lines.push('## AKTUELLA LEVERANTÖRER (från admin /providers)');
+
+    if (rorligtRes.ok) {
+      const rJson = await rorligtRes.json() as { providers?: PageProviderApi[] };
+      const rList = (rJson.providers || []).filter(p => p.active);
+      if (rList.length > 0) {
+        lines.push('### Rörligt avtal');
+        rList.forEach(p => {
+          const badges: string[] = [];
+          if (p.is_recommended) badges.push('Rekommenderad');
+          if (p.best_price_badge_text) badges.push(p.best_price_badge_text);
+          const badgeText = badges.length ? ` – ${badges.join(' | ')}` : '';
+          lines.push(`• **${p.name}**${badgeText}: ${p.description}`);
+        });
+        lines.push('');
+      }
+    }
+
+    if (fastprisRes.ok) {
+      const fJson = await fastprisRes.json() as { providers?: PageProviderApi[] };
+      const fList = (fJson.providers || []).filter(p => p.active);
+      if (fList.length > 0) {
+        lines.push('### Fastprisavtal');
+        fList.forEach(p => {
+          const badges: string[] = [];
+          if (p.is_recommended) badges.push('Rekommenderad');
+          if (p.best_price_badge_text) badges.push(p.best_price_badge_text);
+          const badgeText = badges.length ? ` – ${badges.join(' | ')}` : '';
+          lines.push(`• **${p.name}**${badgeText}: ${p.description}`);
+        });
+        lines.push('');
+      }
+    }
+
+    const summary = lines.join('\n').trim();
+    return summary.length > 0 ? summary : null;
+  } catch {
+    // Om providers-API:t fallerar ska chatten fortfarande fungera – hoppa bara över leverantörsdelen
+    return null;
+  }
+}
 
 // Funktion för att hämta dynamisk kunskap från Supabase
 async function getDynamicKnowledge() {
@@ -62,13 +204,6 @@ async function getDynamicKnowledge() {
       .gte('valid_to', new Date().toISOString().split('T')[0])
       .order('valid_to', { ascending: true });
 
-    // Hämta aktiva leverantörer
-    const { data: providerData } = await supabase
-      .from('ai_providers')
-      .select('*')
-      .eq('active', true)
-      .order('name', { ascending: true });
-
     // Hämta ALL kunskap istället för bara relevant
     // const relevantKnowledge = knowledgeData?.filter(item => 
     //   item.keywords.some((keyword: string) => 
@@ -78,8 +213,7 @@ async function getDynamicKnowledge() {
 
     return {
       knowledge: knowledgeData || [], // All kunskap
-      campaigns: campaignData || [],
-      providers: providerData || []
+      campaigns: campaignData || []
     };
   } catch (error) {
     console.error('Error fetching dynamic knowledge:', error);
@@ -114,17 +248,8 @@ Du är en expert på svenska elavtal och elmarknaden med djup kunskap om:
 • **Företagsavtal**: Via energi2.se/elchef/ för företag
 
 ### Leverantörer
-• **Rörligt avtal**: 
-  - Cheap Energy (0 kr månadsavgift, 0 öre påslag): https://www.cheapenergy.se/teckna-elavtal/?src=Elchef
-  - Svekraft (0 kr månadsavgift, 7,99 öre påslag): https://www.svekraft.com/elavtal/?src=Elchef
-  - Motala: https://motalaenergi.se/privatperson/?src=Elchef
-• **Fastprisavtal**: 
-  - Svealands Elbolag: https://www.svealandselbolag.se/teckna-avtal/?src=Elchef
-  - Cheap Energy: https://www.cheapenergy.se/teckna-elavtal/?src=Elchef
-  - Stockholms Elbolag: https://www.stockholmselbolag.se/elavtal/?src=Elchef
-  - Svekraft: https://www.svekraft.com/elavtal/?src=Elchef
-  - Motala: https://motalaenergi.se/privatperson/?src=Elchef
-• **Företag**: Energi2.se - https://www.energi2.se/elavtal/?src=Elchef
+• Vi samarbetar med flera olika elleverantörer.
+• Den aktuella listan över leverantörer och deras erbjudanden hämtas automatiskt från systemet (admin-sidan för leverantörer). Ange inte egna påhittade leverantörer.
 
 ### Bytprocess
 • Helt digitalt - inga papper eller samtal
@@ -279,15 +404,16 @@ export async function POST(req: NextRequest) {
     // Hämta dynamisk kunskap från Supabase
     const dynamicKnowledge = await getDynamicKnowledge();
     
-    // Temporärt inaktiverat prisfunktionen - API fungerar men orsakar 500-fel i AI
-    // const currentPrices = null; // Temporärt inaktiverat
+    // Hämta aktuella priser via våra interna pris-API:er (ej kritiskt; AI fungerar även utan)
+    const livePriceSummary = await getLiveProviderPriceSummary(req);
+    // Hämta aktuella leverantörer från admin-sidan (/api/providers)
+    const adminProvidersSummary = await getProvidersFromAdmin(req);
     
     // Debug: logga vad som hämtades
     if (dynamicKnowledge) {
       console.log('Dynamisk kunskap hämtad:', {
         knowledgeCount: dynamicKnowledge.knowledge.length,
-        campaignCount: dynamicKnowledge.campaigns.length,
-        providerCount: dynamicKnowledge.providers.length
+        campaignCount: dynamicKnowledge.campaigns.length
       });
     }
     
@@ -311,37 +437,17 @@ export async function POST(req: NextRequest) {
         });
         enhancedSystemPrompt += '\n';
       }
-      
-      // Lägg till aktuella leverantörer
-      if (dynamicKnowledge.providers.length > 0) {
-        enhancedSystemPrompt += '\n## AKTUELLA LEVERANTÖRER\n';
-        dynamicKnowledge.providers.forEach(provider => {
-          enhancedSystemPrompt += `• **${provider.name}** (${provider.type}): ${provider.features.join(', ')}\n`;
-        });
-        enhancedSystemPrompt += '\n';
-      }
     }
-    
-    // Temporärt inaktiverat prisfunktionen
-    // if (currentPrices) {
-    //   enhancedSystemPrompt += '\n\n## AKTUELLA ELPRISER (uppdaterade från leverantör)\n';
-    //   enhancedSystemPrompt += `**Rörliga priser (spot) per kWh:**\n`;
-    //   enhancedSystemPrompt += `• SE1 (Norra Sverige): ${currentPrices.spot_prices.se1?.toFixed(2) || 'N/A'} öre/kWh\n`;
-    //   enhancedSystemPrompt += `• SE2 (Norra Mellansverige): ${currentPrices.spot_prices.se2?.toFixed(2) || 'N/A'} öre/kWh\n`;
-    //   enhancedSystemPrompt += `• SE3 (Södra Mellansverige): ${currentPrices.spot_prices.se3?.toFixed(2) || 'N/A'} öre/kWh\n`;
-    //   enhancedSystemPrompt += `• SE4 (Södra Sverige): ${currentPrices.spot_prices.se4?.toFixed(2) || 'N/A'} öre/kWh\n\n`;
-    //   
-    //   enhancedSystemPrompt += `**Våra rörliga avtal:**\n`;
-    //   enhancedSystemPrompt += `• 0 kr månadsavgift första året\n`;
-    //   enhancedSystemPrompt += `• 0 öre påslag på spotpriset\n`;
-    //   enhancedSystemPrompt += `• Ingen bindningstid\n\n`;
-    //   
-    //   enhancedSystemPrompt += `**Fastprisavtal (6 månader):**\n`;
-    //   enhancedSystemPrompt += `• SE1: ${currentPrices.variable_fixed_prices.se1?.['6_months']?.toFixed(2) || 'N/A'} öre/kWh\n`;
-    //   enhancedSystemPrompt += `• SE2: ${currentPrices.variable_fixed_prices.se2?.['6_months']?.toFixed(2) || 'N/A'} öre/kWh\n`;
-    //   enhancedSystemPrompt += `• SE3: ${currentPrices.variable_fixed_prices.se3?.['6_months']?.toFixed(2) || 'N/A'} öre/kWh\n`;
-    //   enhancedSystemPrompt += `• SE4: ${currentPrices.variable_fixed_prices.se4?.['6_months']?.toFixed(2) || 'N/A'} öre/kWh\n\n`;
-    // }
+
+    // Lägg till automatisk leverantörslista från admin om den finns
+    if (adminProvidersSummary) {
+      enhancedSystemPrompt += '\n\n' + adminProvidersSummary;
+    }
+
+    // Lägg till automatisk pris-sammanfattning om den finns tillgänglig
+    if (livePriceSummary) {
+      enhancedSystemPrompt += '\n\n' + livePriceSummary;
+    }
     
     // Om ingen dynamisk kunskap finns, använd statisk fallback
     if (!dynamicKnowledge) {
