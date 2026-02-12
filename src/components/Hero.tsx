@@ -122,32 +122,32 @@ const USPList = styled.ul`
   }
 `;
 
+function getInitialHeroVariant(): 'A' | 'B' {
+  if (typeof window === 'undefined') {
+    return 'A';
+  }
+  try {
+    const stored = window.localStorage.getItem('hero_variant_v1');
+    const storedExpiry = window.localStorage.getItem('hero_variant_expiry_v1');
+    const now = Date.now();
+    const isExpired = storedExpiry ? now > Number(storedExpiry) : true;
+    if (stored && (stored === 'A' || stored === 'B') && !isExpired) {
+      return stored as 'A' | 'B';
+    }
+    const newVariant: 'A' | 'B' = Math.random() < 0.5 ? 'A' : 'B';
+    const expiry = now + 30 * 24 * 60 * 60 * 1000;
+    window.localStorage.setItem('hero_variant_v1', newVariant);
+    window.localStorage.setItem('hero_variant_expiry_v1', String(expiry));
+    return newVariant;
+  } catch {
+    return 'A';
+  }
+}
+
 export default function Hero() {
-  const [variant, setVariant] = useState<'A' | 'B'>('A');
+  const [variant] = useState<'A' | 'B'>(getInitialHeroVariant);
   const [videoStarted, setVideoStarted] = useState(false);
   const videoRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    try {
-      const stored = typeof window !== 'undefined' ? window.localStorage.getItem('hero_variant_v1') : null;
-      const storedExpiry = typeof window !== 'undefined' ? window.localStorage.getItem('hero_variant_expiry_v1') : null;
-      const now = Date.now();
-      const isExpired = storedExpiry ? now > Number(storedExpiry) : true;
-      if (stored && (stored === 'A' || stored === 'B') && !isExpired) {
-        setVariant(stored as 'A' | 'B');
-        return;
-      }
-      const newVariant: 'A' | 'B' = Math.random() < 0.5 ? 'A' : 'B';
-      const expiry = now + 30 * 24 * 60 * 60 * 1000;
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem('hero_variant_v1', newVariant);
-        window.localStorage.setItem('hero_variant_expiry_v1', String(expiry));
-      }
-      setVariant(newVariant);
-    } catch {
-      // no-op
-    }
-  }, []);
 
   // Säkerställ att videon hamnar i bild, särskilt på mobil, när användaren startar den
   useEffect(() => {
