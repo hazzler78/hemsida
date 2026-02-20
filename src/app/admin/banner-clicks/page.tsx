@@ -167,8 +167,11 @@ export default function AdminBannerClicks() {
         border: '1px solid var(--gray-200)',
       }}>
       <h1 style={{ marginBottom: 4, color: 'var(--foreground)' }}>Bannerklick (Admin)</h1>
-      <p style={{ color: 'var(--gray-600)', marginBottom: 20, fontSize: '0.95rem' }}>
+      <p style={{ color: 'var(--gray-600)', marginBottom: 8, fontSize: '0.95rem' }}>
         CTR = klick ÷ visningar per variant. Vinnare = variant med högst CTR.
+      </p>
+      <p style={{ color: 'var(--gray-600)', marginBottom: 20, fontSize: '0.85rem' }}>
+        Data raderas aldrig – filtren styr bara vad som visas. Använd "Start nytt A/B-test" för att se enbart ny statistik.
       </p>
 
       {/* Filter och sök */}
@@ -188,10 +191,24 @@ export default function AdminBannerClicks() {
         <button onClick={fetchLogs} style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--gray-300)', background: 'var(--gray-50)', fontWeight: 500 }}>Uppdatera</button>
         <button
           type="button"
+          onClick={() => {
+            const today = new Date().toISOString().slice(0, 10);
+            setDateFrom(today);
+            setDateTo('');
+            setSearch('');
+          }}
+          style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--primary)', background: 'rgba(0,106,167,0.08)', fontWeight: 600, color: 'var(--primary)' }}
+          title="Visa endast statistik från idag – data raderas aldrig"
+        >
+          Start nytt A/B-test
+        </button>
+        <button
+          type="button"
           onClick={() => { setDateFrom(''); setDateTo(''); setSearch(''); }}
           style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--gray-300)', background: '#fff', fontWeight: 500, color: 'var(--gray-700)' }}
+          title="Visa all data"
         >
-          Rensa filter
+          Visa all data
         </button>
       </div>
 
