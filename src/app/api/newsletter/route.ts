@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
       const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
       try {
         await supabase.from('contacts').insert([{
+          name: '', // tabellen contacts kräver name; tom för nyhetsbrev
           email: email,
           ref: ref || 'newsletter',
           campaign_code: campaignCode || null,

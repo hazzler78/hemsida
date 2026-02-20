@@ -86,6 +86,7 @@ export default function AdminDashboard() {
   const [dateRange, setDateRange] = useState<'24h' | '4d' | '7d' | '30d' | '90d'>('24h');
   const [selectedProvider, setSelectedProvider] = useState<string>('all');
   const [availableProviders, setAvailableProviders] = useState<string[]>([]);
+  const [contactsApiFailed, setContactsApiFailed] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -180,6 +181,7 @@ export default function AdminDashboard() {
           `/api/admin/contacts-stats?from=${encodeURIComponent(fromISO)}`,
           { headers: { 'x-admin-password': ADMIN_PASSWORD } }
         );
+        setContactsApiFailed(!contactsRes.ok);
         if (contactsRes.ok) {
           const contactsJson = await contactsRes.json();
           formSubmissions = contactsJson.formSubmissions ?? 0;
@@ -188,6 +190,7 @@ export default function AdminDashboard() {
           newsletterSubscriptions = contactsJson.newsletterSubscriptions ?? [];
         }
       } catch (contactsErr) {
+        setContactsApiFailed(true);
         console.warn('Admin contacts-stats API failed, using zeros:', contactsErr);
       }
 
@@ -788,6 +791,7 @@ export default function AdminDashboard() {
             <MetricCard 
               title="Leads"
               value={stats.formSubmissions}
+              subtitle="Nyhetsbrev + kontakt + solceller (tabellen contacts, valt datumintervall)"
               icon="✉️"
               color="#f59e0b"
             />
@@ -805,6 +809,20 @@ export default function AdminDashboard() {
               color="#f97316"
             />
           </div>
+
+          {contactsApiFailed && (
+            <div style={{
+              padding: '12px 16px',
+              marginBottom: 24,
+              background: '#fef3c7',
+              border: '1px solid #f59e0b',
+              borderRadius: 8,
+              fontSize: '0.875rem',
+              color: '#92400e'
+            }}>
+              <strong>Leads-data kunde inte hämtas.</strong> Kontrollera att <code>ADMIN_DASHBOARD_PASSWORD</code> (x-admin-password) stämmer och att <code>SUPABASE_URL</code> / <code>SUPABASE_SERVICE_ROLE_KEY</code> är satta på servern. Om du bara har <code>NEXT_PUBLIC_SUPABASE_URL</code> används den som fallback.
+            </div>
+          )}
 
           {/* Affiliate Clicks Section */}
           <div style={{ 
