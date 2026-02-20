@@ -128,236 +128,308 @@ export default function AdminBannerClicks() {
   const filteredImpressions = impressions.filter(i => withinDate(i.created_at));
 
   // Variant descriptions for AI calculator banner
-  const variantNames = {
+  const variantNames: Record<string, string> = {
     'A': 'Nyhet! Låt vår AI analysera din elräkning och räkna ut din möjliga besparing.',
     'B': 'Testa vår AI – ladda upp din faktura och se hur mycket du kan spara.'
   };
 
+  // Beräkna vinnare (högst CTR vinner; vid lika vinner den med flest klick)
+  const aClicks = filtered.filter(l => l.variant === 'A').length;
+  const aImps = filteredImpressions.filter(i => i.variant === 'A').length;
+  const bClicks = filtered.filter(l => l.variant === 'B').length;
+  const bImps = filteredImpressions.filter(i => i.variant === 'B').length;
+  const aCtr = aImps > 0 ? aClicks / aImps : 0;
+  const bCtr = bImps > 0 ? bClicks / bImps : 0;
+  const winner: 'A' | 'B' | null =
+    aImps > 0 || bImps > 0
+      ? aCtr > bCtr
+        ? 'A'
+        : bCtr > aCtr
+          ? 'B'
+          : aClicks >= bClicks
+            ? 'A'
+            : 'B'
+      : null;
+  const winnerCtr = winner === 'A' ? aCtr : winner === 'B' ? bCtr : 0;
+  const winnerClicks = winner === 'A' ? aClicks : winner === 'B' ? bClicks : 0;
+  const winnerImps = winner === 'A' ? aImps : winner === 'B' ? bImps : 0;
+
+  const tableCell = { padding: '10px 12px', border: '1px solid var(--gray-200)', fontSize: '0.9rem' };
+  const tableHeader = { ...tableCell, background: 'var(--gray-100)', fontWeight: 600 };
+
   return (
     <div style={{ maxWidth: 1200, margin: '2rem auto', padding: 24 }}>
-      <h1>Bannerklick (Admin)</h1>
-      <p style={{ color: '#64748b', marginTop: 4, marginBottom: 12 }}>
-        CTR = klick / visningar per variant (senaste hämtningen)
+      <h1 style={{ marginBottom: 4 }}>Bannerklick (Admin)</h1>
+      <p style={{ color: 'var(--gray-600)', marginBottom: 20, fontSize: '0.95rem' }}>
+        CTR = klick ÷ visningar per variant. Vinnare = variant med högst CTR.
       </p>
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12, flexWrap: 'wrap' }}>
+
+      {/* Filter och sök */}
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 20, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <label style={{ fontSize: 12, color: '#64748b' }}>Från</label>
-          <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={{ padding: 8, border: '1px solid #cbd5e1', borderRadius: 6 }} />
-          <label style={{ fontSize: 12, color: '#64748b' }}>Till</label>
-          <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} style={{ padding: 8, border: '1px solid #cbd5e1', borderRadius: 6 }} />
+          <label style={{ fontSize: 12, color: 'var(--gray-600)' }}>Från</label>
+          <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={{ padding: 8, border: '1px solid var(--gray-300)', borderRadius: 'var(--radius-sm)' }} />
+          <label style={{ fontSize: 12, color: 'var(--gray-600)' }}>Till</label>
+          <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} style={{ padding: 8, border: '1px solid var(--gray-300)', borderRadius: 'var(--radius-sm)' }} />
         </div>
         <input
           placeholder="Sök (session, agent, href, variant)"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          style={{ flex: 1, minWidth: 240, padding: 8, border: '1px solid #cbd5e1', borderRadius: 6 }}
+          style={{ flex: 1, minWidth: 240, padding: 8, border: '1px solid var(--gray-300)', borderRadius: 'var(--radius-sm)' }}
         />
-        <button onClick={fetchLogs} style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #cbd5e1' }}>Uppdatera</button>
+        <button onClick={fetchLogs} style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--gray-300)', background: 'var(--gray-50)', fontWeight: 500 }}>Uppdatera</button>
       </div>
-      {loading && <p>Laddar...</p>}
-      {!loading && filtered.length === 0 && <p>Inga klickloggar.</p>}
 
-      {!loading && filtered.length > 0 && (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ background: '#f3f4f6' }}>
-              <th style={{ padding: 8, border: '1px solid #e5e7eb' }}>Datum</th>
-              <th style={{ padding: 8, border: '1px solid #e5e7eb' }}>Variant</th>
-              <th style={{ padding: 8, border: '1px solid #e5e7eb' }}>Session</th>
-              <th style={{ padding: 8, border: '1px solid #e5e7eb' }}>Href</th>
-              <th style={{ padding: 8, border: '1px solid #e5e7eb' }}>Referer</th>
-              <th style={{ padding: 8, border: '1px solid #e5e7eb' }}>Agent</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((l) => (
-              <tr key={l.id}>
-                <td style={{ padding: 8, border: '1px solid #e5e7eb' }}>{new Date(l.created_at).toLocaleString()}</td>
-                <td style={{ padding: 8, border: '1px solid #e5e7eb' }}>{l.variant}</td>
-                <td style={{ padding: 8, border: '1px solid #e5e7eb', fontSize: 12 }}>{l.session_id}</td>
-                <td style={{ padding: 8, border: '1px solid #e5e7eb', fontSize: 12, maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={l.href || ''}>{l.href}</td>
-                <td style={{ padding: 8, border: '1px solid #e5e7eb', fontSize: 12, maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={l.referer || ''}>{l.referer}</td>
-                <td style={{ padding: 8, border: '1px solid #e5e7eb', fontSize: 12 }}>{l.user_agent}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {loading && <p style={{ color: 'var(--gray-600)' }}>Laddar...</p>}
+      {!loading && filtered.length === 0 && <p style={{ color: 'var(--gray-600)' }}>Inga klickloggar.</p>}
+
+      {/* Vinnare – tydlig sektion överst */}
+      {!loading && (aImps > 0 || bImps > 0) && (
+        <section
+          style={{
+            marginBottom: 28,
+            padding: 20,
+            borderRadius: 'var(--radius-lg)',
+            background: winner ? 'linear-gradient(135deg, rgba(0,106,167,0.08) 0%, rgba(254,204,0,0.06) 100%)' : 'var(--gray-50)',
+            border: winner ? '2px solid var(--primary)' : '1px solid var(--gray-200)',
+            boxShadow: 'var(--shadow-sm)'
+          }}
+        >
+          <h2 style={{ marginBottom: 8, fontSize: '1.1rem', color: 'var(--gray-700)' }}>Vinnare (mest klick per visning)</h2>
+          {winner ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '1.75rem' }} aria-hidden>🏆</span>
+              <div>
+                <strong style={{ fontSize: '1.35rem', color: 'var(--primary)' }}>Variant {winner}</strong>
+                <div style={{ color: 'var(--gray-600)', marginTop: 4 }}>
+                  CTR {(winnerCtr * 100).toFixed(1)}% · {winnerClicks} klick av {winnerImps} visningar
+                </div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--gray-600)', marginTop: 4 }}>{variantNames[winner]}</div>
+              </div>
+            </div>
+          ) : (
+            <p style={{ color: 'var(--gray-600)' }}>Ingen tydlig vinnare (för lite data).</p>
+          )}
+        </section>
       )}
 
-      {/* Översikt och CTR per variant (filtrerat intervall) */}
+      {/* CTR per variant – kort med vinnar-markering */}
       {!loading && (
-        <div style={{ marginTop: 24 }}>
-          <h2>CTR per variant</h2>
-          {/* Snabböversikt */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 12 }}>
-            {['A','B'].map(v => {
+        <section style={{ marginBottom: 28 }}>
+          <h2 style={{ marginBottom: 12, fontSize: '1.15rem' }}>CTR per variant</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
+            {(['A', 'B'] as const).map(v => {
               const vClicks = filtered.filter(l => l.variant === v).length;
               const vImps = filteredImpressions.filter(i => i.variant === v).length;
               const ctrNum = vImps > 0 ? (vClicks / vImps) : 0;
+              const isWinner = winner === v;
               return (
-                <div key={v} style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: 12 }}>
-                  <div style={{ fontSize: 12, color: '#64748b' }}>Variant {v}</div>
-                  <div style={{ fontSize: 22, fontWeight: 700 }}>{vImps > 0 ? (ctrNum * 100).toFixed(1) + '%' : '—'}</div>
-                  <div style={{ fontSize: 12, color: '#64748b' }}>{vClicks} klick • {vImps} visningar</div>
+                <div
+                  key={v}
+                  style={{
+                    border: isWinner ? '2px solid var(--primary)' : '1px solid var(--gray-200)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: 16,
+                    background: isWinner ? 'rgba(0,106,167,0.06)' : 'var(--gray-50)',
+                    boxShadow: 'var(--shadow-sm)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                    <span style={{ fontSize: 12, color: 'var(--gray-600)' }}>Variant {v}</span>
+                    {isWinner && <span style={{ fontSize: 11, background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: 'var(--radius-full)', fontWeight: 600 }}>Vinnare</span>}
+                  </div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{vImps > 0 ? (ctrNum * 100).toFixed(1) + '%' : '—'}</div>
+                  <div style={{ fontSize: 12, color: 'var(--gray-600)', marginTop: 4 }}>{vClicks} klick · {vImps} visningar</div>
                 </div>
               );
             })}
             {/* Lift */}
-            {(() => {
-              const aClicks = filtered.filter(l => l.variant === 'A').length;
-              const aImps = filteredImpressions.filter(i => i.variant === 'A').length;
-              const bClicks = filtered.filter(l => l.variant === 'B').length;
-              const bImps = filteredImpressions.filter(i => i.variant === 'B').length;
-              const aCtr = aImps > 0 ? aClicks / aImps : 0;
-              const bCtr = bImps > 0 ? bClicks / bImps : 0;
-              const lift = aCtr && bCtr ? ((bCtr - aCtr) / aCtr) * 100 : 0;
-              const label = lift === 0 ? '—' : `${lift > 0 ? '+' : ''}${lift.toFixed(1)}% B vs A`;
-              return (
-                <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: 12 }}>
-                  <div style={{ fontSize: 12, color: '#64748b' }}>Relativ skillnad</div>
-                  <div style={{ fontSize: 22, fontWeight: 700 }}>{(aImps > 0 || bImps > 0) ? label : '—'}</div>
-                  <div style={{ fontSize: 12, color: '#64748b' }}>B jämfört med A</div>
-                </div>
-              );
-            })()}
+            <div style={{ border: '1px solid var(--gray-200)', borderRadius: 'var(--radius-md)', padding: 16, background: 'var(--gray-50)', boxShadow: 'var(--shadow-sm)' }}>
+              <div style={{ fontSize: 12, color: 'var(--gray-600)' }}>Relativ skillnad</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>
+                {aImps > 0 && bImps > 0
+                  ? (() => {
+                      const lift = aCtr ? ((bCtr - aCtr) / aCtr) * 100 : 0;
+                      return `${lift >= 0 ? '+' : ''}${lift.toFixed(1)}% B vs A`;
+                    })()
+                  : '—'}
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--gray-600)', marginTop: 4 }}>B jämfört med A</div>
+            </div>
           </div>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 16 }}>
             <thead>
-              <tr style={{ background: '#f3f4f6' }}>
-                <th style={{ padding: 8, border: '1px solid #e5e7eb' }}>Variant</th>
-                <th style={{ padding: 8, border: '1px solid #e5e7eb' }}>Visningar</th>
-                <th style={{ padding: 8, border: '1px solid #e5e7eb' }}>Klick</th>
-                <th style={{ padding: 8, border: '1px solid #e5e7eb' }}>CTR</th>
+              <tr>
+                <th style={tableHeader}>Variant</th>
+                <th style={tableHeader}>Visningar</th>
+                <th style={tableHeader}>Klick</th>
+                <th style={tableHeader}>CTR</th>
               </tr>
             </thead>
             <tbody>
-              {['A','B'].map(v => {
+              {(['A', 'B'] as const).map(v => {
                 const vClicks = filtered.filter(l => l.variant === v).length;
                 const vImps = filteredImpressions.filter(i => i.variant === v).length;
                 const ctr = vImps > 0 ? `${((vClicks / vImps) * 100).toFixed(1)}%` : '—';
+                const isWinner = winner === v;
                 return (
-                  <tr key={v}>
-                    <td style={{ padding: 8, border: '1px solid #e5e7eb' }}>
-                      <div><strong>{v}</strong></div>
-                      <div style={{ fontSize: '0.8em', color: '#666' }}>{variantNames[v as keyof typeof variantNames]}</div>
+                  <tr key={v} style={isWinner ? { background: 'rgba(0,106,167,0.06)' } : undefined}>
+                    <td style={tableCell}>
+                      <div style={{ fontWeight: 600 }}>Variant {v}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--gray-600)', marginTop: 2 }}>{variantNames[v]}</div>
                     </td>
-                    <td style={{ padding: 8, border: '1px solid #e5e7eb' }}>{vImps}</td>
-                    <td style={{ padding: 8, border: '1px solid #e5e7eb' }}>{vClicks}</td>
-                    <td style={{ padding: 8, border: '1px solid #e5e7eb' }}>{ctr}</td>
+                    <td style={tableCell}>{vImps}</td>
+                    <td style={tableCell}>{vClicks}</td>
+                    <td style={tableCell}>{ctr}</td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
-        </div>
+        </section>
+      )}
+
+      {/* Raw klick-lista */}
+      {!loading && filtered.length > 0 && (
+        <section style={{ marginBottom: 28 }}>
+          <h2 style={{ marginBottom: 12, fontSize: '1.15rem' }}>Senaste klick (rad för rad)</h2>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  <th style={tableHeader}>Datum</th>
+                  <th style={tableHeader}>Variant</th>
+                  <th style={tableHeader}>Session</th>
+                  <th style={tableHeader}>Href</th>
+                  <th style={tableHeader}>Referer</th>
+                  <th style={tableHeader}>Agent</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((l) => (
+                  <tr key={l.id}>
+                    <td style={tableCell}>{new Date(l.created_at).toLocaleString()}</td>
+                    <td style={tableCell}>{l.variant}</td>
+                    <td style={tableCell}>{l.session_id}</td>
+                    <td style={{ ...tableCell, maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={l.href || ''}>{l.href}</td>
+                    <td style={{ ...tableCell, maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={l.referer || ''}>{l.referer}</td>
+                    <td style={tableCell}>{l.user_agent}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
       )}
 
       {/* Nedbrytning: Referer-domän */}
-      {!loading && filtered.length > 0 && (
-        <div style={{ marginTop: 24 }}>
-          <h2>Nedbrytning per källa (referer-domän)</h2>
-          {(() => {
-            const domainOf = (url?: string | null) => {
-              if (!url) return '(okänd)';
-              try {
-                const u = new URL(url);
-                return u.hostname.replace(/^www\./, '');
-              } catch {
-                return '(okänd)';
-              }
-            };
-            const rows = filtered.reduce<Record<string, { clicks: number; a: number; b: number }>>((acc, l) => {
-              const d = domainOf(l.referer);
-              if (!acc[d]) acc[d] = { clicks: 0, a: 0, b: 0 };
-              acc[d].clicks += 1;
-              if (l.variant === 'A') acc[d].a += 1;
-              if (l.variant === 'B') acc[d].b += 1;
-              return acc;
-            }, {});
-            const impRows = filteredImpressions.reduce<Record<string, { imps: number; a: number; b: number }>>((acc, i) => {
-              const d = domainOf(i.referer);
-              if (!acc[d]) acc[d] = { imps: 0, a: 0, b: 0 };
-              acc[d].imps += 1;
-              if (i.variant === 'A') acc[d].a += 1;
-              if (i.variant === 'B') acc[d].b += 1;
-              return acc;
-            }, {});
-            const entries = Object.entries(rows).map(([domain, c]) => {
-              const imp: { imps: number; a: number; b: number } = impRows[domain] || { imps: 0, a: 0, b: 0 };
-              const ctr = imp.imps > 0 ? (c.clicks / imp.imps) : 0;
-              return { domain, clicks: c.clicks, impressions: imp.imps, ctr };
-            }).sort((a, b) => b.clicks - a.clicks).slice(0, 12);
-            return (
+      {!loading && filtered.length > 0 && (() => {
+        const domainOf = (url?: string | null) => {
+          if (!url) return '(okänd)';
+          try {
+            const u = new URL(url);
+            return u.hostname.replace(/^www\./, '');
+          } catch {
+            return '(okänd)';
+          }
+        };
+        const rows = filtered.reduce<Record<string, { clicks: number; a: number; b: number }>>((acc, l) => {
+          const d = domainOf(l.referer);
+          if (!acc[d]) acc[d] = { clicks: 0, a: 0, b: 0 };
+          acc[d].clicks += 1;
+          if (l.variant === 'A') acc[d].a += 1;
+          if (l.variant === 'B') acc[d].b += 1;
+          return acc;
+        }, {});
+        const impRows = filteredImpressions.reduce<Record<string, { imps: number; a: number; b: number }>>((acc, i) => {
+          const d = domainOf(i.referer);
+          if (!acc[d]) acc[d] = { imps: 0, a: 0, b: 0 };
+          acc[d].imps += 1;
+          if (i.variant === 'A') acc[d].a += 1;
+          if (i.variant === 'B') acc[d].b += 1;
+          return acc;
+        }, {});
+        const entries = Object.entries(rows).map(([domain, c]) => {
+          const imp: { imps: number; a: number; b: number } = impRows[domain] || { imps: 0, a: 0, b: 0 };
+          const ctr = imp.imps > 0 ? (c.clicks / imp.imps) : 0;
+          return { domain, clicks: c.clicks, impressions: imp.imps, ctr };
+        }).sort((a, b) => b.clicks - a.clicks).slice(0, 12);
+        return (
+          <section style={{ marginBottom: 28 }}>
+            <h2 style={{ marginBottom: 12, fontSize: '1.15rem' }}>Nedbrytning per källa (referer-domän)</h2>
+            <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr style={{ background: '#f3f4f6' }}>
-                    <th style={{ padding: 8, border: '1px solid #e5e7eb' }}>Domän</th>
-                    <th style={{ padding: 8, border: '1px solid #e5e7eb' }}>Visningar</th>
-                    <th style={{ padding: 8, border: '1px solid #e5e7eb' }}>Klick</th>
-                    <th style={{ padding: 8, border: '1px solid #e5e7eb' }}>CTR</th>
+                  <tr>
+                    <th style={tableHeader}>Domän</th>
+                    <th style={tableHeader}>Visningar</th>
+                    <th style={tableHeader}>Klick</th>
+                    <th style={tableHeader}>CTR</th>
                   </tr>
                 </thead>
                 <tbody>
                   {entries.map(r => (
                     <tr key={r.domain}>
-                      <td style={{ padding: 8, border: '1px solid #e5e7eb' }}>{r.domain}</td>
-                      <td style={{ padding: 8, border: '1px solid #e5e7eb' }}>{r.impressions}</td>
-                      <td style={{ padding: 8, border: '1px solid #e5e7eb' }}>{r.clicks}</td>
-                      <td style={{ padding: 8, border: '1px solid #e5e7eb' }}>{r.impressions > 0 ? ((r.ctr * 100).toFixed(1) + '%') : '—'}</td>
+                      <td style={tableCell}>{r.domain}</td>
+                      <td style={tableCell}>{r.impressions}</td>
+                      <td style={tableCell}>{r.clicks}</td>
+                      <td style={tableCell}>{r.impressions > 0 ? ((r.ctr * 100).toFixed(1) + '%') : '—'}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            );
-          })()}
-        </div>
-      )}
+            </div>
+          </section>
+        );
+      })()}
 
       {/* Nedbrytning: Destination (href) */}
-      {!loading && filtered.length > 0 && (
-        <div style={{ marginTop: 24 }}>
-          <h2>Nedbrytning per destination (href)</h2>
-          {(() => {
-            const byHref = filtered.reduce<Record<string, { clicks: number }>>((acc, l) => {
-              const key = l.href || '(okänd)';
-              if (!acc[key]) acc[key] = { clicks: 0 };
-              acc[key].clicks += 1;
-              return acc;
-            }, {});
-            const impByHref = filteredImpressions.reduce<Record<string, number>>((acc) => {
-              const key = '(banner)';
-              acc[key] = (acc[key] || 0) + 1;
-              return acc;
-            }, {});
-            const rows = Object.entries(byHref).map(([href, v]) => ({
-              href,
-              clicks: v.clicks,
-              impressions: impByHref['(banner)'] || 0,
-              ctr: (impByHref['(banner)'] || 0) > 0 ? v.clicks / (impByHref['(banner)'] || 1) : 0
-            })).sort((a, b) => b.clicks - a.clicks).slice(0, 12);
-            return (
+      {!loading && filtered.length > 0 && (() => {
+        const byHref = filtered.reduce<Record<string, { clicks: number }>>((acc, l) => {
+          const key = l.href || '(okänd)';
+          if (!acc[key]) acc[key] = { clicks: 0 };
+          acc[key].clicks += 1;
+          return acc;
+        }, {});
+        const impByHref = filteredImpressions.reduce<Record<string, number>>((acc) => {
+          const key = '(banner)';
+          acc[key] = (acc[key] || 0) + 1;
+          return acc;
+        }, {});
+        const rows = Object.entries(byHref).map(([href, v]) => ({
+          href,
+          clicks: v.clicks,
+          impressions: impByHref['(banner)'] || 0,
+          ctr: (impByHref['(banner)'] || 0) > 0 ? v.clicks / (impByHref['(banner)'] || 1) : 0
+        })).sort((a, b) => b.clicks - a.clicks).slice(0, 12);
+        return (
+          <section style={{ marginBottom: 28 }}>
+            <h2 style={{ marginBottom: 12, fontSize: '1.15rem' }}>Nedbrytning per destination (href)</h2>
+            <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr style={{ background: '#f3f4f6' }}>
-                    <th style={{ padding: 8, border: '1px solid #e5e7eb' }}>Href</th>
-                    <th style={{ padding: 8, border: '1px solid #e5e7eb' }}>Klick</th>
-                    <th style={{ padding: 8, border: '1px solid #e5e7eb' }}>CTR (global)</th>
+                  <tr>
+                    <th style={tableHeader}>Href</th>
+                    <th style={tableHeader}>Klick</th>
+                    <th style={tableHeader}>CTR (global)</th>
                   </tr>
                 </thead>
                 <tbody>
                   {rows.map(r => (
                     <tr key={r.href}>
-                      <td style={{ padding: 8, border: '1px solid #e5e7eb', maxWidth: 520, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={r.href}>{r.href}</td>
-                      <td style={{ padding: 8, border: '1px solid #e5e7eb' }}>{r.clicks}</td>
-                      <td style={{ padding: 8, border: '1px solid #e5e7eb' }}>{(r.ctr * 100).toFixed(1)}%</td>
+                      <td style={{ ...tableCell, maxWidth: 520, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={r.href}>{r.href}</td>
+                      <td style={tableCell}>{r.clicks}</td>
+                      <td style={tableCell}>{(r.ctr * 100).toFixed(1)}%</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            );
-          })()}
-        </div>
-      )}
+            </div>
+          </section>
+        );
+      })()}
     </div>
   );
 }
