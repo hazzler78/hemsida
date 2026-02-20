@@ -233,7 +233,7 @@ export default function SolarQuoteForm() {
   };
 
   return (
-    <Section>
+    <Section id="solceller">
       <Container>
         <Title>Ta nästa steg mot total energibesparing</Title>
         <Subtitle>

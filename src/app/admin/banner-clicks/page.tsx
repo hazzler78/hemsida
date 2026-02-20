@@ -127,10 +127,10 @@ export default function AdminBannerClicks() {
 
   const filteredImpressions = impressions.filter(i => withinDate(i.created_at));
 
-  // Variant descriptions for AI calculator banner
+  // A/B: A = AI analys (fakturaanalys), B = Solceller (offer formulär)
   const variantNames: Record<string, string> = {
-    'A': 'Nyhet! Låt vår AI analysera din elräkning och räkna ut din möjliga besparing.',
-    'B': 'Testa vår AI – ladda upp din faktura och se hur mycket du kan spara.'
+    'A': 'AI analys – Låt vår AI analysera din elräkning (länk till fakturaanalys).',
+    'B': 'Solceller – Få offert på solceller (scroll till solcellsformulär).'
   };
 
   // Beräkna vinnare (högst CTR vinner; vid lika vinner den med flest klick)

@@ -413,10 +413,11 @@ export default function Hero() {
                     marginTop: '0.25rem',
                     background: 'transparent',
                     border: 'none',
-                    color: 'rgba(226, 232, 240, 0.95)',
+                    color: '#ffffff',
                     fontSize: '0.9rem',
                     textDecoration: 'underline',
                     cursor: 'pointer',
+                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
                   }}
                 >
                   Vill du förstå din elräkning först? Ladda upp faktura

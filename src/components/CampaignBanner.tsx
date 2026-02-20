@@ -12,7 +12,7 @@ const Banner = styled.div`
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
+  color: #ffffff;
   text-align: center;
   padding: 1rem 0.75rem;
   font-size: clamp(0.95rem, 2.5vw, 1.1rem);
@@ -27,28 +27,24 @@ const Banner = styled.div`
   transition: all 0.3s ease-in-out;
   overflow-wrap: break-word;
   word-break: break-word;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 `;
 
 const Highlight = styled.span`
-  color: #FFD700;
-  background: rgba(255, 215, 0, 0.2);
-  padding: 0.1em 0.4em;
-  border-radius: 0.4em;
-  margin: 0 0.2em;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(255, 215, 0, 0.3);
+  color: #ffffff;
+  font-weight: 700;
 `;
 
 const StyledLink = styled.a`
-  color: #FFD700;
+  color: #ffffff;
   margin: 0 0.2em;
   text-decoration: underline;
   font-weight: 700;
-  transition: color 0.2s;
-  
+  transition: opacity 0.2s;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+
   &:hover {
-    color: #FFED4E;
+    opacity: 0.9;
   }
 `;
 
@@ -102,12 +98,15 @@ export default function CampaignBanner() {
     } catch {}
   }, [variant]);
 
-  const href = withDefaultCtaUtm('/fakturaanalys', 'banner', `variant${variant}`, 'ai-savings');
+  // A = AI analys → /fakturaanalys. B = Solceller → scroll till #solceller
+  const hrefA = withDefaultCtaUtm('/fakturaanalys', 'banner', 'variantA', 'ai-savings');
+  const hrefB = typeof window !== 'undefined' ? `${window.location.origin}/#solceller` : '/#solceller';
 
-  const handleClick = () => {
+  const handleClickA = (e: React.MouseEvent) => {
+    e.preventDefault();
     try {
       const sessionId = (typeof window !== 'undefined') ? (window.localStorage.getItem('invoice_session_id') || '') : '';
-      const payload = JSON.stringify({ variant, href, sessionId });
+      const payload = JSON.stringify({ variant: 'A', href: hrefA, sessionId });
       const url = '/api/events/banner-click';
       if (navigator.sendBeacon) {
         const blob = new Blob([payload], { type: 'application/json' });
@@ -115,10 +114,38 @@ export default function CampaignBanner() {
       } else {
         fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload }).catch(() => {});
       }
-    } catch {}
+      window.location.href = hrefA;
+    } catch {
+      window.location.href = hrefA;
+    }
   };
 
-  // Expanded text variants
+  const handleClickB = (e: React.MouseEvent) => {
+    e.preventDefault();
+    try {
+      const sessionId = (typeof window !== 'undefined') ? (window.localStorage.getItem('invoice_session_id') || '') : '';
+      const payload = JSON.stringify({ variant: 'B', href: hrefB, sessionId });
+      const url = '/api/events/banner-click';
+      if (navigator.sendBeacon) {
+        const blob = new Blob([payload], { type: 'application/json' });
+        navigator.sendBeacon(url, blob);
+      } else {
+        fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload }).catch(() => {});
+      }
+      if (typeof window !== 'undefined') {
+        if (window.location.pathname === '/' || window.location.pathname === '') {
+          const el = document.getElementById('solceller');
+          el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          window.location.href = '/#solceller';
+        }
+      }
+    } catch {
+      if (typeof window !== 'undefined') window.location.href = '/#solceller';
+    }
+  };
+
+  // A = AI analys, B = Solceller
   const textA = (
     <>
       Låt vår <Highlight>AI</Highlight> analysera din elräkning.
@@ -127,7 +154,7 @@ export default function CampaignBanner() {
 
   const textB = (
     <>
-      Ladda upp faktura – få AI-analys direkt.
+      Få offert på <Highlight>solceller</Highlight> – sänk din elräkning långsiktigt.
     </>
   );
 
@@ -135,7 +162,11 @@ export default function CampaignBanner() {
     <Banner>
       <Image src="/favicon.svg" alt="Elchef" width={20} height={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
       {variant === 'A' ? textA : textB}
-      <StyledLink href={href} onClick={handleClick}>Prova nu</StyledLink>
+      {variant === 'A' ? (
+        <StyledLink href={hrefA} onClick={handleClickA}>Prova nu</StyledLink>
+      ) : (
+        <StyledLink href="/#solceller" onClick={handleClickB}>Begär offert</StyledLink>
+      )}
     </Banner>
   );
 } 
