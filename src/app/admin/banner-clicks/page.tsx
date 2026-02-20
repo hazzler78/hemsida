@@ -31,7 +31,9 @@ export default function AdminBannerClicks() {
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
-  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateFrom, setDateFrom] = useState<string>(() =>
+    typeof window !== 'undefined' ? (localStorage.getItem('banner_ab_test_from') || '') : ''
+  );
   const [dateTo, setDateTo] = useState<string>("");
 
   useEffect(() => {
@@ -196,15 +198,21 @@ export default function AdminBannerClicks() {
             setDateFrom(today);
             setDateTo('');
             setSearch('');
+            if (typeof window !== 'undefined') localStorage.setItem('banner_ab_test_from', today);
           }}
           style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--primary)', background: 'rgba(0,106,167,0.08)', fontWeight: 600, color: 'var(--primary)' }}
-          title="Visa endast statistik från idag – data raderas aldrig"
+          title="Visa endast statistik från idag – sparas tills du klickar Visa all data"
         >
           Start nytt A/B-test
         </button>
         <button
           type="button"
-          onClick={() => { setDateFrom(''); setDateTo(''); setSearch(''); }}
+          onClick={() => {
+            setDateFrom('');
+            setDateTo('');
+            setSearch('');
+            if (typeof window !== 'undefined') localStorage.removeItem('banner_ab_test_from');
+          }}
           style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--gray-300)', background: '#fff', fontWeight: 500, color: 'var(--gray-700)' }}
           title="Visa all data"
         >
