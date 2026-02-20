@@ -171,7 +171,7 @@ export default function AdminBannerClicks() {
         CTR = klick ÷ visningar per variant. Vinnare = variant med högst CTR.
       </p>
       <p style={{ color: 'var(--gray-600)', marginBottom: 20, fontSize: '0.85rem' }}>
-        Data raderas aldrig – filtren styr bara vad som visas. Använd "Start nytt A/B-test" för att se enbart ny statistik.
+        Data raderas aldrig – filtren styr bara vad som visas. Använd &quot;Start nytt A/B-test&quot; för att se enbart ny statistik.
       </p>
 
       {/* Filter och sök */}
