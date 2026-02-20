@@ -145,16 +145,16 @@ export default function CampaignBanner() {
     }
   };
 
-  // A = AI analys, B = Solceller
+  // Nudge-stil: A = AI (låg ansträngning, snabb vinst), B = Solceller (nyfikenhet, ingen förpliktelse)
   const textA = (
     <>
-      Låt vår <Highlight>AI</Highlight> analysera din elräkning.
+      Bara en faktura – se din <Highlight>möjliga besparing</Highlight> på 30 sekunder.
     </>
   );
 
   const textB = (
     <>
-      Få offert på <Highlight>solceller</Highlight> – sänk din elräkning långsiktigt.
+      Nyfiken på <Highlight>solceller</Highlight>? Få en offert – ingen förpliktelse.
     </>
   );
 
@@ -163,7 +163,7 @@ export default function CampaignBanner() {
       <Image src="/favicon.svg" alt="Elchef" width={20} height={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
       {variant === 'A' ? textA : textB}
       {variant === 'A' ? (
-        <StyledLink href={hrefA} onClick={handleClickA}>Prova nu</StyledLink>
+        <StyledLink href={hrefA} onClick={handleClickA}>Se direkt</StyledLink>
       ) : (
         <StyledLink href="/#solceller" onClick={handleClickB}>Begär offert</StyledLink>
       )}

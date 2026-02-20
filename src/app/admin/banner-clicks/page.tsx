@@ -81,8 +81,8 @@ export default function AdminBannerClicks() {
 
   if (!authed) {
     return (
-      <div style={{ maxWidth: 400, margin: '4rem auto', padding: 24, border: '1px solid #e5e7eb', borderRadius: 12 }}>
-        <h2>Admininloggning</h2>
+      <div style={{ maxWidth: 400, margin: '4rem auto', padding: 24, background: '#ffffff', border: '1px solid var(--gray-200)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)' }}>
+        <h2 style={{ color: 'var(--foreground)' }}>Admininloggning</h2>
         <form onSubmit={handleLogin}>
           <input
             type="password"
@@ -127,10 +127,10 @@ export default function AdminBannerClicks() {
 
   const filteredImpressions = impressions.filter(i => withinDate(i.created_at));
 
-  // A/B: A = AI analys (fakturaanalys), B = Solceller (offer formulär)
+  // A/B nudge: A = AI (bara en faktura, 30 sek), B = Solceller (nyfiken, ingen förpliktelse)
   const variantNames: Record<string, string> = {
-    'A': 'AI analys – Låt vår AI analysera din elräkning (länk till fakturaanalys).',
-    'B': 'Solceller – Få offert på solceller (scroll till solcellsformulär).'
+    'A': 'AI – Bara en faktura, se möjliga besparing på 30 sek (länk till fakturaanalys).',
+    'B': 'Solceller – Nyfiken? Få offert, ingen förpliktelse (scroll till formulär).'
   };
 
   // Beräkna vinnare (högst CTR vinner; vid lika vinner den med flest klick)
@@ -159,7 +159,14 @@ export default function AdminBannerClicks() {
 
   return (
     <div style={{ maxWidth: 1200, margin: '2rem auto', padding: 24 }}>
-      <h1 style={{ marginBottom: 4 }}>Bannerklick (Admin)</h1>
+      <div style={{
+        background: '#ffffff',
+        borderRadius: 'var(--radius-lg)',
+        padding: '1.5rem 1.75rem',
+        boxShadow: 'var(--shadow-md)',
+        border: '1px solid var(--gray-200)',
+      }}>
+      <h1 style={{ marginBottom: 4, color: 'var(--foreground)' }}>Bannerklick (Admin)</h1>
       <p style={{ color: 'var(--gray-600)', marginBottom: 20, fontSize: '0.95rem' }}>
         CTR = klick ÷ visningar per variant. Vinnare = variant med högst CTR.
       </p>
@@ -179,6 +186,13 @@ export default function AdminBannerClicks() {
           style={{ flex: 1, minWidth: 240, padding: 8, border: '1px solid var(--gray-300)', borderRadius: 'var(--radius-sm)' }}
         />
         <button onClick={fetchLogs} style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--gray-300)', background: 'var(--gray-50)', fontWeight: 500 }}>Uppdatera</button>
+        <button
+          type="button"
+          onClick={() => { setDateFrom(''); setDateTo(''); setSearch(''); }}
+          style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--gray-300)', background: '#fff', fontWeight: 500, color: 'var(--gray-700)' }}
+        >
+          Rensa filter
+        </button>
       </div>
 
       {loading && <p style={{ color: 'var(--gray-600)' }}>Laddar...</p>}
@@ -430,6 +444,7 @@ export default function AdminBannerClicks() {
           </section>
         );
       })()}
+      </div>
     </div>
   );
 }
