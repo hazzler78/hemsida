@@ -22,9 +22,10 @@ export async function GET(req: NextRequest) {
 
     const supabase = getSupabaseServerClient();
 
-    const { count: formSubmissions } = await supabase
+    const { count: solarLeads } = await supabase
       .from('contacts')
       .select('*', { count: 'exact', head: true })
+      .eq('form_type', 'sol_laddbox')
       .gte('created_at', fromISO);
 
     const { data: contactsData } = await supabase
@@ -50,7 +51,7 @@ export async function GET(req: NextRequest) {
       .limit(100);
 
     return NextResponse.json({
-      formSubmissions: formSubmissions ?? 0,
+      solarLeads: solarLeads ?? 0,
       newsletterSubs,
       contactRequests: contactRequests ?? [],
       newsletterSubscriptions: newsletterSubscriptions ?? [],

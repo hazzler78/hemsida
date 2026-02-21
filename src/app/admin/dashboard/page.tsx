@@ -10,7 +10,7 @@ interface DashboardStats {
   pageViews: number;
   aiAnalyses: number;
   contractClicks: number;
-  formSubmissions: number;
+  solarLeads: number;
   
   // Business metrics
   totalSavings: number;
@@ -172,7 +172,7 @@ export default function AdminDashboard() {
       const averageSavings = savingsAmounts.length > 0 ? totalSavings / savingsAmounts.length : 0;
 
       // 4. Form Submissions + Contact requests + Newsletter (via admin API – RLS blocks anon read on contacts)
-      let formSubmissions = 0;
+      let solarLeads = 0;
       let newsletterSubs = 0;
       let contactRequests: DashboardStats['contactRequests'] = [];
       let newsletterSubscriptions: DashboardStats['newsletterSubscriptions'] = [];
@@ -184,7 +184,7 @@ export default function AdminDashboard() {
         setContactsApiFailed(!contactsRes.ok);
         if (contactsRes.ok) {
           const contactsJson = await contactsRes.json();
-          formSubmissions = contactsJson.formSubmissions ?? 0;
+          solarLeads = contactsJson.solarLeads ?? 0;
           newsletterSubs = contactsJson.newsletterSubs ?? 0;
           contactRequests = contactsJson.contactRequests ?? [];
           newsletterSubscriptions = contactsJson.newsletterSubscriptions ?? [];
@@ -516,7 +516,7 @@ export default function AdminDashboard() {
         pageViews: pageViews || 0,
         aiAnalyses: aiAnalyses || 0,
         contractClicks,
-        formSubmissions: formSubmissions || 0,
+        solarLeads: solarLeads || 0,
         totalSavings,
         averageSavings,
         newsletterSubs,
@@ -789,10 +789,10 @@ export default function AdminDashboard() {
               color="#10b981"
             />
             <MetricCard 
-              title="Leads"
-              value={stats.formSubmissions}
-              subtitle="Nyhetsbrev + kontakt + solceller (tabellen contacts, valt datumintervall)"
-              icon="✉️"
+              title="Solceller-leads"
+              value={stats.solarLeads}
+              subtitle="Intresseanmälningar för solceller/laddbox (valt datumintervall)"
+              icon="☀️"
               color="#f59e0b"
             />
             <MetricCard 

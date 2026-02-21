@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseServerClient } from '@/lib/supabaseServer';
 
 const MAILERLITE_API_KEY = process.env.MAILERLITE_API_KEY;
 const MAILERLITE_GROUP_ID = process.env.MAILERLITE_GROUP_ID;
@@ -10,14 +10,10 @@ export async function POST(request: NextRequest) {
   try {
     const { email, ref, campaignCode }: { email: string; ref?: string; campaignCode?: string } = await request.json();
 
-    // Store newsletter subscription in contacts table for analytics
-    const SUPABASE_URL = process.env.SUPABASE_URL;
-    const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    
-    if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
-      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-      try {
-        await supabase.from('contacts').insert([{
+    // Store newsletter subscription in contacts table for analytics (samma tabell som dashboard Leads)
+    try {
+      const supabase = getSupabaseServerClient();
+      await supabase.from('contacts').insert([{
           name: '', // tabellen contacts kräver name; tom för nyhetsbrev
           email: email,
           ref: ref || 'newsletter',
@@ -26,9 +22,8 @@ export async function POST(request: NextRequest) {
           form_type: 'newsletter',
           created_at: new Date().toISOString(),
         }]);
-      } catch (e) {
-        console.warn('Failed to store newsletter subscription for analytics:', e);
-      }
+    } catch (e) {
+      console.warn('Failed to store newsletter subscription for analytics (Leads kommer inte räknas):', e);
     }
 
     // Validera e-postadress
