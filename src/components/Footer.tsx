@@ -129,6 +129,7 @@ export default function Footer() {
               <li><Link href={withDefaultCtaUtm('/elpriskollen', 'footer', 'services-elpriskollen')}>Elpriskollen</Link></li>
               <li><Link href={withDefaultCtaUtm('/energiradgivning', 'footer', 'services-energiradgivning')}>Energirådgivning</Link></li>
               <li><Link href={withDefaultCtaUtm('/foretag', 'footer', 'services-foretag')}>Företag</Link></li>
+              <li><Link href="/#solceller">Solceller – begär offert</Link></li>
             </ul>
           </FooterColumn>
 
