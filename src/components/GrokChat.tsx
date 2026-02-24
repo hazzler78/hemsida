@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import ChatContactForm from './ChatContactForm';
 import ContractChoice from './ContractChoice';
 import BillUpload from './BillUpload';
@@ -91,12 +92,20 @@ const initialMessages = [
   {
     role: 'assistant',
     content:
-      'Hej! Jag är Grodan 🐸 – fråga mig om elavtal, byte eller elpriser så hjälper jag dig direkt.'
+      'Hej! Jag är Grodan – fråga mig om elavtal, byte eller elpriser så hjälper jag dig direkt.'
   }
 ];
 
 function GrodanIcon() {
-  return <span style={{ fontSize: 22, marginRight: 6 }}>🐸</span>;
+  return (
+    <Image
+      src="/frog_icon.jpeg"
+      alt="Grodan"
+      width={24}
+      height={24}
+      style={{ marginRight: 6, borderRadius: '50%' }}
+    />
+  );
 }
 
 // Generera en unik session ID för denna konversation
@@ -354,22 +363,29 @@ export default function GrokChat() {
           bottom: chatBottom,
           right: 24,
           zIndex: 1004,
-          background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
+          background: '#ffffff',
           color: 'white',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
+          border: '1px solid rgba(148, 163, 184, 0.6)',
           borderRadius: '50%',
           width: 56,
           height: 56,
           boxShadow: 'var(--glass-shadow-light)',
-          fontSize: 28,
           cursor: 'pointer',
           backdropFilter: 'var(--glass-blur)',
           WebkitBackdropFilter: 'var(--glass-blur)',
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          padding: 0,
+          overflow: 'hidden',
         }}
         aria-label={open ? 'Stäng chat' : 'Öppna chat'}
       >
-        🐸
+        <Image
+          src="/frog_icon.jpeg"
+          alt="Öppna Grodan-chat"
+          width={56}
+          height={56}
+          style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+        />
       </button>
       {/* Chat window */}
       {open && (
