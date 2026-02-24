@@ -173,6 +173,7 @@ export default function SolarQuoteForm() {
     name: '',
     email: '',
     phone: '',
+    consumption: '',
     message: '',
   });
   const [ref, setRef] = useState<string | null>(null);
@@ -191,7 +192,7 @@ export default function SolarQuoteForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    if (!formData.email || !formData.email.includes('@')) {
+    if (!formData.email || !formData.email.includes('@') || !formData.name.trim() || !formData.phone.trim()) {
       setSubmitStatus('error');
       setIsSubmitting(false);
       return;
@@ -205,6 +206,7 @@ export default function SolarQuoteForm() {
           name: formData.name || undefined,
           email: formData.email,
           phone: formData.phone || undefined,
+          consumption: formData.consumption || undefined,
           // Håll meddelandet rent – Telegram Markdown kan strula på [ ]
           message: formData.message || undefined,
           subscribeNewsletter: false,
@@ -216,7 +218,7 @@ export default function SolarQuoteForm() {
 
       if (response.ok) {
         setSubmitStatus('success');
-        setFormData({ name: '', email: '', phone: '', message: '' });
+        setFormData({ name: '', email: '', phone: '', consumption: '', message: '' });
       } else {
         setSubmitStatus('error');
       }
@@ -251,6 +253,7 @@ export default function SolarQuoteForm() {
               value={formData.name}
               onChange={handleChange}
               placeholder="Ditt namn"
+              required
             />
           </FormGroup>
           <FormGroup>
@@ -274,6 +277,18 @@ export default function SolarQuoteForm() {
               value={formData.phone}
               onChange={handleChange}
               placeholder="070-123 45 67"
+              required
+            />
+          </FormGroup>
+          <FormGroup>
+            <Label htmlFor="solar-consumption">Elförbrukning per år (kWh)</Label>
+            <Input
+              type="text"
+              id="solar-consumption"
+              name="consumption"
+              value={formData.consumption}
+              onChange={handleChange}
+              placeholder="T.ex. 10 000 kWh/år"
             />
           </FormGroup>
           <FormGroup>
@@ -299,7 +314,7 @@ export default function SolarQuoteForm() {
         )}
         {submitStatus === 'error' && (
           <ErrorMessage>
-            Något gick fel. Kontrollera att e-postadressen är korrekt och försök igen.
+            Något gick fel. Kontrollera att alla obligatoriska fält är korrekt ifyllda och försök igen.
           </ErrorMessage>
         )}
       </Container>
