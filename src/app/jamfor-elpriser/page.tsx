@@ -684,7 +684,7 @@ export default function JamforElpriser() {
                           textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
                         }}>
                           <a 
-                            href={withDefaultCtaUtm('/rorligt-avtal', 'jamfor', 'cta-rorligt')}
+                            href={withDefaultCtaUtm('/rorligt-avtal-v2', 'jamfor', 'cta-rorligt')}
                             onClick={() => trackContractClick('rorligt')}
                             style={{
                               color: '#10b981',
@@ -912,7 +912,7 @@ export default function JamforElpriser() {
                             textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
                           }}>
                             <a 
-                              href={withDefaultCtaUtm('/rorligt-avtal', 'jamfor', 'cta-rorligt')}
+                              href={withDefaultCtaUtm('/rorligt-avtal-v2', 'jamfor', 'cta-rorligt')}
                               onClick={() => trackContractClick('rorligt')}
                               style={{
                                 color: '#10b981',
@@ -1054,7 +1054,7 @@ export default function JamforElpriser() {
                       disableHoverEffect={true}
                       onClick={() => {
                         trackContractClick('rorligt');
-                        window.location.href = withDefaultCtaUtm('/rorligt-avtal', 'jamfor', 'cta-rorligt');
+                        window.location.href = withDefaultCtaUtm('/rorligt-avtal-v2', 'jamfor', 'cta-rorligt');
                       }}
                       aria-label="Rörligt avtal - 0 kr i avgifter första året – utan bindningstid"
                     >

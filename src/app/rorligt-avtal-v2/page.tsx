@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { MOTALA_LOGO_SRC } from '@/lib/providerLogos';
+import { getElectricityArea, type ElectricityArea } from '@/lib/types';
 
 interface PageProvider {
   id: number;
@@ -18,6 +19,9 @@ interface PageProvider {
   campaign_text?: string;
   campaign_bold?: boolean;
   campaign_italic?: boolean;
+  manual_monthly_fee_kr?: number | null;
+  manual_surcharge_ore_per_kwh?: number | null;
+  manual_rate_type?: 'hourly' | 'monthly' | 'quarterly' | null;
   best_price_badge_text?: string;
 }
 
@@ -26,6 +30,84 @@ interface UserPreferences {
   currentProvider?: string;
   priority?: 'price' | 'security' | 'flexibility';
   postalCode?: string;
+}
+
+/** Månadskostnad, påslag och pristyp från /api/prices/providers (prisfiler). */
+type ProviderPriceItem = {
+  monthly_fee_kr: number;
+  surcharge_ore_per_kwh: number;
+  rate_type: 'hourly' | 'monthly';
+};
+
+type ProviderPricesMap = Record<string, ProviderPriceItem>;
+
+// Fallback: månadskostnad kr när leverantör saknas i prisfilerna
+const MÅNADSAVGIFT_KR: Record<string, number> = {
+  'Cheap Energy': 0,
+  'Svekraft': 0,
+  'Tibber': 49,
+  'Telinet Energi': 59,
+  'Fortum': 69,
+  'Eon': 0,
+  'E.ON': 0,
+  'Greenely': 69,
+  'Skellefteå Kraft': 0,
+  'Skellefteå': 0,
+  'Vattenfall': 45,
+  'Bixia': 39,
+  'Motala': 20,
+  'Motala Energi': 20,
+  'Stockholms Elbolag': 32,
+};
+
+function getMånadskostnadKr(providerName: string): number {
+  if (MÅNADSAVGIFT_KR[providerName] !== undefined) return MÅNADSAVGIFT_KR[providerName];
+  const key = Object.keys(MÅNADSAVGIFT_KR).find((k) => k.toLowerCase() === providerName.toLowerCase());
+  return key !== undefined ? MÅNADSAVGIFT_KR[key] : 0;
+}
+
+// Fallback: påslag öre/kWh när leverantör saknas i prisfilerna
+const PÅSLAG_ÖRE_PER_KWH: Record<string, number> = {
+  'Cheap Energy': 0,
+  'Svekraft': 6.86,
+  'Tibber': 11.6,
+  'Telinet Energi': 9.71,
+  'Fortum': 9.9,
+  'Eon': 0,
+  'E.ON': 0,
+  'Greenely': 0,
+  'Skellefteå Kraft': 7.5,
+  'Skellefteå': 7.5,
+  'Vattenfall': 17.58,
+  'Bixia': 5,
+  'Motala': 12.38,
+  'Motala Energi': 12.38,
+};
+
+function getPåslagÖrePerKwh(providerName: string): number {
+  if (PÅSLAG_ÖRE_PER_KWH[providerName] !== undefined) {
+    return PÅSLAG_ÖRE_PER_KWH[providerName];
+  }
+  const key = Object.keys(PÅSLAG_ÖRE_PER_KWH).find(
+    (k) => k.toLowerCase() === providerName.toLowerCase()
+  );
+  return key !== undefined ? PÅSLAG_ÖRE_PER_KWH[key] : 0;
+}
+
+/** Leverantörer som inte har prisfiler – priser sätts manuellt (MÅNADSAVGIFT_KR, PÅSLAG_ÖRE_PER_KWH). */
+const PROVIDERS_MANUAL_PRICE = new Set([
+  'Skellefteå', 'Skellefteå Kraft', 'Greenely', 'Bixia', 'Vattenfall', 'Tibber', 'Telinet Energi', 'Fortum',
+]);
+
+/** Hämtar månadskostnad + påslag från API-svar (prisfiler). Returnerar null för leverantörer med manuella priser. */
+function getProviderPriceFromApi(providerName: string, providers: ProviderPricesMap | null): ProviderPriceItem | null {
+  if (!providers) return null;
+  const isManual = PROVIDERS_MANUAL_PRICE.has(providerName) ||
+    [...PROVIDERS_MANUAL_PRICE].some((k) => k.toLowerCase() === providerName.toLowerCase());
+  if (isManual) return null;
+  if (providers[providerName]) return providers[providerName];
+  const key = Object.keys(providers).find((k) => k.toLowerCase() === providerName.toLowerCase());
+  return key ? providers[key] : null;
 }
 
 const PageContainer = styled.div`
@@ -205,13 +287,15 @@ const TrustBadge = styled.div`
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(34, 197, 94, 0.1);
+  background: rgba(255, 255, 255, 0.96);
   color: #059669;
   padding: 0.5rem 1rem;
   border-radius: 9999px;
   font-size: 0.85rem;
   font-weight: 600;
   margin: 0.5rem;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
 `;
 
 const TrustSection = styled.div`
@@ -242,6 +326,7 @@ const ProvidersGrid = styled.div`
 
 const ProviderCard = styled.div<{ recommended?: boolean }>`
   position: relative;
+  margin-top: 1.75rem;
   background: ${props => props.recommended ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.95))' : 'rgba(255, 255, 255, 0.95)'};
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -269,7 +354,7 @@ const ProviderCard = styled.div<{ recommended?: boolean }>`
 
 const RecommendedBadge = styled.div`
   position: absolute;
-  top: -12px;
+  top: -28px;
   left: 50%;
   transform: translateX(-50%);
   background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -280,26 +365,27 @@ const RecommendedBadge = styled.div`
   font-weight: 700;
   box-shadow: 0 4px 12px rgba(22, 147, 255, 0.3);
   z-index: 10;
+  white-space: nowrap;
 `;
 
 const InfoBadge = styled.div`
   position: absolute;
-  top: -12px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  padding: 0.5rem 1.5rem;
+  top: 12px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #2563eb;
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  padding: 0.35rem 0.9rem;
   border-radius: 9999px;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   z-index: 10;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
 `;
 
 const BestPriceBadge = styled.div`
   position: absolute;
-  top: -12px;
+  top: -28px;
   left: 50%;
   transform: translateX(-50%);
   background: linear-gradient(135deg, #a855f7, #9333ea);
@@ -341,6 +427,18 @@ const ProviderDescription = styled.p`
   margin-bottom: 1.5rem;
   line-height: 1.6;
   flex-grow: 1;
+`;
+
+const PriceBlock = styled.div`
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #059669;
+  margin-bottom: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
 `;
 
 const ProviderButton = styled.a`
@@ -386,7 +484,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     name: 'Cheap Energy',
     type: 'rorligt',
     logo_url: '/cheap-logo.png',
-    description: '0 kr i månadsavgift, 0 öre i påslag i 12 månader. Ingen bindningstid.',
+    description: 'Passar dig som framför allt vill ha så lågt pris som möjligt och gärna sköter allt digitalt. Ett enkelt avtal utan krångel – du tecknar online och vi hjälper dig med bytet.',
     url: 'https://www.cheapenergy.se/teckna-elavtal/?src=Elchef',
     is_recommended: true,
     display_order: 1,
@@ -397,7 +495,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     name: 'Svekraft',
     type: 'rorligt',
     logo_url: '/svekraft-logo.png',
-    description: '0 kr i månadsavgift i 12 månader, 7,99 öre i påslag. Ingen bindningstid.',
+    description: 'Bra val om du vill komma igång billigt första tiden och vill ha ett flexibelt rörligt avtal. Passar dig som inte bytt elavtal tidigare och vill ha hjälp genom hela processen.',
     url: 'https://www.svekraft.com/elavtal/?src=Elchef',
     is_recommended: false,
     display_order: 2,
@@ -408,7 +506,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     name: 'Tibber',
     type: 'rorligt',
     logo_url: '/tibber.png',
-    description: '49 kr i månadsavgift, 8,6 öre i påslag. Ingen bindningstid.',
+    description: 'För dig som gillar teknik och vill styra din förbrukning via app. Timpris och smarta funktioner som passar om du kan flytta delar av din elanvändning till billigare timmar.',
     url: 'https://go.adt242.com/t/t?a=1590956516&as=2012933659&t=2&tk=1',
     is_recommended: false,
     display_order: 3,
@@ -419,7 +517,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     name: 'Telinet Energi',
     type: 'rorligt',
     logo_url: '/telinet.png',
-    description: '59 kr i månadsavgift, 13,33 öre i påslag. Ingen bindningstid.',
+    description: 'Passar dig som vill ha ett grönt elavtal från en aktör som funnits länge på marknaden. Bra om du vill kunna nå kundservice enkelt och få hjälp om något känns oklart.',
     url: 'https://at.telinet.se/t/t?a=1870484942&as=2012933659&t=2&tk=1',
     is_recommended: false,
     display_order: 4,
@@ -430,7 +528,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     name: 'Fortum',
     type: 'rorligt',
     logo_url: '/fortum.png',
-    description: '69 kr i månadsavgift, 12,38 öre i påslag. Ingen bindningstid.',
+    description: 'Större, etablerad leverantör med många kunder i Sverige. Ett alternativ för dig som prioriterar trygghet och stabilitet före att jaga varje öre i pris.',
     url: 'https://ion.fortum.com/t/t?a=1312475339&as=2012933659&t=2&tk=1',
     is_recommended: false,
     display_order: 5,
@@ -441,7 +539,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     name: 'Motala',
     type: 'rorligt',
     logo_url: MOTALA_LOGO_SRC,
-    description: 'Konkurrenskraftiga elavtal för privatpersoner.',
+    description: 'Mindre svensk leverantör med personlig känsla. Bra val om du vill kunna prata med en kundtjänst nära till hands och ändå ha ett modernt rörligt avtal.',
     url: 'https://motalaenergi.se/privatperson/?src=Elchef',
     is_recommended: false,
     display_order: 6,
@@ -488,8 +586,14 @@ export default function RorligtAvtalV2Page() {
   const [step, setStep] = useState<'questions' | 'results'>('questions');
   const [providers, setProviders] = React.useState<PageProvider[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [fastProviders, setFastProviders] = React.useState<PageProvider[]>([]);
+  const [fastLoading, setFastLoading] = React.useState(true);
   const [preferences, setPreferences] = useState<UserPreferences>({});
   const [failedLogos, setFailedLogos] = React.useState<Set<number>>(new Set());
+  const [providerPrices, setProviderPrices] = React.useState<ProviderPricesMap | null>(null);
+  const [providerPricesLoading, setProviderPricesLoading] = React.useState(false);
+  const [priceArea, setPriceArea] = React.useState<ElectricityArea>('se3');
+  const [consumptionKwhPerYear, setConsumptionKwhPerYear] = React.useState(13500);
 
   React.useEffect(() => {
     const fetchProviders = async () => {
@@ -530,6 +634,71 @@ export default function RorligtAvtalV2Page() {
 
     fetchProviders();
   }, []);
+
+  // Hämta fastpris-leverantörer för att kunna visa fasta avtal i samma flöde
+  React.useEffect(() => {
+    const fetchFastProviders = async () => {
+      try {
+        const response = await fetch('/api/providers?type=fastpris&active=true');
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Kunde inte hämta fastprisleverantörer');
+        }
+
+        setFastProviders(result.providers || []);
+      } catch (error) {
+        console.error('Error fetching fast providers:', error);
+        setFastProviders([]);
+      } finally {
+        setFastLoading(false);
+      }
+    };
+
+    fetchFastProviders();
+  }, []);
+
+  // Hämta prisdata (månadskostnad + påslag) baserat på elområde och årsförbrukning
+  React.useEffect(() => {
+    let cancelled = false;
+    setProviderPricesLoading(true);
+    const fetchProviderPrices = async () => {
+      try {
+        const res = await fetch(`/api/prices/providers?area=${priceArea}&consumption=${consumptionKwhPerYear}`);
+        if (cancelled) return;
+        if (res.ok) {
+          const data = await res.json();
+          setProviderPrices(data.providers ?? null);
+        }
+      } catch {
+        if (!cancelled) setProviderPrices(null);
+      } finally {
+        if (!cancelled) setProviderPricesLoading(false);
+      }
+    };
+    fetchProviderPrices();
+    return () => { cancelled = true; };
+  }, [priceArea, consumptionKwhPerYear]);
+
+  // Justera elområde utifrån postnummer när användaren fyller i det
+  React.useEffect(() => {
+    const postal = preferences.postalCode?.replace(/\D/g, '');
+    if (postal && postal.length === 5) {
+      try {
+        const area = getElectricityArea(postal);
+        setPriceArea(area);
+      } catch {
+        // behåll nuvarande area
+      }
+    }
+  }, [preferences.postalCode]);
+
+  // Använd användarens årsförbrukning för prisberäkning om den finns
+  React.useEffect(() => {
+    if (preferences.annualUsage && preferences.annualUsage > 0) {
+      setConsumptionKwhPerYear(preferences.annualUsage);
+    }
+  }, [preferences.annualUsage]);
 
   React.useEffect(() => {
     try {
@@ -620,15 +789,18 @@ export default function RorligtAvtalV2Page() {
   return (
     <PageContainer>
       <Content>
-        <Title>Hitta ditt perfekta rörliga elavtal</Title>
-        <Subtitle>Vi hjälper dig hitta det bästa avtalet baserat på dina behov</Subtitle>
+        <Title>Hitta rätt elavtal för dig</Title>
+        <Subtitle>Vi hjälper dig hitta en leverantör och avtalsform som passar dina behov – oavsett om du vill ha rörligt pris eller binda priset.</Subtitle>
         
         <ProgressBar progress={progress} />
 
         {step === 'questions' ? (
           <StepContainer>
             <QuestionTitle>Berätta lite om dina preferenser</QuestionTitle>
-            <QuestionText>Svara på några frågor så visar vi leverantörer som matchar vad du letar efter</QuestionText>
+            <QuestionText>
+              Svara på några frågor så visar vi leverantörer som matchar vad du letar efter.
+              I nästa steg kan du se både rörliga avtal och fastprisavtal – och väljer själv vilket du föredrar hos leverantören.
+            </QuestionText>
 
             <InputGroup>
               <Label>Ungefärlig årsförbrukning (kWh/år) *</Label>
@@ -708,11 +880,11 @@ export default function RorligtAvtalV2Page() {
             <StepContainer>
               <QuestionTitle>Leverantörer som matchar dina preferenser</QuestionTitle>
               <QuestionText>
-                Här är leverantörer som matchar vad du söker efter. 
+                Här är leverantörer som matchar vad du söker efter.
                 {preferences.priority === 'price' && ' Vi har sorterat med fokus på lägsta pris först.'}
                 {preferences.priority === 'security' && ' Vi har sorterat med fokus på etablerade leverantörer först.'}
                 {preferences.priority === 'flexibility' && ' Vi har sorterat med fokus på flexibla avtal utan bindningstid först.'}
-                {' '}Läs gärna igenom alla alternativ innan du väljer.
+                {' '}När du klickar vidare till en leverantör kan du själv välja fast eller rörligt pris hos dem. Läs gärna igenom alla alternativ innan du väljer.
               </QuestionText>
 
               {loading ? (
@@ -727,10 +899,10 @@ export default function RorligtAvtalV2Page() {
                         <BestPriceBadge>{String(provider.best_price_badge_text)}</BestPriceBadge>
                       )}
                       {!provider.best_price_badge_text && index === 0 && preferences.priority === 'price' && (
-                        <InfoBadge>Matchar dina preferenser</InfoBadge>
+                        <BestPriceBadge>Billigast just nu</BestPriceBadge>
                       )}
                       {!provider.best_price_badge_text && provider.is_recommended && !(index === 0 && preferences.priority === 'price') && (
-                        <RecommendedBadge>Rekommenderat</RecommendedBadge>
+                        <RecommendedBadge>⭐ Rekommenderat idag</RecommendedBadge>
                       )}
                       {provider.logo_url && provider.logo_url.trim() !== '' && !failedLogos.has(provider.id) && (
                         <ProviderLogo 
@@ -742,6 +914,31 @@ export default function RorligtAvtalV2Page() {
                         />
                       )}
                       <ProviderName>{provider.name}</ProviderName>
+                      {(() => {
+                        const fromApi = getProviderPriceFromApi(provider.name, providerPrices);
+                        const månadKr = fromApi?.monthly_fee_kr ?? provider.manual_monthly_fee_kr ?? getMånadskostnadKr(provider.name);
+                        const påslagValue = fromApi?.surcharge_ore_per_kwh ?? provider.manual_surcharge_ore_per_kwh ?? getPåslagÖrePerKwh(provider.name);
+                        const rateLabel = fromApi?.rate_type === 'monthly'
+                          ? 'Rörligt månadspris'
+                          : provider.manual_rate_type === 'monthly'
+                            ? 'Rörligt månadspris'
+                            : provider.manual_rate_type === 'quarterly'
+                              ? 'Rörligt kvartspris'
+                              : 'Rörligt timpris';
+                        const påslagText =
+                          påslagValue === 0
+                            ? '0 öre/kWh i påslag'
+                            : påslagValue < 0
+                              ? `${påslagValue.toLocaleString('sv-SE')} öre/kWh i påslag (minuspåslag)`
+                              : `${påslagValue.toLocaleString('sv-SE')} öre/kWh i påslag`;
+                        return (
+                          <PriceBlock>
+                            <span style={{ fontWeight: 600, fontSize: '0.85rem', color: '#374151' }}>{rateLabel}</span>
+                            <span>{månadKr === 0 ? '0 kr/månad' : `${månadKr} kr/månad`}</span>
+                            <span>{påslagText}</span>
+                          </PriceBlock>
+                        );
+                      })()}
                       {provider.campaign_text && typeof provider.campaign_text === 'string' && (
                         <div style={{
                           fontWeight: provider.campaign_bold ? 'bold' : 'normal',
@@ -771,6 +968,51 @@ export default function RorligtAvtalV2Page() {
                     </ProviderCard>
                   ))}
                 </ProvidersGrid>
+              )}
+
+              {!fastLoading && fastProviders.length > 0 && (
+                <>
+                  <div style={{ marginTop: '3rem' }}>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', textAlign: 'center', marginBottom: '0.5rem' }}>
+                      Vill du hellre binda priset?
+                    </h3>
+                    <p style={{ color: '#4b5563', fontSize: '0.95rem', textAlign: 'center', maxWidth: 640, margin: '0 auto 1.5rem' }}>
+                      Här är leverantörer med fastprisavtal. Du kommer till samma sida hos leverantören oavsett om du väljer fast eller rörligt – där väljer du själv den avtalsform som känns tryggast.
+                    </p>
+                  </div>
+
+                  <ProvidersGrid>
+                    {fastProviders.map((provider) => (
+                      <ProviderCard key={`fast-${provider.id}`}>
+                        {provider.logo_url && provider.logo_url.trim() !== '' && !failedLogos.has(provider.id) && (
+                          <ProviderLogo
+                            src={provider.logo_url}
+                            alt={provider.name}
+                            onError={() => {
+                              setFailedLogos(prev => new Set(prev).add(provider.id as number));
+                            }}
+                          />
+                        )}
+                        {provider.is_recommended && <RecommendedBadge>⭐ Rekommenderat idag</RecommendedBadge>}
+                        <ProviderName>{provider.name}</ProviderName>
+                        <ProviderDescription>
+                          {provider.description || ''}
+                        </ProviderDescription>
+                        <ProviderButton
+                          href={provider.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleProviderClick(provider.name, provider.url);
+                          }}
+                        >
+                          Gå vidare till {provider.name}
+                        </ProviderButton>
+                      </ProviderCard>
+                    ))}
+                  </ProvidersGrid>
+                </>
               )}
 
               <div style={{ marginTop: '2rem', textAlign: 'center' }}>

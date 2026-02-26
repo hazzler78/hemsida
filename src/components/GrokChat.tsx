@@ -322,7 +322,7 @@ export default function GrokChat() {
       // Navigering till rätt sida efter kort fördröjning
       setTimeout(() => {
         const targetPage = contractType === 'rorligt' 
-          ? '/rorligt-avtal'
+          ? '/rorligt-avtal-v2'
           : '/fastpris-avtal';
         
         // Lägg till en notifiering i chatten

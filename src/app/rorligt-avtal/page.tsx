@@ -332,6 +332,22 @@ const HighlightBadge = styled.div`
   z-index: 10;
 `;
 
+const BestPriceBadge = styled.div`
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #a855f7, #9333ea);
+  color: white;
+  padding: 0.5rem 1.25rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
+  z-index: 10;
+  white-space: nowrap;
+`;
+
 const PriceBlock = styled.div`
   font-size: 0.9rem;
   font-weight: 600;
@@ -460,7 +476,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     name: 'Cheap Energy',
     type: 'rorligt',
     logo_url: '/cheap-logo.png',
-    description: '0 kr i månadsavgift, 0 öre i påslag i 12 månader. Ingen bindningstid.',
+    description: 'Passar dig som framför allt vill ha så lågt pris som möjligt och gärna sköter allt digitalt. Ett enkelt avtal utan krångel – du tecknar online och vi hjälper dig med bytet.',
     url: 'https://www.cheapenergy.se/teckna-elavtal/?src=Elchef',
     is_recommended: true,
     display_order: 1,
@@ -471,7 +487,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     name: 'Svekraft',
     type: 'rorligt',
     logo_url: '/svekraft-logo.png',
-    description: '0 kr i månadsavgift i 12 månader, 7,99 öre i påslag. Ingen bindningstid.',
+    description: 'Bra val om du vill komma igång billigt första tiden och vill ha ett flexibelt rörligt avtal. Passar dig som inte bytt elavtal tidigare och vill ha hjälp genom hela processen.',
     url: 'https://www.svekraft.com/elavtal/?src=Elchef',
     is_recommended: false,
     display_order: 2,
@@ -482,7 +498,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     name: 'Tibber',
     type: 'rorligt',
     logo_url: '/tibber.png',
-    description: '49 kr i månadsavgift, 8,6 öre i påslag. Ingen bindningstid.',
+    description: 'För dig som gillar teknik och vill styra din förbrukning via app. Timpris och smarta funktioner som passar om du kan flytta delar av din elanvändning till billigare timmar.',
     url: 'https://go.adt242.com/t/t?a=1590956516&as=2012933659&t=2&tk=1',
     is_recommended: false,
     display_order: 3,
@@ -493,7 +509,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     name: 'Telinet Energi',
     type: 'rorligt',
     logo_url: '/telinet.png',
-    description: '59 kr i månadsavgift, 13,33 öre i påslag. Ingen bindningstid.',
+    description: 'Passar dig som vill ha ett grönt elavtal från en aktör som funnits länge på marknaden. Bra om du vill kunna nå kundservice enkelt och få hjälp om något känns oklart.',
     url: 'https://at.telinet.se/t/t?a=1870484942&as=2012933659&t=2&tk=1',
     is_recommended: false,
     display_order: 4,
@@ -504,7 +520,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     name: 'Fortum',
     type: 'rorligt',
     logo_url: '/fortum.png',
-    description: '69 kr i månadsavgift, 12,38 öre i påslag. Ingen bindningstid.',
+    description: 'Större, etablerad leverantör med många kunder i Sverige. Ett alternativ för dig som prioriterar trygghet och stabilitet före att jaga varje öre i pris.',
     url: 'https://ion.fortum.com/t/t?a=1312475339&as=2012933659&t=2&tk=1',
     is_recommended: false,
     display_order: 5,
@@ -515,7 +531,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     name: 'Motala',
     type: 'rorligt',
     logo_url: MOTALA_LOGO_SRC,
-    description: 'Konkurrenskraftiga elavtal för privatpersoner.',
+    description: 'Mindre svensk leverantör med personlig känsla. Bra val om du vill kunna prata med en kundtjänst nära till hands och ändå ha ett modernt rörligt avtal.',
     url: 'https://motalaenergi.se/privatperson/?src=Elchef',
     is_recommended: false,
     display_order: 6,
@@ -777,8 +793,10 @@ export default function RorligtAvtalPage() {
           </div>
         ) : (
           <ProvidersGrid>
-            {sortedProviders.map((provider) => (
+            {sortedProviders.map((provider, index) => (
               <ProviderCard key={provider.id}>
+                {index === 0 && <BestPriceBadge>Billigast just nu</BestPriceBadge>}
+                {index !== 0 && provider.is_recommended && <HighlightBadge>⭐ Rekommenderat idag</HighlightBadge>}
                 {provider.logo_url && provider.logo_url.trim() !== '' && !failedLogos.has(provider.id) && (
                   <ProviderLogo
                     src={provider.logo_url}
@@ -788,7 +806,6 @@ export default function RorligtAvtalPage() {
                     }}
                   />
                 )}
-                {provider.is_recommended && <HighlightBadge>Rekommenderat</HighlightBadge>}
                 <ProviderName>{provider.name}</ProviderName>
                 {(() => {
                   const fromApi = getProviderPriceFromApi(provider.name, providerPrices);

@@ -331,7 +331,7 @@ export default function Hero() {
                     e.currentTarget.style.filter = 'brightness(1)';
                   }, [])}
                   onClick={() => {
-                    trackHeroClick('rorligt', '/rorligt-avtal');
+                    trackHeroClick('rorligt', '/rorligt-avtal-v2');
                     // TikTok InitiateCheckout-style event när vi skickar användaren till Salesys-flödet
                     try {
                       const ttq: any = (window as any).ttq;
@@ -350,7 +350,7 @@ export default function Hero() {
                     }
                     const sid =
                       typeof window !== 'undefined' ? window.localStorage.getItem('invoice_session_id') || '' : '';
-                    const url = '/rorligt-avtal' + (sid ? `?sid=${encodeURIComponent(sid)}` : '');
+                    const url = '/rorligt-avtal-v2' + (sid ? `?sid=${encodeURIComponent(sid)}` : '');
                     window.location.href = url;
                   }}
                 >

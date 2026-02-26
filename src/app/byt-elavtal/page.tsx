@@ -208,7 +208,7 @@ const NextStepsList = styled.ol`
 
 export default function BytElavtal() {
   const handleRorligtClick = () => {
-    window.location.href = '/rorligt-avtal';
+    window.location.href = '/rorligt-avtal-v2';
   };
 
   const handleFastprisClick = () => {
