@@ -408,21 +408,6 @@ const RecommendedBadge = styled.div`
   white-space: nowrap;
 `;
 
-const InfoBadge = styled.div`
-  position: absolute;
-  top: 12px;
-  right: 16px;
-  background: rgba(255, 255, 255, 0.96);
-  color: #2563eb;
-  border: 1px solid rgba(37, 99, 235, 0.25);
-  padding: 0.35rem 0.9rem;
-  border-radius: 9999px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  z-index: 10;
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
-`;
-
 const BestPriceBadge = styled.div`
   position: absolute;
   top: -28px;
@@ -631,7 +616,6 @@ export default function RorligtAvtalV2Page() {
   const [preferences, setPreferences] = useState<UserPreferences>({});
   const [failedLogos, setFailedLogos] = React.useState<Set<number>>(new Set());
   const [providerPrices, setProviderPrices] = React.useState<ProviderPricesMap | null>(null);
-  const [providerPricesLoading, setProviderPricesLoading] = React.useState(false);
   const [priceArea, setPriceArea] = React.useState<ElectricityArea>('se3');
   const [consumptionKwhPerYear, setConsumptionKwhPerYear] = React.useState(13500);
 
@@ -701,7 +685,6 @@ export default function RorligtAvtalV2Page() {
   // Hämta prisdata (månadskostnad + påslag) baserat på elområde och årsförbrukning
   React.useEffect(() => {
     let cancelled = false;
-    setProviderPricesLoading(true);
     const fetchProviderPrices = async () => {
       try {
         const res = await fetch(`/api/prices/providers?area=${priceArea}&consumption=${consumptionKwhPerYear}`);
@@ -713,7 +696,6 @@ export default function RorligtAvtalV2Page() {
       } catch {
         if (!cancelled) setProviderPrices(null);
       } finally {
-        if (!cancelled) setProviderPricesLoading(false);
       }
     };
     fetchProviderPrices();
