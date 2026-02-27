@@ -638,10 +638,16 @@ export default function RorligtAvtalV2Page() {
                 ? provider.logo_url 
                 : fallbackProvider?.logo_url
             );
+            // Använd alltid de nyaste, guidande texterna från FALLBACK_PROVIDERS när de finns
+            const description = fallbackProvider?.description ?? provider.description;
             return {
               ...provider,
+              description,
               logo_url: logoUrl,
-              best_price_badge_text: provider.best_price_badge_text && provider.best_price_badge_text.trim() !== '' ? provider.best_price_badge_text : undefined
+              best_price_badge_text:
+                provider.best_price_badge_text && provider.best_price_badge_text.trim() !== ''
+                  ? provider.best_price_badge_text
+                  : undefined,
             };
           });
           setProviders(mergedProviders);
