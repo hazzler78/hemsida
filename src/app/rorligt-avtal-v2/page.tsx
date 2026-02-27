@@ -403,7 +403,7 @@ const ProviderCard = styled.div<{ recommended?: boolean }>`
 
 const RecommendedBadge = styled.div`
   position: absolute;
-  top: -28px;
+  top: -16px;
   left: 50%;
   transform: translateX(-50%);
   background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -419,7 +419,7 @@ const RecommendedBadge = styled.div`
 
 const BestPriceBadge = styled.div`
   position: absolute;
-  top: -28px;
+  top: -16px;
   left: 50%;
   transform: translateX(-50%);
   background: linear-gradient(135deg, #a855f7, #9333ea);
