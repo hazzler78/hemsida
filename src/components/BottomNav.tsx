@@ -105,6 +105,11 @@ function BottomNavContent() {
     };
   }, []);
   
+  // Dölj bottennavigeringen på vissa fokuserade flöden (t.ex. rörligt-avtal-v2)
+  if (pathname === '/rorligt-avtal-v2') {
+    return null;
+  }
+
   return (
     <Nav offset={bottomOffset}>
       <NavItem href={withDefaultCtaUtm('/', 'bottomnav', 'home')} className={pathname === '/' ? 'active' : ''}>
@@ -133,11 +138,13 @@ function BottomNavContent() {
 
 export default function BottomNav() {
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Säkra att inget blinkar: rendera inget förrän vi är på klienten
   if (!mounted) {
     return null;
   }
