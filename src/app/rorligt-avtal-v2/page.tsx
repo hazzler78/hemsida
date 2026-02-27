@@ -325,6 +325,14 @@ const ProvidersGrid = styled.div`
   }
 `;
 
+const SafeBottomSpacer = styled.div`
+  height: 120px;
+  
+  @media (min-width: 768px) {
+    height: 40px;
+  }
+`;
+
 /* Shimmer – ljusstrimma som rör sig sakta över kortet (ren CSS) */
 const providerCardShimmer = keyframes`
   0% { transform: translateX(-100%) skewX(-20deg); }
@@ -1065,6 +1073,7 @@ export default function RorligtAvtalV2Page() {
           </>
         )}
       </Content>
+      {step === 'results' && <SafeBottomSpacer />}
     </PageContainer>
   );
 }
