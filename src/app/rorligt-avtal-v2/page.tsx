@@ -152,10 +152,11 @@ const StepContainer = styled.div`
   padding: 2rem;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  margin-bottom: 2rem;
+  margin-bottom: 4rem;
   
   @media (min-width: 768px) {
     padding: 3rem;
+    margin-bottom: 3rem;
   }
 `;
 
