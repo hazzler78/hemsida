@@ -518,7 +518,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     name: 'Cheap Energy',
     type: 'rorligt',
     logo_url: '/cheap-logo.png',
-    description: 'Passar dig som framför allt vill ha så lågt pris som möjligt och gärna sköter allt digitalt. Ett enkelt avtal utan krångel – du tecknar online och vi hjälper dig med bytet.',
+    description: 'Passar dig som framför allt vill ha så lågt pris som möjligt och gärna sköter allt digitalt.',
     url: 'https://www.cheapenergy.se/teckna-elavtal/?src=Elchef',
     is_recommended: true,
     display_order: 1,
