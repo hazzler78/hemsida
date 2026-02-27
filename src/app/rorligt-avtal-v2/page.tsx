@@ -113,10 +113,10 @@ function getProviderPriceFromApi(providerName: string, providers: ProviderPrices
 const PageContainer = styled.div`
   min-height: 100vh;
   background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
-  padding: 2rem 1rem;
+  padding: 2rem 1rem 3.5rem;
   
   @media (min-width: 768px) {
-    padding: 3rem 2rem;
+    padding: 3rem 2rem 4rem;
   }
 `;
 
