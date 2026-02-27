@@ -138,13 +138,11 @@ function BottomNavContent() {
 
 export default function BottomNav() {
   const [mounted, setMounted] = useState(false);
-  const pathname = usePathname();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Säkra att inget blinkar: rendera inget förrän vi är på klienten
   if (!mounted) {
     return null;
   }
