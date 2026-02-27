@@ -408,9 +408,9 @@ const RecommendedBadge = styled.div`
   transform: translateX(-50%);
   background: linear-gradient(135deg, var(--primary), var(--secondary));
   color: white;
-  padding: 0.5rem 1.5rem;
+  padding: 0.4rem 1.3rem;
   border-radius: 9999px;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
   box-shadow: 0 4px 12px rgba(22, 147, 255, 0.3);
   z-index: 10;
@@ -424,9 +424,9 @@ const BestPriceBadge = styled.div`
   transform: translateX(-50%);
   background: linear-gradient(135deg, #a855f7, #9333ea);
   color: white;
-  padding: 0.5rem 1.5rem;
+  padding: 0.4rem 1.3rem;
   border-radius: 9999px;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
   box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
   z-index: 10;
