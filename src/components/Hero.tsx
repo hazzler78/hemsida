@@ -190,6 +190,7 @@ export default function Hero() {
   const [videoStarted, setVideoStarted] = useState(false);
   const videoContainerRef = useRef<HTMLDivElement | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [ctaStyleReady, setCtaStyleReady] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -199,6 +200,11 @@ export default function Hero() {
     update();
     window.addEventListener('resize', update);
     return () => window.removeEventListener('resize', update);
+  }, []);
+
+  // Förhindra färg-blink vid första render: använd neutral stil tills klienten är redo
+  useEffect(() => {
+    setCtaStyleReady(true);
   }, []);
 
   useEffect(() => {
@@ -237,11 +243,18 @@ export default function Hero() {
       : 'Billigare el väntar – se avtal som lönar sig just nu!';
 
   // A/B-test: gul CTA-knapp vs grön CTA-knapp
-  const buttonBackground =
-    variant === 'A'
-      ? 'linear-gradient(135deg, #fbbf24, #fde68a)' // gul
-      : 'linear-gradient(135deg, #22c55e, #16a34a)'; // grön
-  const buttonTextColor = variant === 'A' ? '#1f2937' : 'white';
+  // Första frame: neutral brand-gradient för att undvika blink mellan varianter
+  const neutralBackground = 'linear-gradient(135deg, var(--primary), var(--secondary))';
+  const neutralTextColor = 'white';
+  const buttonBackground = ctaStyleReady
+    ? (variant === 'A'
+        ? 'linear-gradient(135deg, #fbbf24, #fde68a)' // gul
+        : 'linear-gradient(135deg, #22c55e, #16a34a)' // grön
+      )
+    : neutralBackground;
+  const buttonTextColor = ctaStyleReady
+    ? (variant === 'A' ? '#1f2937' : 'white')
+    : neutralTextColor;
 
   const trackHeroClick = useCallback((target: 'rorligt' | 'fastpris', href: string) => {
     try {
