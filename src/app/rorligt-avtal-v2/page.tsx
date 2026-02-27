@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { MOTALA_LOGO_SRC } from '@/lib/providerLogos';
 import { getElectricityArea, type ElectricityArea } from '@/lib/types';
 
@@ -324,31 +324,71 @@ const ProvidersGrid = styled.div`
   }
 `;
 
+/* Shimmer – ljusstrimma som rör sig sakta över kortet (ren CSS) */
+const providerCardShimmer = keyframes`
+  0% { transform: translateX(-100%) skewX(-20deg); }
+  100% { transform: translateX(100%) skewX(-20deg); }
+`;
+
 const ProviderCard = styled.div<{ recommended?: boolean }>`
   position: relative;
   margin-top: 1.75rem;
-  background: ${props => props.recommended ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.95))' : 'rgba(255, 255, 255, 0.95)'};
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 20px;
-  padding: 2rem;
-  box-shadow: ${props => props.recommended ? '0 20px 40px rgba(22, 147, 255, 0.2)' : '0 20px 40px rgba(0, 0, 0, 0.1)'};
-  border: ${props => props.recommended ? '2px solid var(--primary)' : '1px solid rgba(255, 255, 255, 0.2)'};
   text-align: center;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: visible;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   height: 100%;
   min-height: 300px;
+  border-radius: 20px;
+  padding: 2rem;
+  border: ${props => props.recommended ? '2px solid var(--primary)' : '1px solid rgba(255, 255, 255, 0.3)'};
+  box-shadow: ${props => props.recommended ? '0 20px 40px rgba(22, 147, 255, 0.2)' : '0 20px 40px rgba(0, 0, 0, 0.1)'};
+  
+  /* Stärkare frosted glass (20px blur) + fallback för äldre mobiler */
+  @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    background: ${props => props.recommended ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.88))' : 'rgba(255, 255, 255, 0.9)'};
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    background: ${props => props.recommended ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.95))' : 'rgba(255, 255, 255, 0.98)'};
+  }
+  
+  /* Shimmer – ljusstrimma som rör sig sakta över kortet */
+  &::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      120deg,
+      transparent,
+      rgba(255, 255, 255, 0.35),
+      transparent
+    );
+    transform: skewX(-20deg);
+    animation: ${providerCardShimmer} 6s infinite linear;
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  /* Innehåll ovanför shimmer */
+  & > * {
+    position: relative;
+    z-index: 1;
+  }
   
   @media (min-width: 768px) {
     min-height: 350px;
   }
   
+  /* Hover: scale + glow (Liquid Glass) */
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: ${props => props.recommended ? '0 30px 60px rgba(22, 147, 255, 0.3)' : '0 30px 60px rgba(0, 0, 0, 0.15)'};
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: ${props => props.recommended ? '0 24px 48px rgba(0, 106, 167, 0.3)' : '0 24px 48px rgba(0, 0, 0, 0.2)'};
   }
 `;
 

@@ -87,6 +87,8 @@ export default function AdminDashboard() {
   const [selectedProvider, setSelectedProvider] = useState<string>('all');
   const [availableProviders, setAvailableProviders] = useState<string[]>([]);
   const [contactsApiFailed, setContactsApiFailed] = useState(false);
+  const [telegramSummaryLoading, setTelegramSummaryLoading] = useState(false);
+  const [telegramSummaryResult, setTelegramSummaryResult] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -1791,7 +1793,51 @@ export default function AdminDashboard() {
               <QuickLink href="/admin/banner-clicks" icon="🎨" label="Banner A/B" />
               <QuickLink href="/admin/chatlog" icon="💬" label="Chattloggar" />
               <QuickLink href="/admin/data-verification" icon="🔍" label="Dataverifiering" />
+              <button
+                type="button"
+                onClick={async () => {
+                  setTelegramSummaryLoading(true);
+                  setTelegramSummaryResult(null);
+                  try {
+                    const res = await fetch('/api/admin/telegram-summary?days=7', {
+                      headers: { 'x-admin-password': ADMIN_PASSWORD },
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.ok) {
+                      setTelegramSummaryResult(`Skickat till Telegram (${data.totalChats} chattar, ${data.days} dagar)`);
+                    } else {
+                      setTelegramSummaryResult(data.error || (data.telegramConfigured ? 'Misslyckades' : 'Telegram ej konfigurerat'));
+                    }
+                  } catch (e) {
+                    setTelegramSummaryResult(e instanceof Error ? e.message : 'Fel');
+                  } finally {
+                    setTelegramSummaryLoading(false);
+                  }
+                }}
+                disabled={telegramSummaryLoading}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '12px 16px',
+                  background: '#f9fafb',
+                  borderRadius: 8,
+                  border: '1px solid #e5e7eb',
+                  cursor: telegramSummaryLoading ? 'not-allowed' : 'pointer',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  color: '#374151',
+                }}
+              >
+                <span style={{ fontSize: '1.25rem' }}>📤</span>
+                <span>{telegramSummaryLoading ? 'Skickar...' : 'GrokChat till Telegram'}</span>
+              </button>
             </div>
+            {telegramSummaryResult && (
+              <div style={{ marginTop: 12, fontSize: '0.875rem', color: telegramSummaryResult.startsWith('Skickat') ? '#059669' : '#dc2626' }}>
+                {telegramSummaryResult}
+              </div>
+            )}
           </div>
         </>
       )}
