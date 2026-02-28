@@ -748,12 +748,15 @@ export default function GrokChat() {
             <div ref={chatEndRef} />
           </div>
           <form onSubmit={sendMessage} style={{ 
-            display: 'flex', 
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            minWidth: 0,
             flexShrink: 0,
+            boxSizing: 'border-box',
             borderTop: '1px solid rgba(255, 255, 255, 0.2)', 
             background: 'rgba(255, 255, 255, 0.95)', 
-            padding: '0.5rem',
-            paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))',
+            padding: '0.5rem 0.5rem max(0.5rem, env(safe-area-inset-bottom)) 0.5rem',
             backdropFilter: 'var(--glass-blur)',
             WebkitBackdropFilter: 'var(--glass-blur)',
           }}>
@@ -763,16 +766,17 @@ export default function GrokChat() {
               onChange={event => setInput(event.target.value)}
               placeholder={contactFormSubmitted ? "Tack för din kontakt!" : contractChoiceSubmitted ? "Tack för ditt val!" : billUploadSubmitted ? "Analysen är klar!" : "Skriv din fråga…"}
               style={{ 
-                flex: 1, 
+                flex: 1,
+                minWidth: 0,
                 border: '1px solid rgba(203, 213, 225, 0.5)', 
                 borderRadius: 12, 
-                padding: '0.8rem 1rem', 
+                padding: '0.8rem 0.75rem', 
                 fontSize: 16, 
                 outline: 'none', 
                 background: contactFormSubmitted || contractChoiceSubmitted || billUploadSubmitted ? 'rgba(243, 244, 246, 0.8)' : 'rgba(255, 255, 255, 0.9)', 
-                marginRight: 8,
                 backdropFilter: 'var(--glass-blur)',
                 WebkitBackdropFilter: 'var(--glass-blur)',
+                boxSizing: 'border-box',
               }}
               disabled={loading || contactFormSubmitted || contractChoiceSubmitted || billUploadSubmitted}
               maxLength={500}
@@ -782,6 +786,7 @@ export default function GrokChat() {
               type="submit" 
               disabled={loading || !input.trim() || contactFormSubmitted || contractChoiceSubmitted || billUploadSubmitted} 
               style={{ 
+                flexShrink: 0,
                 background: 'linear-gradient(135deg, var(--primary), var(--secondary))', 
                 color: 'white', 
                 border: '1px solid rgba(255, 255, 255, 0.2)', 
@@ -791,6 +796,7 @@ export default function GrokChat() {
                 borderRadius: 12, 
                 fontWeight: 700, 
                 height: 44,
+                minWidth: 44,
                 backdropFilter: 'var(--glass-blur)',
                 WebkitBackdropFilter: 'var(--glass-blur)',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -803,6 +809,7 @@ export default function GrokChat() {
               onClick={() => setShowContactForm(true)}
               disabled={contactFormSubmitted || contractChoiceSubmitted || billUploadSubmitted}
               style={{ 
+                flexShrink: 0,
                 background: contactFormSubmitted || contractChoiceSubmitted || billUploadSubmitted ? 'rgba(148, 163, 184, 0.5)' : 'linear-gradient(135deg, var(--secondary), var(--primary))', 
                 color: 'white', 
                 border: '1px solid rgba(255, 255, 255, 0.2)', 
@@ -811,8 +818,8 @@ export default function GrokChat() {
                 cursor: 'pointer', 
                 borderRadius: 12, 
                 fontWeight: 600, 
-                height: 44, 
-                marginLeft: 8,
+                height: 44,
+                minWidth: 44,
                 backdropFilter: 'var(--glass-blur)',
                 WebkitBackdropFilter: 'var(--glass-blur)',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
