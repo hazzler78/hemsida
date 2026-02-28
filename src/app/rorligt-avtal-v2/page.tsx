@@ -150,12 +150,14 @@ const StepContainer = styled.div`
   -webkit-backdrop-filter: blur(20px);
   border-radius: 24px;
   padding: 2rem;
+  padding-right: 6rem;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   margin-bottom: 4rem;
   
   @media (min-width: 768px) {
     padding: 3rem;
+    padding-right: 7rem;
     margin-bottom: 3rem;
   }
 `;
@@ -339,11 +341,36 @@ const providerCardShimmer = keyframes`
   100% { transform: translateX(100%) skewX(-20deg); }
 `;
 
+const CardShimmerLayer = styled.div`
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  &::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      120deg,
+      transparent,
+      rgba(255, 255, 255, 0.35),
+      transparent
+    );
+    transform: skewX(-20deg);
+    animation: ${providerCardShimmer} 6s infinite linear;
+  }
+`;
+
 const ProviderCard = styled.div<{ recommended?: boolean }>`
   position: relative;
   margin-top: 1.75rem;
   text-align: center;
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -361,26 +388,6 @@ const ProviderCard = styled.div<{ recommended?: boolean }>`
   }
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     background: ${props => props.recommended ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.95))' : 'rgba(255, 255, 255, 0.98)'};
-  }
-  
-  /* Shimmer – ljusstrimma som rör sig sakta över kortet */
-  &::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(
-      120deg,
-      transparent,
-      rgba(255, 255, 255, 0.35),
-      transparent
-    );
-    transform: skewX(-20deg);
-    animation: ${providerCardShimmer} 6s infinite linear;
-    pointer-events: none;
-    z-index: 0;
   }
   
   /* Innehåll ovanför shimmer */
@@ -937,6 +944,7 @@ export default function RorligtAvtalV2Page() {
                 <ProvidersGrid>
                   {recommendedProviders.map((provider, index) => (
                     <ProviderCard key={provider.id} recommended={index === 0 && preferences.priority === 'price'}>
+                      <CardShimmerLayer />
                       {provider.best_price_badge_text && typeof provider.best_price_badge_text === 'string' && provider.best_price_badge_text.trim() !== '' && (
                         <BestPriceBadge>{String(provider.best_price_badge_text)}</BestPriceBadge>
                       )}
@@ -1028,6 +1036,7 @@ export default function RorligtAvtalV2Page() {
                   <ProvidersGrid>
                     {fastProviders.map((provider) => (
                       <ProviderCard key={`fast-${provider.id}`}>
+                        <CardShimmerLayer />
                         {provider.logo_url && provider.logo_url.trim() !== '' && !failedLogos.has(provider.id) && (
                           <ProviderLogo
                             src={provider.logo_url}
