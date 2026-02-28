@@ -453,20 +453,20 @@ export default function GrokChat() {
           style={{
             position: 'fixed',
             pointerEvents: 'auto',
+            right: 24,
+            width: 'max(280px, min(500px, calc(100vw - 48px)))',
+            maxWidth: 'calc(100vw - 48px)',
+            boxSizing: 'border-box',
             ...(visualViewportHeight !== null
               ? {
                   top: visualViewportTop,
-                  right: 24,
-                  width: 360,
-                  maxWidth: '98vw',
                   height: visualViewportHeight,
+                  maxHeight: '90vh',
                 }
               : {
                   bottom: chatWindowBottom,
-                  right: 24,
-                  width: 360,
-                  maxWidth: '98vw',
                   height: chatWindowHeight,
+                  maxHeight: '90vh',
                 }),
             background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'var(--glass-blur)',
