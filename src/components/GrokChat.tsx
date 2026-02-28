@@ -131,6 +131,7 @@ export default function GrokChat() {
   
   const chatEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const chatWindowRef = useRef<HTMLDivElement>(null);
   const prevOpenRef = useRef(false);
 
   // Generera session ID när komponenten mountas
@@ -171,6 +172,15 @@ export default function GrokChat() {
       if (window.innerWidth <= 600) {
         setVisualViewportHeight(vv.height);
         setVisualViewportTop(vv.offsetTop);
+        // Force reflow after keyboard show/hide so iOS hit-testing stays correct (fixes stuck close button)
+        requestAnimationFrame(() => {
+          const el = chatWindowRef.current;
+          if (el) {
+            (el as HTMLElement).style.transform = 'translateZ(0)';
+            (el as HTMLElement).offsetHeight;
+            (el as HTMLElement).style.transform = '';
+          }
+        });
       }
     };
 
@@ -184,6 +194,24 @@ export default function GrokChat() {
     };
   }, [open]);
 
+  // When chat is open on mobile: add body class to hide bottom nav; remove on close
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    if (open && typeof window !== 'undefined' && window.innerWidth <= 600) {
+      document.body.classList.add('chat-open');
+      const nav = document.querySelector('.bottom-nav');
+      if (nav) nav.setAttribute('aria-hidden', 'true');
+      return () => {
+        document.body.classList.remove('chat-open');
+        const n = document.querySelector('.bottom-nav');
+        if (n) n.setAttribute('aria-hidden', 'false');
+      };
+    }
+    document.body.classList.remove('chat-open');
+    const n = document.querySelector('.bottom-nav');
+    if (n) n.setAttribute('aria-hidden', 'false');
+  }, [open]);
+
   // Scrolla till toppen när chatten öppnas, annars ingen automatisk scroll
   useEffect(() => {
     if (open && !prevOpenRef.current && chatContainerRef.current) {
@@ -192,15 +220,14 @@ export default function GrokChat() {
     prevOpenRef.current = open;
   }, [open]);
 
-  // Prevent body scroll behind chat when open (helps iOS focus/scroll)
+  // Prevent body scroll behind chat when open; always restore on close (fixes stuck state)
   useEffect(() => {
-    if (open && typeof document !== 'undefined') {
-      const prev = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = prev;
-      };
-    }
+    if (!open || typeof document === 'undefined') return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
   }, [open]);
 
   const sendMessage = async (event?: React.FormEvent) => {
@@ -392,7 +419,7 @@ export default function GrokChat() {
           position: 'fixed',
           bottom: chatBottom,
           right: 24,
-          zIndex: 1004,
+          zIndex: 10000,
           background: '#ffffff',
           color: 'white',
           border: '1px solid rgba(148, 163, 184, 0.6)',
@@ -420,8 +447,10 @@ export default function GrokChat() {
       {/* Chat window */}
       {open && (
         <div
+          ref={chatWindowRef}
           style={{
             position: 'fixed',
+            pointerEvents: 'auto',
             ...(visualViewportHeight !== null
               ? {
                   top: visualViewportTop,
@@ -443,28 +472,32 @@ export default function GrokChat() {
             border: '1px solid rgba(255, 255, 255, 0.3)',
             borderRadius: 18,
             boxShadow: 'var(--glass-shadow-heavy)',
-            zIndex: 1004,
+            zIndex: 10000,
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
           }}
         >
-          <div style={{ 
-            background: 'linear-gradient(135deg, var(--primary), var(--secondary))', 
-            color: 'white', 
-            padding: '1rem', 
-            fontWeight: 700, 
-            fontSize: 19, 
-            letterSpacing: 0.2, 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'space-between',
-            backdropFilter: 'var(--glass-blur)',
-            WebkitBackdropFilter: 'var(--glass-blur)',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.2)'
-          }}>
+          <div
+            style={{
+              background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
+              color: 'white',
+              padding: '1rem',
+              fontWeight: 700,
+              fontSize: 19,
+              letterSpacing: 0.2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              backdropFilter: 'var(--glass-blur)',
+              WebkitBackdropFilter: 'var(--glass-blur)',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+              pointerEvents: 'auto',
+              flexShrink: 0,
+            }}
+          >
             <span><GrodanIcon /> Grodan – AI-chat</span>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8, pointerEvents: 'auto' }}>
               <button
                 onClick={clearChat}
                 style={{ 
@@ -478,7 +511,9 @@ export default function GrokChat() {
                   marginRight: 2,
                   backdropFilter: 'var(--glass-blur)',
                   WebkitBackdropFilter: 'var(--glass-blur)',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s ease',
+                  touchAction: 'manipulation',
+                  pointerEvents: 'auto',
                 }}
                 title="Rensa chatten"
                 aria-label="Rensa chatten"
@@ -501,7 +536,9 @@ export default function GrokChat() {
                   justifyContent: 'center',
                   backdropFilter: 'var(--glass-blur)',
                   WebkitBackdropFilter: 'var(--glass-blur)',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s ease',
+                  touchAction: 'manipulation',
+                  pointerEvents: 'auto',
                 }} 
                 aria-label="Stäng"
               >

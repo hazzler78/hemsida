@@ -276,7 +276,9 @@ export default function RootLayout({
           <CampaignBanner />
           <div id="app">
             {children}
-            <BottomNav />
+            <div className="bottom-nav" aria-hidden="false">
+              <BottomNav />
+            </div>
             <Footer />
           </div>
         </StyledComponentsRegistry>

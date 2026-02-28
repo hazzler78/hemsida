@@ -504,6 +504,11 @@ p {
   }
 }
 
+/* When chat is open on mobile, hide bottom nav so it doesn't overlap chat/input */
+body.chat-open .bottom-nav {
+  display: none !important;
+}
+
 /* Move Cookiebot widget/icon away from chat bubble (bottom-left) */
 #CybotCookiebotDialogPoweredByLink,
 [id^="CybotCookiebotDialogPoweredByLink"],
