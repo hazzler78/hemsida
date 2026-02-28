@@ -150,14 +150,12 @@ const StepContainer = styled.div`
   -webkit-backdrop-filter: blur(20px);
   border-radius: 24px;
   padding: 2rem;
-  padding-right: 6rem;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   margin-bottom: 4rem;
   
   @media (min-width: 768px) {
     padding: 3rem;
-    padding-right: 7rem;
     margin-bottom: 3rem;
   }
 `;
