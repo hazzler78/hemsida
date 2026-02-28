@@ -144,33 +144,63 @@ export default function GrokChat() {
   const [chatBottom, setChatBottom] = useState(104); // 80px nav + 24px margin
   const [chatWindowBottom, setChatWindowBottom] = useState(120); // 80px nav + 40px margin
   const [chatWindowHeight, setChatWindowHeight] = useState(480);
-  
+
+  // iOS Safari keyboard fix: use visualViewport so chat stays above keyboard when input is focused
+  const [visualViewportHeight, setVisualViewportHeight] = useState<number | null>(null);
+  const [visualViewportTop, setVisualViewportTop] = useState(0);
+
   useEffect(() => {
-    // Simplified positioning without expensive DOM queries
     function updatePositions() {
       const mobile = window.innerWidth <= 600;
-      
-      // Set positions to be above bottom navigation (80px height)
-      setChatBottom(mobile ? 120 : 104); // 80px nav + 24px margin
-      setChatWindowBottom(mobile ? 140 : 120); // 80px nav + 40px margin
+      setChatBottom(mobile ? 120 : 104);
+      setChatWindowBottom(mobile ? 140 : 120);
       setChatWindowHeight(mobile ? 400 : 480);
     }
-    
     updatePositions();
     window.addEventListener('resize', updatePositions);
-    
-    return () => {
-      window.removeEventListener('resize', updatePositions);
-    };
+    return () => window.removeEventListener('resize', updatePositions);
   }, []);
+
+  // When chat is open on mobile, sync with visualViewport so iOS keyboard doesn't push chat up
+  useEffect(() => {
+    if (!open || typeof window === 'undefined') return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const updateViewport = () => {
+      if (window.innerWidth <= 600) {
+        setVisualViewportHeight(vv.height);
+        setVisualViewportTop(vv.offsetTop);
+      }
+    };
+
+    updateViewport();
+    vv.addEventListener('resize', updateViewport);
+    vv.addEventListener('scroll', updateViewport);
+    return () => {
+      vv.removeEventListener('resize', updateViewport);
+      vv.removeEventListener('scroll', updateViewport);
+      setVisualViewportHeight(null);
+    };
+  }, [open]);
 
   // Scrolla till toppen när chatten öppnas, annars ingen automatisk scroll
   useEffect(() => {
     if (open && !prevOpenRef.current && chatContainerRef.current) {
-      // Chatten öppnas nu
       chatContainerRef.current.scrollTop = 0;
     }
     prevOpenRef.current = open;
+  }, [open]);
+
+  // Prevent body scroll behind chat when open (helps iOS focus/scroll)
+  useEffect(() => {
+    if (open && typeof document !== 'undefined') {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
   }, [open]);
 
   const sendMessage = async (event?: React.FormEvent) => {
@@ -392,11 +422,21 @@ export default function GrokChat() {
         <div
           style={{
             position: 'fixed',
-            bottom: chatWindowBottom,
-            right: 24,
-            width: 360,
-            maxWidth: '98vw',
-            height: chatWindowHeight,
+            ...(visualViewportHeight !== null
+              ? {
+                  top: visualViewportTop,
+                  right: 24,
+                  width: 360,
+                  maxWidth: '98vw',
+                  height: visualViewportHeight,
+                }
+              : {
+                  bottom: chatWindowBottom,
+                  right: 24,
+                  width: 360,
+                  maxWidth: '98vw',
+                  height: chatWindowHeight,
+                }),
             background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'var(--glass-blur)',
             WebkitBackdropFilter: 'var(--glass-blur)',
@@ -471,7 +511,14 @@ export default function GrokChat() {
           </div>
           <div
             ref={chatContainerRef}
-            style={{ flex: 1, padding: '1rem', overflowY: 'auto', background: 'rgba(248, 250, 252, 0.8)' }}
+            style={{
+              flex: 1,
+              minHeight: 0,
+              padding: '1rem',
+              overflowY: 'auto',
+              WebkitOverflowScrolling: 'touch',
+              background: 'rgba(248, 250, 252, 0.8)',
+            }}
           >
             {messages.map((msg, i) => (
               <div key={i} style={{
@@ -663,9 +710,11 @@ export default function GrokChat() {
           </div>
           <form onSubmit={sendMessage} style={{ 
             display: 'flex', 
+            flexShrink: 0,
             borderTop: '1px solid rgba(255, 255, 255, 0.2)', 
             background: 'rgba(255, 255, 255, 0.95)', 
             padding: '0.5rem',
+            paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))',
             backdropFilter: 'var(--glass-blur)',
             WebkitBackdropFilter: 'var(--glass-blur)',
           }}>
