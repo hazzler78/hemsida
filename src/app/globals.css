@@ -72,10 +72,8 @@ html {
 
 html,
 body {
-  /* Tillåt horisontell scroll om något (t.ex. video) hamnar utanför layout-vyn,
-     istället för att klippa bort innehåll på vissa mobiler/lägen. */
   max-width: 100%;
-  overflow-x: auto;
+  overflow-x: hidden;
 }
 
 /* Alla bilder skalar på mobil – förhindrar horisontell scroll */

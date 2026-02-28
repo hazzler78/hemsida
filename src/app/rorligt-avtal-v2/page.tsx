@@ -343,7 +343,7 @@ const ProviderCard = styled.div<{ recommended?: boolean }>`
   position: relative;
   margin-top: 1.75rem;
   text-align: center;
-  overflow: visible;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   height: 100%;
