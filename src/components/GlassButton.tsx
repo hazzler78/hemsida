@@ -1,4 +1,4 @@
-import { useEffect, useRef, ElementType } from 'react';
+import { useEffect, useRef, useState, ElementType } from 'react';
 
 export interface GlassButtonProps {
   children: React.ReactNode;
@@ -14,6 +14,9 @@ export interface GlassButtonProps {
   as?: ElementType;
 }
 
+/** Use translateZ(0) so Safari keeps a stable compositor layer and avoids flicker. */
+const layerTransform = (t: string) => (t ? `${t} translateZ(0)` : 'translateZ(0)');
+
 export default function GlassButton({ 
   children, 
   variant = 'primary', 
@@ -28,19 +31,30 @@ export default function GlassButton({
   as = 'button',
 }: GlassButtonProps) {
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const [isTouchOrNoHover, setIsTouchOrNoHover] = useState(true);
 
   useEffect(() => {
-    if (disableScrollEffect) return;
-    const handleScroll = () => {
-      const offset = window.scrollY;
-      if (buttonRef.current && !disabled) {
-        buttonRef.current.style.transform = `translateY(${offset * 0.1}px)`;
-      }
-    };
+    const hasHover = typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches;
+    setIsTouchOrNoHover(!hasHover);
+  }, []);
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [disabled, disableScrollEffect]);
+  useEffect(() => {
+    if (disableScrollEffect || isTouchOrNoHover) return;
+    let rafId: number;
+    const handleScroll = () => {
+      rafId = requestAnimationFrame(() => {
+        const offset = window.scrollY;
+        if (buttonRef.current && !disabled) {
+          buttonRef.current.style.transform = layerTransform(`translateY(${offset * 0.1}px)`);
+        }
+      });
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      cancelAnimationFrame(rafId);
+    };
+  }, [disabled, disableScrollEffect, isTouchOrNoHover]);
 
   const getVariantStyles = () => {
     switch (variant) {
@@ -101,35 +115,37 @@ export default function GlassButton({
 
   const Element: ElementType = as;
 
+  const useHover = !disableHoverEffect && !disabled && !isTouchOrNoHover;
+
   const handleMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
-    if (!disableHoverEffect && !disabled) {
+    if (useHover) {
       const target = e.currentTarget;
       target.style.background = hoverBackground;
-      target.style.transform = 'translateY(-2px) scale(1.02)';
+      target.style.transform = layerTransform('translateY(-2px) scale(1.02)');
       target.style.boxShadow = 'var(--glass-shadow-medium)';
     }
   };
 
   const handleMouseLeave = (e: React.MouseEvent<HTMLElement>) => {
-    if (!disableHoverEffect && !disabled) {
+    if (useHover) {
       const target = e.currentTarget;
       target.style.background = variantStyles.background;
-      target.style.transform = 'translateY(0) scale(1)';
+      target.style.transform = layerTransform('translateY(0) scale(1)');
       target.style.boxShadow = 'var(--glass-shadow-light)';
     }
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLElement>) => {
-    if (!disableHoverEffect && !disabled) {
+    if (useHover) {
       const target = e.currentTarget;
-      target.style.transform = 'translateY(0) scale(0.98)';
+      target.style.transform = layerTransform('translateY(0) scale(0.98)');
     }
   };
 
   const handleMouseUp = (e: React.MouseEvent<HTMLElement>) => {
-    if (!disableHoverEffect && !disabled) {
+    if (useHover) {
       const target = e.currentTarget;
-      target.style.transform = 'translateY(-2px) scale(1.02)';
+      target.style.transform = layerTransform('translateY(-2px) scale(1.02)');
     }
   };
 
@@ -157,8 +173,12 @@ export default function GlassButton({
         position: 'relative',
         overflow: 'hidden',
         opacity: disabled ? 0.6 : 1,
-        transform: disabled ? 'none' : undefined,
+        transform: disabled ? 'none' : 'translateZ(0)',
         whiteSpace: 'nowrap',
+        WebkitAppearance: 'none',
+        appearance: 'none',
+        touchAction: 'manipulation',
+        backfaceVisibility: 'hidden' as const,
         ...(background ? { background } : {}),
       }}
     >
