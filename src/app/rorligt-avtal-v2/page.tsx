@@ -475,6 +475,12 @@ const PriceBlock = styled.div`
   gap: 0.15rem;
 `;
 
+/** Wrapper so every card has the same space below the button (mobile-first, fixes cards without badge). */
+const ProviderButtonRow = styled.div`
+  margin-top: auto;
+  padding-bottom: 1.5rem;
+`;
+
 const ProviderButton = styled.a`
   display: inline-block;
   background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -487,7 +493,6 @@ const ProviderButton = styled.a`
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  margin-top: auto;
   
   &:hover {
     transform: scale(1.05);
@@ -991,17 +996,19 @@ export default function RorligtAvtalV2Page() {
                       <ProviderDescription>
                         {provider.description || ''}
                       </ProviderDescription>
-                      <ProviderButton
-                        href={provider.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleProviderClick(provider.name, provider.url);
-                        }}
-                      >
-                        Välj {provider.name}
-                      </ProviderButton>
+                      <ProviderButtonRow>
+                        <ProviderButton
+                          href={provider.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleProviderClick(provider.name, provider.url);
+                          }}
+                        >
+                          Välj {provider.name}
+                        </ProviderButton>
+                      </ProviderButtonRow>
                     </ProviderCard>
                   ))}
                 </ProvidersGrid>
@@ -1035,17 +1042,19 @@ export default function RorligtAvtalV2Page() {
                         <ProviderDescription>
                           {provider.description || ''}
                         </ProviderDescription>
-                        <ProviderButton
-                          href={provider.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleProviderClick(provider.name, provider.url);
-                          }}
-                        >
-                          Gå vidare till {provider.name}
-                        </ProviderButton>
+                        <ProviderButtonRow>
+                          <ProviderButton
+                            href={provider.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleProviderClick(provider.name, provider.url);
+                            }}
+                          >
+                            Gå vidare till {provider.name}
+                          </ProviderButton>
+                        </ProviderButtonRow>
                       </ProviderCard>
                     ))}
                   </ProvidersGrid>
