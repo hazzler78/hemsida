@@ -176,9 +176,11 @@ export default function GrokChat() {
         requestAnimationFrame(() => {
           const el = chatWindowRef.current;
           if (el) {
-            (el as HTMLElement).style.transform = 'translateZ(0)';
-            (el as HTMLElement).offsetHeight;
-            (el as HTMLElement).style.transform = '';
+            const htmlEl = el as HTMLElement;
+            htmlEl.style.transform = 'translateZ(0)';
+            // Force reflow for iOS hit-testing (fixes stuck close button)
+            htmlEl.getBoundingClientRect();
+            htmlEl.style.transform = '';
           }
         });
       }
