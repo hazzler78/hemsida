@@ -27,13 +27,13 @@ export default function Home() {
   return (
     <main>
       <Hero />
-      <HeroPriceWidget />
+      <SolarQuoteForm />
       <HeroUSPs />
       {/* <PriceCalculator /> */}
       <Testimonials />
       <ContactForm />
       <FAQ />
-      <SolarQuoteForm />
+      <HeroPriceWidget />
       <NewsletterHero />
     </main>
   );

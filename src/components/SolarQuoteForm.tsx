@@ -7,8 +7,6 @@ const Section = styled.section`
   background: linear-gradient(160deg, rgba(0, 106, 167, 0.15) 0%, rgba(254, 204, 0, 0.08) 100%);
   padding: var(--section-spacing) 0;
   color: white;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 `;
 
 const Container = styled.div`
