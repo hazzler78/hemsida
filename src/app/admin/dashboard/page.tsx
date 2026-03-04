@@ -204,7 +204,10 @@ export default function AdminDashboard() {
           console.warn('Contacts query failed:', contactsError);
         } else if (contactsData) {
           // Dela upp i kontaktlista + antal nyhetsbrevsanmälningar
-          contactRequests = contactsData.map(({ subscribe_newsletter, ...rest }) => rest);
+          contactRequests = contactsData.map((c) => {
+            const { subscribe_newsletter, ...rest } = c;
+            return rest;
+          });
           newsletterSubs = contactsData.filter(c => c.subscribe_newsletter).length;
         }
 
