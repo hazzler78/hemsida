@@ -1,6 +1,21 @@
-# Cloudflare: miljövariabler för admin dashboard (solcells‑leads m.m.)
+# Admin dashboard: Solceller‑leads och Cloudflare
 
-För att `/admin/dashboard` ska visa **Solceller‑leads**, kontaktförfrågningar och nyhetsbrev måste API:t `/api/admin/contacts-stats` kunna läsa från **Supabase** med service‑rollen.
+Dashboarden hämtar nu **contacts** (solcells‑leads, kontaktförfrågningar, nyhetsbrev) **direkt från Supabase i webbläsaren** med anon‑nyckeln – **inga miljövariabler i Cloudflare behövs** för detta.
+
+Du behöver bara **en SELECT‑policy i Supabase** så att anon får läsa `contacts`:
+
+1. Supabase → **SQL Editor** → kör:
+   ```sql
+   create policy "Allow anon read contacts for dashboard"
+   on public.contacts for select to anon using (true);
+   ```
+2. Spara. Efter det ska “Solceller‑leads” och kontaktlistorna visas i `/admin/dashboard` (välj t.ex. “Senaste 30 dagarna”).
+
+---
+
+## (Valfritt) Om du vill använda server‑API istället
+
+För att `/admin/dashboard` ska använda API:t `/api/admin/contacts-stats` (server med service‑roll) i stället måste Cloudflare ha rätt miljövariabler.
 
 API:t använder **endast** dessa miljövariabler (ingen D1, ingen annan Cloudflare‑databas):
 
