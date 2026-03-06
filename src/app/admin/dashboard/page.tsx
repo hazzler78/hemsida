@@ -173,61 +173,27 @@ export default function AdminDashboard() {
       const totalSavings = savingsAmounts.reduce((sum, amount) => sum + amount, 0);
       const averageSavings = savingsAmounts.length > 0 ? totalSavings / savingsAmounts.length : 0;
 
-      // 4. Form Submissions + Contact requests + Newsletter (direkt från Supabase med anon-nyckeln)
+      // 4. Form Submissions + Contact requests + Newsletter (via admin API – RLS blocks anon read on contacts)
       let solarLeads = 0;
       let newsletterSubs = 0;
       let contactRequests: DashboardStats['contactRequests'] = [];
       let newsletterSubscriptions: DashboardStats['newsletterSubscriptions'] = [];
       try {
-        // Solcells-/laddbox-leads
-        const { count: solarLeadsCount, error: solarLeadsError } = await supabase
-          .from('contacts')
-          .select('*', { count: 'exact', head: true })
-          .eq('form_type', 'sol_laddbox')
-          .gte('created_at', fromISO);
-
-        if (solarLeadsError) {
-          console.warn('Solar leads query failed:', solarLeadsError);
-        } else {
-          solarLeads = solarLeadsCount ?? 0;
+        const contactsRes = await fetch(
+          `/api/admin/contacts-stats?from=${encodeURIComponent(fromISO)}`,
+          { headers: { 'x-admin-password': ADMIN_PASSWORD } }
+        );
+        setContactsApiFailed(!contactsRes.ok);
+        if (contactsRes.ok) {
+          const contactsJson = await contactsRes.json();
+          solarLeads = contactsJson.solarLeads ?? 0;
+          newsletterSubs = contactsJson.newsletterSubs ?? 0;
+          contactRequests = contactsJson.contactRequests ?? [];
+          newsletterSubscriptions = contactsJson.newsletterSubscriptions ?? [];
         }
-
-        // Alla kontaktförfrågningar i perioden
-        const { data: contactsData, error: contactsError } = await supabase
-          .from('contacts')
-          .select('id, name, email, phone, message, form_type, ref, campaign_code, created_at, subscribe_newsletter')
-          .gte('created_at', fromISO)
-          .order('created_at', { ascending: false })
-          .limit(100);
-
-        if (contactsError) {
-          console.warn('Contacts query failed:', contactsError);
-        } else if (contactsData) {
-          // Dela upp i kontaktlista + antal nyhetsbrevsanmälningar
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          contactRequests = contactsData.map(({ subscribe_newsletter, ...rest }) => rest);
-          newsletterSubs = contactsData.filter(c => c.subscribe_newsletter).length;
-        }
-
-        // Nyhetsbrevsprenumerationer lista
-        const { data: newsletterData, error: newsletterError } = await supabase
-          .from('contacts')
-          .select('id, email, ref, campaign_code, created_at')
-          .eq('subscribe_newsletter', true)
-          .gte('created_at', fromISO)
-          .order('created_at', { ascending: false })
-          .limit(100);
-
-        if (newsletterError) {
-          console.warn('Newsletter subscriptions query failed:', newsletterError);
-        } else {
-          newsletterSubscriptions = newsletterData ?? [];
-        }
-
-        setContactsApiFailed(false);
       } catch (contactsErr) {
         setContactsApiFailed(true);
-        console.warn('Admin contacts queries failed, using zeros:', contactsErr);
+        console.warn('Admin contacts-stats API failed, using zeros:', contactsErr);
       }
 
       // 5. Social Shares
