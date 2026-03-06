@@ -22,6 +22,10 @@ export async function GET(req: NextRequest) {
 
     const supabase = getSupabaseServerClient();
 
+    // Hint så du kan verifiera i produktion vilket Supabase-projekt Cloudflare använder (inga nycklar exponeras)
+    const supabaseUrl = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+    const projectRef = supabaseUrl ? new URL(supabaseUrl).hostname.split('.')[0] : '(url ej satt)';
+
     const { count: solarLeads } = await supabase
       .from('contacts')
       .select('*', { count: 'exact', head: true })
@@ -55,6 +59,8 @@ export async function GET(req: NextRequest) {
       newsletterSubs,
       contactRequests: contactRequests ?? [],
       newsletterSubscriptions: newsletterSubscriptions ?? [],
+      // Verifiera i produktion: ska vara "tptwyuywgchxcjxybmya" om Cloudflare har rätt env
+      _supabaseProjectRef: projectRef,
     });
   } catch (e) {
     console.error('Error fetching admin contacts stats:', e);

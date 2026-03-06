@@ -25,3 +25,22 @@ API:t använder **endast** dessa miljövariabler (ingen D1, ingen annan Cloudfla
 6. Trigga en **ny deploy** (Retry deployment eller pusha en commit).
 
 Efter det ska anrop till `/api/admin/contacts-stats?from=...` med header `x-admin-password: grodan2025` returnera `solarLeads`, `contactRequests` och `newsletterSubscriptions` från **Supabase** (projekt `tptwyuywgchxcjxybmya`). Det finns ingen konflikt med D1 – admin‑API:t pratar bara med Supabase.
+
+---
+
+## Kontrollera att Cloudflare använder rätt projekt
+
+Du kan inte se de faktiska nyckelvärdena i Cloudflare (de döljs). API:t returnerar därför en **hint** så du kan verifiera vilket projekt som används:
+
+1. Öppna **Console** på `https://www.elchef.se/admin/dashboard`.
+2. Kör:
+   ```js
+   fetch('/api/admin/contacts-stats?from=2025-01-01T00:00:00.000Z', {
+     headers: { 'x-admin-password': 'grodan2025' }
+   }).then(r => r.json()).then(console.log);
+   ```
+3. Titta i svaret på **`_supabaseProjectRef`**:
+   - **`tptwyuywgchxcjxybmya`** → Cloudflare använder rätt projekt (dina leads ska då visas om det finns data).
+   - **Något annat** (t.ex. `tmhakjwnfhbqkcrujpbl` eller `(url ej satt)`) → sätt eller rätta till `SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_URL` i Cloudflare och deploya igen.
+
+Inga nycklar exponeras – bara projekt‑ID:t som kommer från URL:en.
