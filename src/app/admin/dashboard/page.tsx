@@ -624,12 +624,15 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div style={{ 
-      maxWidth: 1400, 
-      margin: '2rem auto', 
-      padding: 24,
-      minHeight: '100vh'
-    }}>
+    <div
+      style={{
+        maxWidth: 1400,
+        margin: '2rem auto',
+        padding: 24,
+        minHeight: '100vh'
+      }}
+      suppressHydrationWarning
+    >
       {/* Header */}
       <div style={{ 
         display: 'flex', 
