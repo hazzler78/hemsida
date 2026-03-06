@@ -80,6 +80,10 @@ export interface ContactFormData {
   phone?: string;
   subscribeNewsletter: boolean;
   message?: string;
+  /** Stad (t.ex. för Otovo/sol – obligatoriskt i solformuläret) */
+  city?: string;
+  /** Gatuadress (valfritt) */
+  address?: string;
   contractType?: '12_months' | '24_months' | '36_months' | 'variable';
   contractStartDate?: string;
 }

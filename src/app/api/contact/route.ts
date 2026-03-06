@@ -58,7 +58,7 @@ async function sendTelegramNotification(data: ContactFormData & { formType?: str
 ${formLabel}
 
 ${data.name ? `🙍‍♂️ *Namn:* ${data.name}\n` : ''}📧 *E-post:* ${data.email}
-${data.phone ? `📞 *Telefon:* ${data.phone}\n` : ''}${formType !== 'sol_laddbox' ? `📰 *Nyhetsbrev:* ${data.subscribeNewsletter ? 'Ja' : 'Nej'}\n` : ''}${data.message ? `\n📝 *Meddelande:* ${data.message}` : ''}
+${data.phone ? `📞 *Telefon:* ${data.phone}\n` : ''}${data.city ? `🏙️ *Stad:* ${data.city}\n` : ''}${data.address ? `📍 *Adress:* ${data.address}\n` : ''}${formType !== 'sol_laddbox' ? `📰 *Nyhetsbrev:* ${data.subscribeNewsletter ? 'Ja' : 'Nej'}\n` : ''}${data.message ? `\n📝 *Meddelande:* ${data.message}` : ''}
 
 ⏰ *Tidpunkt:* ${new Date().toLocaleString('sv-SE')}
 🌐 *Källa:* Elchef.se kontaktformulär
@@ -174,6 +174,8 @@ export async function POST(request: NextRequest) {
           campaign_code: data.campaignCode || null,
           subscribe_newsletter: !!data.subscribeNewsletter,
           form_type: formType,
+          city: data.city?.trim() || null,
+          address: data.address?.trim() || null,
           created_at: new Date().toISOString(),
         }]);
     } catch (e) {

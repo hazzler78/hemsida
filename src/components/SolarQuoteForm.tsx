@@ -171,6 +171,8 @@ export default function SolarQuoteForm() {
     name: '',
     email: '',
     phone: '',
+    city: '',
+    address: '',
     consumption: '',
     message: '',
   });
@@ -190,7 +192,7 @@ export default function SolarQuoteForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    if (!formData.email || !formData.email.includes('@') || !formData.name.trim() || !formData.phone.trim()) {
+    if (!formData.email || !formData.email.includes('@') || !formData.name.trim() || !formData.phone.trim() || !formData.city.trim()) {
       setSubmitStatus('error');
       setIsSubmitting(false);
       return;
@@ -204,8 +206,9 @@ export default function SolarQuoteForm() {
           name: formData.name || undefined,
           email: formData.email,
           phone: formData.phone || undefined,
+          city: formData.city.trim() || undefined,
+          address: formData.address.trim() || undefined,
           consumption: formData.consumption || undefined,
-          // Håll meddelandet rent – Telegram Markdown kan strula på [ ]
           message: formData.message || undefined,
           subscribeNewsletter: false,
           ref: ref || 'sol_laddbox',
@@ -216,7 +219,7 @@ export default function SolarQuoteForm() {
 
       if (response.ok) {
         setSubmitStatus('success');
-        setFormData({ name: '', email: '', phone: '', consumption: '', message: '' });
+        setFormData({ name: '', email: '', phone: '', city: '', address: '', consumption: '', message: '' });
       } else {
         setSubmitStatus('error');
       }
@@ -276,6 +279,29 @@ export default function SolarQuoteForm() {
               onChange={handleChange}
               placeholder="070-123 45 67"
               required
+            />
+          </FormGroup>
+          <FormGroup>
+            <Label htmlFor="solar-city">Stad *</Label>
+            <Input
+              type="text"
+              id="solar-city"
+              name="city"
+              value={formData.city}
+              onChange={handleChange}
+              placeholder="T.ex. Stockholm"
+              required
+            />
+          </FormGroup>
+          <FormGroup>
+            <Label htmlFor="solar-address">Adress (valfritt)</Label>
+            <Input
+              type="text"
+              id="solar-address"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              placeholder="Gatuadress om du vill"
             />
           </FormGroup>
           <FormGroup>
