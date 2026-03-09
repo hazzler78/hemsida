@@ -156,73 +156,6 @@ EXTRA VIKTIGT FÖR PÅSLAG:
 
 Svara ENDAST med JSON-arrayen, inget annat text.`;
 
-    // Step 2: Calculate unnecessary costs from structured data
-    const calculationPrompt = `Du är en expert på svenska elräkningar från ALLA elleverantörer. Baserat på den extraherade JSON-datan, identifiera onödiga kostnader och beräkna total besparing.
-
-ORDLISTA - ONÖDIGA KOSTNADER (endast under Elhandel):
-- Månadsavgift, Fast månadsavgift, Fast månadsavg., Månadsavg.
-- Rörliga kostnader, Rörlig kostnad, Rörliga avgifter, Rörlig avgift
-- Fast påslag, Fasta påslag, Fast avgift, Fast avg., Fasta avgifter, Fast kostnad, Fasta kostnader, Påslag, Påslag (alla varianter)
-- Fast påslag spot
-- Årsavgift, Årsavg., Årskostnad, Elavtal årsavgift, Årsavgift elavtal
-- Förvaltat Portfölj Utfall, Förvaltat portfölj utfall
-- Bra miljöval, Bra miljöval (Licens Elklart AB)
-- Trygg, Trygghetspaket
-- Basavgift, Grundavgift, Administrationsavgift, Abonnemangsavgift, Grundpris
-- Fakturaavgift, Kundavgift, Elhandelsavgift, Handelsavgift
-- Indexavgift
-- Grön elavgift, Ursprungsgarantiavgift, Ursprung
-- Miljöpaket, Serviceavgift, Leverantörsavgift
-- Dröjsmålsränta, Påminnelsesavgift, Priskollen
-- Rent vatten, Fossilfri, Fossilfri ingår
-- Profilpris, Bundet profilpris
-
-LEVERANTÖRSSPECIFIKA ONÖDIGA KOSTNADER:
-- E.ON: "Elavtal årsavgift", "Fast påslag", "Rörliga kostnader"
-- Fortum: "Månadsavgift", "Påslag", "Elcertifikat"
-- Vattenfall: "Fast avgift", "Påslag", "Årsavgift"
-- EDF: "Abonnemangsavgift", "Påslag", "Serviceavgift"
-- Göteborg Energi: "Månadsavgift", "Påslag", "Elcertifikat"
-- Stockholm Exergi: "Fast avgift", "Påslag", "Årsavgift"
-- Andra leverantörer: Identifiera liknande avgifter och påslag
-
-EXKLUDERA (räknas INTE som onödiga):
-- Elöverföring, Energiskatt, Medel spotpris, Spotpris, Elpris
-- Elcertifikat, Elcertifikatavgift
-- Bundet elpris, Fastpris (själva energipriset), Rörligt elpris (själva energipriset)
-- Förbrukning, kWh, Öre/kWh, Kr/kWh
-
-INSTRUKTION:
-1. Gå igenom JSON-datan och identifiera alla kostnader som matchar ordlistan OCH är under "Elhandel"
-2. Summera alla onödiga kostnader
-3. Använd beloppen exakt som de står i JSON (om fakturan visar belopp inklusive moms, gör ingen extra 25 % påslag i beräkningen)
-4. Presentera resultatet enligt formatet nedan
-
-FORMAT:
-🚨 Dina onödiga elavgifter upptäckta!
-
-Jag har hittat [antal] onödiga avgifter på din elräkning som kostar dig pengar varje månad:
-
-💸 Onödiga kostnader denna månad:
-1. [Kostnadsnamn]: [belopp] kr
-2. [Kostnadsnamn]: [belopp] kr
-
-💰 Din årliga besparing:
-Du betalar [total] kr/månad i onödiga avgifter (inklusive moms) = [total × 12] kr/år!
-
-Detta är pengar som går direkt till din elleverantör utan att du får något extra för dem.
-
-✅ Lösningen:
-Byt till ett avtal utan dessa avgifter och spara [total × 12] kr/år (inklusive moms)!
-
-🎯 Välj ditt nya avtal:
-- Rörligt avtal: 0 kr i avgifter första året – spara [total × 12] kr/år
-- Fastpris med prisgaranti: Prisgaranti med valfri bindningstid
-
-⏰ Byt idag – det tar bara 2 minuter och vi fixar allt åt dig!
-
-Svara på svenska och var hjälpsam och pedagogisk.`; // Updated fastpris text
-
     // Original single-step prompt (fallback)
     const systemPrompt = `Du är en expert på svenska elräkningar som hjälper användare identifiera extra kostnader, dolda avgifter och onödiga tillägg på deras elfakturor. 
 
@@ -328,8 +261,6 @@ Svara på svenska och var hjälpsam och pedagogisk.`;
     
     try {
       // Step 1: Extract structured data (försök först med gpt-5.4, fallback till gpt-4o)
-      let extractionData: any | null = null;
-      let extractedJson = '';
 
       const extractionPayloadBase = {
         messages: [
@@ -375,7 +306,9 @@ Svara på svenska och var hjälpsam och pedagogisk.`;
       }
 
       if (extractionRes.ok) {
-        extractionData = await extractionRes.json();
+        const extractionData = (await extractionRes.json()) as {
+          choices?: { message?: { content?: string } }[];
+        };
         const extractedJson = extractionData.choices?.[0]?.message?.content || '';
         console.log('Raw extraction response:', extractedJson.substring(0, 200));
         

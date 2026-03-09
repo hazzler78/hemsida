@@ -161,16 +161,16 @@ Svara ENDAST med JSON-arrayen, inget annat.`;
           return `"amount": ${integer}.${decimals}`;
         });
 
-        const parsedData = JSON.parse(cleanJson);
+        const parsedData = JSON.parse(cleanJson) as { name?: string; amount?: number }[];
         debugInfo.parsedData = parsedData;
         
-        const elavtalItem = parsedData.find((item: { name?: string }) => 
+        const elavtalItem = parsedData.find((item) => 
           item.name && item.name.toLowerCase().includes('elavtal årsavgift')
         );
         
-        if (elavtalItem) {
+        if (elavtalItem && typeof elavtalItem.amount === 'number') {
           debugInfo.elavtalFound = true;
-          debugInfo.elavtalAmount = (elavtalItem as any).amount as number;
+          debugInfo.elavtalAmount = elavtalItem.amount;
         }
         
         const elavtalMatch = extractedJson.match(/["']?Elavtal årsavgift["']?\s*[,\]]\s*["']?(\d+(?:[,.]\d+)?)["']?\s*kr/);
