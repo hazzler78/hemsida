@@ -163,14 +163,14 @@ ORDLISTA - ONÖDIGA KOSTNADER (endast under Elhandel):
 - Månadsavgift, Fast månadsavgift, Fast månadsavg., Månadsavg.
 - Rörliga kostnader, Rörlig kostnad, Rörliga avgifter, Rörlig avgift
 - Fast påslag, Fasta påslag, Fast avgift, Fast avg., Fasta avgifter, Fast kostnad, Fasta kostnader, Påslag, Påslag (alla varianter)
-- Fast påslag spot, Fast påslag elcertifikat
+- Fast påslag spot
 - Årsavgift, Årsavg., Årskostnad, Elavtal årsavgift, Årsavgift elavtal
 - Förvaltat Portfölj Utfall, Förvaltat portfölj utfall
 - Bra miljöval, Bra miljöval (Licens Elklart AB)
 - Trygg, Trygghetspaket
 - Basavgift, Grundavgift, Administrationsavgift, Abonnemangsavgift, Grundpris
 - Fakturaavgift, Kundavgift, Elhandelsavgift, Handelsavgift
-- Indexavgift, Elcertifikatavgift, Elcertifikat
+- Indexavgift
 - Grön elavgift, Ursprungsgarantiavgift, Ursprung
 - Miljöpaket, Serviceavgift, Leverantörsavgift
 - Dröjsmålsränta, Påminnelsesavgift, Priskollen
@@ -188,14 +188,14 @@ LEVERANTÖRSSPECIFIKA ONÖDIGA KOSTNADER:
 
 EXKLUDERA (räknas INTE som onödiga):
 - Elöverföring, Energiskatt, Medel spotpris, Spotpris, Elpris
-- **OBS**: Moms inkluderas i besparingsberäkningen eftersom konsumenten betalar den verkliga kostnaden inklusive moms
+- Elcertifikat, Elcertifikatavgift
 - Bundet elpris, Fastpris (själva energipriset), Rörligt elpris (själva energipriset)
 - Förbrukning, kWh, Öre/kWh, Kr/kWh
 
 INSTRUKTION:
 1. Gå igenom JSON-datan och identifiera alla kostnader som matchar ordlistan OCH är under "Elhandel"
 2. Summera alla onödiga kostnader
-3. **VIKTIGT**: Inkludera moms (25%) i besparingsberäkningen eftersom konsumenten betalar den verkliga kostnaden inklusive moms
+3. Använd beloppen exakt som de står i JSON (om fakturan visar belopp inklusive moms, gör ingen extra 25 % påslag i beräkningen)
 4. Presentera resultatet enligt formatet nedan
 
 FORMAT:
@@ -323,42 +323,63 @@ Svara på svenska och var hjälpsam och pedagogisk.`;
       return NextResponse.json({ error: 'Missing OpenAI API key' }, { status: 500 });
     }
 
-    // Two-step approach: Extract JSON first, then calculate
+    // Two-step approach: Extract JSON first, then calculate (med robust fallback till gpt-4o)
     let gptAnswer = '';
     
     try {
-      // Step 1: Extract structured data
-      const extractionRes = await fetch('https://api.openai.com/v1/chat/completions', {
+      // Step 1: Extract structured data (försök först med gpt-5.4, fallback till gpt-4o)
+      let extractionData: any | null = null;
+      let extractedJson = '';
+
+      const extractionPayloadBase = {
+        messages: [
+          { role: 'system', content: extractionPrompt },
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: 'Extrahera alla kostnader från denna elräkning som JSON-array. SVARA ENDAST MED JSON.' },
+              { type: 'image_url', image_url: { url: base64Image } }
+            ]
+          }
+        ],
+        temperature: 0.0,
+      };
+
+      // Försök med gpt-5.4 först
+      // För gpt-5.4 används max_completion_tokens istället för max_tokens
+      let extractionRes = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${openaiApiKey}`,
         },
-        body: JSON.stringify({
-          model: 'gpt-4o',
-          messages: [
-            { role: 'system', content: extractionPrompt },
-            {
-              role: 'user',
-              content: [
-                { type: 'text', text: 'Extrahera alla kostnader från denna elräkning som JSON-array. SVARA ENDAST MED JSON.' },
-                { type: 'image_url', image_url: { url: base64Image } }
-              ]
-            }
-          ],
-          max_tokens: 2000,
-          temperature: 0.0,
-        }),
+        body: JSON.stringify({ model: 'gpt-5.4', ...extractionPayloadBase, max_completion_tokens: 2000 }),
       });
 
+      if (!extractionRes.ok) {
+        console.log('gpt-5.4 extraction failed, status:', extractionRes.status);
+        try {
+          const text = await extractionRes.text();
+          console.log('gpt-5.4 extraction body:', text);
+        } catch {}
+
+        // Fallback till gpt-4o
+        extractionRes = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${openaiApiKey}`,
+          },
+          body: JSON.stringify({ model: 'gpt-4o', ...extractionPayloadBase, max_tokens: 2000 }),
+        });
+      }
+
       if (extractionRes.ok) {
-        const extractionData = await extractionRes.json();
+        extractionData = await extractionRes.json();
         const extractedJson = extractionData.choices?.[0]?.message?.content || '';
         console.log('Raw extraction response:', extractedJson.substring(0, 200));
         
-        // Try to parse the JSON
         try {
-          // Clean the JSON response - remove any markdown formatting
           let cleanJson = extractedJson.trim();
           if (cleanJson.startsWith('```json')) {
             cleanJson = cleanJson.replace(/^```json\s*/, '').replace(/\s*```$/, '');
@@ -367,184 +388,141 @@ Svara på svenska och var hjälpsam och pedagogisk.`;
             cleanJson = cleanJson.replace(/^```\s*/, '').replace(/\s*```$/, '');
           }
           
-          // Normalize decimal separators: convert Swedish comma format to JSON period format
-          // Match "amount": followed by a number with comma, replace comma with period
-          cleanJson = cleanJson.replace(/"amount"\s*:\s*(\d+),(\d+)/g, '"amount": $1.$2');
+          // Normalisera alla "amount"-värden där modellen använt svenska/”stökiga” format:
+          // - Endast om talet innehåller KOMMA eller MELLANSLAG (t.ex. "3 143,52" eller "3,143.52")
+          // - Rena JSON-tal som "208.13" eller "656.00" lämnas orörda
+          cleanJson = cleanJson.replace(/"amount"\s*:\s*([0-9][0-9., ]*)/g, (match: string, num: string) => {
+            const raw = String(num);
+            const hasComma = raw.includes(',');
+            const hasSpace = /\s/.test(raw);
+
+            // Om talet redan ser ut som ett normalt JSON-tal utan komma/mellanslag: returnera oförändrat
+            if (!hasComma && !hasSpace) {
+              return match;
+            }
+
+            // Ta bort alla mellanslag
+            const withoutSpaces = raw.replace(/\s+/g, '');
+            const parts = withoutSpaces.split(/[.,]/);
+
+            if (parts.length === 1) {
+              // Inga decimaler, bara heltal
+              return `"amount": ${parts[0]}`;
+            }
+
+            const decimals = parts.pop() as string;
+            const integer = parts.join('');
+            return `"amount": ${integer}.${decimals}`;
+          });
           
           console.log('Cleaned JSON:', cleanJson.substring(0, 200));
-          JSON.parse(cleanJson); // Validate JSON structure
+          const parsed = JSON.parse(cleanJson) as { name?: string; amount?: number; section?: string }[];
           
-          // Step 2: Calculate unnecessary costs from structured data
-          const calculationRes = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${openaiApiKey}`,
-            },
-            body: JSON.stringify({
-              model: 'gpt-4o',
-              messages: [
-                { role: 'system', content: calculationPrompt },
-                {
-                  role: 'user',
-                  content: `Här är den extraherade JSON-datan från elräkningen:\n\n${cleanJson}\n\nAnalysera denna data enligt instruktionerna.`
-                }
-              ],
-              max_tokens: 1200,
-              temperature: 0.1,
-            }),
+          const includeTerms = [
+            'månadsavgift',
+            'fast månadsavg',
+            'rörliga kostnader',
+            'rörlig kostnad',
+            'rörliga avgifter',
+            'rörlig avgift',
+            'fast påslag',
+            'fasta påslag',
+            'fast avgift',
+            'fasta avgifter',
+            'fast kostnad',
+            'fasta kostnader',
+            'påslag',
+            'årsavgift',
+            'elavtal årsavgift',
+            'årskostnad',
+            'förvaltat portfölj utfall',
+            'bra miljöval',
+            'trygg',
+            'basavgift',
+            'grundavgift',
+            'administrationsavgift',
+            'abonnemangsavgift',
+            'grundpris',
+            'fakturaavgift',
+            'kundavgift',
+            'elhandelsavgift',
+            'handelsavgift',
+            'indexavgift',
+            'grön elavgift',
+            'ursprungsgarantiavgift',
+            'ursprung',
+            'miljöpaket',
+            'serviceavgift',
+            'leverantörsavgift',
+            'dröjsmålsränta',
+            'påminnelsesavgift',
+            'priskollen',
+            'rent vatten',
+            'fossilfri',
+            'profilpris',
+            'bundet profilpris'
+          ];
+          
+          const excludeTerms = [
+            'elöverföring',
+            'energiskatt',
+            'medel spotpris',
+            'spotpris',
+            'elpris',
+            'elcertifikat',
+            'elcertifikatavgift',
+            'förbrukning',
+            'kwh',
+            'öre/kwh',
+            'kr/kwh',
+            'moms'
+          ];
+          
+          const unnecessaryItems = parsed.filter((item) => {
+            if (!item || !item.name || typeof item.amount !== 'number') return false;
+            if (!item.section || item.section.toLowerCase() !== 'elhandel') return false;
+            const nameLower = item.name.toLowerCase();
+            if (excludeTerms.some((t) => nameLower.includes(t))) return false;
+            return includeTerms.some((t) => nameLower.includes(t));
           });
-
-          if (calculationRes.ok) {
-            const calculationData = await calculationRes.json();
-            gptAnswer = calculationData.choices?.[0]?.message?.content || '';
-            
-        // Step 3: Post-process to catch missed or incorrect amounts
-        if (gptAnswer) {
-          console.log('Post-processing to verify amounts...');
-          console.log('Full GPT Answer for debugging:', gptAnswer);
+          
+          const monthlyTotal = unnecessaryItems.reduce((sum, item) => sum + (item.amount || 0), 0);
+          const yearlyTotal = monthlyTotal * 12;
+          
+          const lines = unnecessaryItems.map((item, idx) => {
+            const amountStr = (item.amount ?? 0).toFixed(2).replace('.', ',');
+            return `${idx + 1}. ${item.name}: ${amountStr} kr`;
+          });
+          
+          const monthlyStr = monthlyTotal.toFixed(2).replace('.', ',');
+          const yearlyStr = yearlyTotal.toFixed(2).replace('.', ',');
+          
+          gptAnswer = [
+            '🚨 Dina onödiga elavgifter upptäckta!',
+            '',
+            `Jag har hittat ${unnecessaryItems.length} onödiga avgifter på din elräkning som kostar dig pengar varje månad:`,
+            '',
+            '💸 Onödiga kostnader denna månad:',
+            ...lines,
+            '',
+            '💰 Din årliga besparing:',
+            `Du betalar ${monthlyStr} kr/månad i onödiga avgifter (inklusive moms om beloppen i fakturan är inklusive moms) = ${yearlyStr} kr/år!`,
+            '',
+            'Detta är pengar som går direkt till din elleverantör utan att du får något extra för dem.',
+            '',
+            '✅ Lösningen:',
+            `Byt till ett avtal utan dessa avgifter och spara ${yearlyStr} kr/år (inklusive moms)!`,
+            '',
+            '🎯 Välj ditt nya avtal:',
+            `- Rörligt avtal: 0 kr i avgifter första året – spara ${yearlyStr} kr/år`,
+            `- Fastpris med prisgaranti: Prisgaranti med valfri bindningstid`,
+            '',
+            '⏰ Byt idag – det tar bara 2 minuter och vi fixar allt åt dig!'
+          ].join('\n');
+          
           console.log('Extracted JSON preview:', cleanJson.substring(0, 500));
-              
-              // Check for "Påslag" amount correction (match any name that contains Påslag)
-              const paaslagMatch = cleanJson.match(/"name"\s*:\s*"[^"]*Påslag[^"]*"[^}]*"amount"\s*:\s*(\d+(?:[,.]\d+)?)/);
-              console.log('Påslag regex match result:', paaslagMatch);
-              
-              if (paaslagMatch) {
-                const correctPaaslagAmount = paaslagMatch[1].replace(',', '.');
-                console.log('Correct Påslag amount from JSON:', correctPaaslagAmount);
-                
-                // Use the amount from JSON (should be correct if AI reads from right column)
-                const finalPaaslagAmount = correctPaaslagAmount;
-                console.log('Using Påslag amount from JSON:', finalPaaslagAmount);
-                
-                // Check if Påslag is in the result (line item may be formatted with or without numbering, with or without bold formatting)
-                const paaslagInResult = gptAnswer.match(/(\d+\.\s*)?\*?\*?Påslag\*?\*?:\s*(\d+(?:[,.]\d+)?)\s*kr/);
-                console.log('Påslag in result regex match:', paaslagInResult);
-                
-                if (paaslagInResult) {
-                  const currentPaaslagAmount = paaslagInResult[2].replace(',', '.');
-                  console.log('Current Påslag amount in result:', currentPaaslagAmount);
-                  
-                  if (Math.abs(parseFloat(currentPaaslagAmount) - parseFloat(finalPaaslagAmount)) > 0.01) {
-                    console.log('Påslag amount is incorrect, correcting...');
-                    
-                    // Update the Påslag amount in the result
-                    gptAnswer = gptAnswer.replace(/(\d+\.\s*)?\*?\*?Påslag\*?\*?:\s*(\d+(?:[,.]\d+)?)\s*kr/, `$1Påslag: ${finalPaaslagAmount} kr`);
-                    
-                    // Recalculate total (both monthly and yearly)
-                    const currentTotal = gptAnswer.match(/spara totalt [^0-9]*(\d+(?:[,.]\d+)?)/i);
-                    if (currentTotal) {
-                      const totalDiff = parseFloat(finalPaaslagAmount) - parseFloat(currentPaaslagAmount);
-                      const newMonthlyTotal = (parseFloat(currentTotal[1].replace(',', '.')) + totalDiff).toFixed(2);
-                      const newYearlyTotal = (parseFloat(newMonthlyTotal) * 12).toFixed(2);
-                      
-                      gptAnswer = gptAnswer.replace(
-                        /spara totalt [^0-9]*(\d+(?:[,.]\d+)?)/i,
-                        `spara totalt ${newMonthlyTotal}`
-                      );
-                      gptAnswer = gptAnswer.replace(
-                        /= (\d+(?:[,.]\d+)?) kr\/år/i,
-                        `= ${newYearlyTotal} kr/år`
-                      );
-                      gptAnswer = gptAnswer.replace(
-                        /spara \[total × 12\] kr\/år/g,
-                        `spara ${newYearlyTotal} kr/år`
-                      );
-                      console.log('Updated Påslag amount and totals');
-                    }
-                  } else {
-                    console.log('Påslag amount is already correct');
-                  }
-                } else {
-                  console.log('Påslag not found in result, but exists in JSON - checking if it should be added');
-                  
-                  // Check if Påslag is already in the result (to avoid duplicates)
-                  const paaslagCount = (gptAnswer.match(/\*?\*?Påslag\*?\*?:/g) || []).length;
-                  console.log('Påslag count in result:', paaslagCount);
-                  const paaslagAlreadyExists = gptAnswer.match(/(\d+\.\s*)?\*?\*?Påslag\*?\*?:\s*(\d+(?:[,.]\d+)?)\s*kr/);
-                  console.log('Påslag already exists check:', paaslagAlreadyExists);
-                  if (paaslagCount === 0) {
-                    // Add Påslag to the result if it's missing
-                    const currentTotal = gptAnswer.match(/spara totalt [^0-9]*(\d+(?:[,.]\d+)?)/i);
-                    if (currentTotal) {
-                      const newMonthlyTotal = (parseFloat(currentTotal[1].replace(',', '.')) + parseFloat(finalPaaslagAmount)).toFixed(2);
-                      const newYearlyTotal = (parseFloat(newMonthlyTotal) * 12).toFixed(2);
-                      
-                      gptAnswer = gptAnswer.replace(
-                      /Onödiga kostnader:([\s\S]*?)Total besparing:/,
-                      `Onödiga kostnader:$1Påslag: ${finalPaaslagAmount} kr\nTotal besparing:`
-                      );
-                      gptAnswer = gptAnswer.replace(
-                        /spara totalt [^0-9]*(\d+(?:[,.]\d+)?)/i,
-                        `spara totalt ${newMonthlyTotal}`
-                      );
-                      gptAnswer = gptAnswer.replace(
-                        /= (\d+(?:[,.]\d+)?) kr\/år/i,
-                        `= ${newYearlyTotal} kr/år`
-                      );
-                      gptAnswer = gptAnswer.replace(
-                        /spara \[total × 12\] kr\/år/g,
-                        `spara ${newYearlyTotal} kr/år`
-                      );
-                      console.log('Added missing Påslag to result and updated totals');
-                    }
-                  } else {
-                    console.log('Påslag already exists in result, skipping addition');
-                  }
-                }
-              } else {
-                console.log('No Påslag found in extracted JSON');
-              }
-              
-              // Check for missed "Elavtal årsavgift"
-              if (!gptAnswer.includes('Elavtal årsavgift')) {
-                console.log('Elavtal årsavgift not found in result, checking extracted JSON...');
-                
-                const elavtalMatch = cleanJson.match(/"name"\s*:\s*"Elavtal årsavgift"[^}]*"amount"\s*:\s*(\d+(?:[,.]\d+)?)/);
-                console.log('Elavtal regex match result:', elavtalMatch);
-                
-                if (elavtalMatch) {
-                  const amount = elavtalMatch[1].replace(',', '.');
-                  console.log('Found Elavtal årsavgift amount:', amount);
-                  
-                  const currentTotal = gptAnswer.match(/total[^0-9]*(\d+(?:[,.]\d+)?)/i);
-                  console.log('Current total match:', currentTotal);
-                  
-                  if (currentTotal) {
-                    const newMonthlyTotal = (parseFloat(currentTotal[1].replace(',', '.')) + parseFloat(amount)).toFixed(2);
-                    const newYearlyTotal = (parseFloat(newMonthlyTotal) * 12).toFixed(2);
-                    console.log('New monthly total:', newMonthlyTotal, 'New yearly total:', newYearlyTotal);
-                    
-                    gptAnswer = gptAnswer.replace(
-                      /Onödiga kostnader:([\s\S]*?)Total besparing:/,
-                      `Onödiga kostnader:$1Elavtal årsavgift: ${amount} kr\nTotal besparing:`
-                    );
-                    gptAnswer = gptAnswer.replace(
-                      /spara totalt [^0-9]*(\d+(?:[,.]\d+)?)/i,
-                      `spara totalt ${newMonthlyTotal}`
-                    );
-                    gptAnswer = gptAnswer.replace(
-                      /= (\d+(?:[,.]\d+)?) kr\/år/i,
-                      `= ${newYearlyTotal} kr/år`
-                    );
-                    gptAnswer = gptAnswer.replace(
-                      /spara \[total × 12\] kr\/år/g,
-                      `spara ${newYearlyTotal} kr/år`
-                    );
-                    console.log('Updated gptAnswer with Elavtal årsavgift and totals');
-                  }
-                } else {
-                  console.log('No Elavtal årsavgift found in extracted JSON');
-                }
-              } else {
-                console.log('Elavtal årsavgift already found in result');
-              }
-            } else {
-              console.log('No result to post-process');
-            }
-          }
         } catch (parseError) {
-          console.log('Failed to parse extraction JSON:', parseError);
+          console.log('Failed to parse extraction JSON or build summary:', parseError);
           console.log('Raw response that failed to parse:', extractedJson);
           console.log('Falling back to single-step approach');
         }
@@ -553,16 +531,9 @@ Svara på svenska och var hjälpsam och pedagogisk.`;
       console.log('Two-step approach failed, falling back to single-step approach');
     }
 
-    // Fallback to original single-step approach if two-step failed
+    // Fallback till original single-step-analys om tvåstegsflödet misslyckades helt
     if (!gptAnswer) {
-    const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openaiApiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o',
+      const singleStepPayloadBase = {
         messages: [
           { role: 'system', content: systemPrompt },
           {
@@ -573,10 +544,36 @@ Svara på svenska och var hjälpsam och pedagogisk.`;
             ]
           }
         ],
-        max_tokens: 1200,
         temperature: 0.1,
-      }),
-    });
+      };
+
+      // Försök först med gpt-5.4
+      let openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openaiApiKey}`,
+        },
+        body: JSON.stringify({ model: 'gpt-5.4', ...singleStepPayloadBase, max_completion_tokens: 1200 }),
+      });
+
+      if (!openaiRes.ok) {
+        console.log('gpt-5.4 single-step failed, status:', openaiRes.status);
+        try {
+          const text = await openaiRes.text();
+          console.log('gpt-5.4 single-step body:', text);
+        } catch {}
+
+        // Fallback till gpt-4o för single-step
+        openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${openaiApiKey}`,
+          },
+          body: JSON.stringify({ model: 'gpt-4o', ...singleStepPayloadBase, max_tokens: 1200 }),
+        });
+      }
 
       if (openaiRes.ok) {
         const gptData = await openaiRes.json();
@@ -605,7 +602,7 @@ Svara på svenska och var hjälpsam och pedagogisk.`;
               file_mime: mimeType,
               file_size: fileSize,
               image_sha256: imageSha256,
-              model: 'gpt-4o',
+              model: 'gpt-5.4',
               system_prompt_version: '2025-01-vision-v1',
               gpt_answer: gptAnswer,
               consent: consent,

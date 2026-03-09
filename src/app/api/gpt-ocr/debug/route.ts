@@ -90,7 +90,7 @@ Svara ENDAST med JSON-arrayen, inget annat.`;
         'Authorization': `Bearer ${openaiApiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-5.4',
         messages: [
           { role: 'system', content: extractionPrompt },
           {
@@ -130,9 +130,7 @@ Svara ENDAST med JSON-arrayen, inget annat.`;
       debugInfo.step1_success = true;
       debugInfo.extractedJson = extractedJson;
       
-      // Try to parse the JSON
       try {
-        // Clean the JSON response - remove any markdown formatting
         let cleanJson = extractedJson.trim();
         if (cleanJson.startsWith('```json')) {
           cleanJson = cleanJson.replace(/^```json\s*/, '').replace(/\s*```$/, '');
@@ -140,30 +138,58 @@ Svara ENDAST med JSON-arrayen, inget annat.`;
         if (cleanJson.startsWith('```')) {
           cleanJson = cleanJson.replace(/^```\s*/, '').replace(/\s*```$/, '');
         }
-        
-        // Normalize decimal separators: convert Swedish comma format to JSON period format
-        cleanJson = cleanJson.replace(/"amount"\s*:\s*(\d+),(\d+)/g, '"amount": $1.$2');
-        
+
+        // Samma robusta normalisering som i huvud-API:t:
+        cleanJson = cleanJson.replace(/"amount"\s*:\s*([0-9][0-9., ]*)/g, (match: string, num: string) => {
+          const raw = String(num);
+          const hasComma = raw.includes(',');
+          const hasSpace = /\s/.test(raw);
+
+          if (!hasComma && !hasSpace) {
+            return match;
+          }
+
+          const withoutSpaces = raw.replace(/\s+/g, '');
+          const parts = withoutSpaces.split(/[.,]/);
+
+          if (parts.length === 1) {
+            return `"amount": ${parts[0]}`;
+          }
+
+          const decimals = parts.pop() as string;
+          const integer = parts.join('');
+          return `"amount": ${integer}.${decimals}`;
+        });
+
         const parsedData = JSON.parse(cleanJson);
         debugInfo.parsedData = parsedData;
         
-        // Check if Elavtal årsavgift is in the data
         const elavtalItem = parsedData.find((item: { name?: string }) => 
           item.name && item.name.toLowerCase().includes('elavtal årsavgift')
         );
         
         if (elavtalItem) {
           debugInfo.elavtalFound = true;
-          debugInfo.elavtalAmount = elavtalItem.amount;
+          debugInfo.elavtalAmount = (elavtalItem as any).amount as number;
         }
         
-        // Test regex pattern
         const elavtalMatch = extractedJson.match(/["']?Elavtal årsavgift["']?\s*[,\]]\s*["']?(\d+(?:[,.]\d+)?)["']?\s*kr/);
-        debugInfo.regexMatch = elavtalMatch;
+        debugInfo.regexMatch = elavtalMatch as RegExpMatchArray | null;
         
       } catch (parseError) {
         debugInfo.parseError = String(parseError);
       }
+    } else {
+      const errorText = await extractionRes.text();
+      console.error('OpenAI extraction error (gpt-5.4):', extractionRes.status, errorText);
+      return NextResponse.json(
+        {
+          error: 'OpenAI extraction failed',
+          status: extractionRes.status,
+          body: errorText,
+        },
+        { status: 502 }
+      );
     }
 
     return NextResponse.json({
