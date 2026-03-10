@@ -7,6 +7,35 @@ export default function OtovoCareSection() {
     <section className="otovo-care-section">
       <div className="otovo-care-layout">
         <div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              marginBottom: '0.75rem',
+            }}
+          >
+            <img
+              src="/otovo-logo.png"
+              alt="Otovo"
+              style={{
+                width: '140px',
+                height: 'auto',
+                maxWidth: '60%',
+              }}
+            />
+            <span
+              style={{
+                fontSize: '0.8rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                opacity: 0.8,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              I samarbete med Otovo
+            </span>
+          </div>
           <p
             style={{
               fontSize: '0.85rem',
