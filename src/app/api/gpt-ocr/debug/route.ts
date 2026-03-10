@@ -140,7 +140,7 @@ Svara ENDAST med JSON-arrayen, inget annat.`;
         }
 
         // Samma robusta normalisering som i huvud-API:t:
-        cleanJson = cleanJson.replace(/"amount"\s*:\s*([0-9][0-9., ]*)/g, (match: string, num: string) => {
+        cleanJson = cleanJson.replace(/"amount"\s*:\s*([0-9][0-9., ]*[0-9])/g, (match: string, num: string) => {
           const raw = String(num);
           const hasComma = raw.includes(',');
           const hasSpace = /\s/.test(raw);

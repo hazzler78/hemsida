@@ -324,7 +324,7 @@ Svara på svenska och var hjälpsam och pedagogisk.`;
           // Normalisera alla "amount"-värden där modellen använt svenska/”stökiga” format:
           // - Endast om talet innehåller KOMMA eller MELLANSLAG (t.ex. "3 143,52" eller "3,143.52")
           // - Rena JSON-tal som "208.13" eller "656.00" lämnas orörda
-          cleanJson = cleanJson.replace(/"amount"\s*:\s*([0-9][0-9., ]*)/g, (match: string, num: string) => {
+          cleanJson = cleanJson.replace(/"amount"\s*:\s*([0-9][0-9., ]*[0-9])/g, (match: string, num: string) => {
             const raw = String(num);
             const hasComma = raw.includes(',');
             const hasSpace = /\s/.test(raw);
@@ -421,37 +421,55 @@ Svara på svenska och var hjälpsam och pedagogisk.`;
           
           const monthlyTotal = unnecessaryItems.reduce((sum, item) => sum + (item.amount || 0), 0);
           const yearlyTotal = monthlyTotal * 12;
-          
-          const lines = unnecessaryItems.map((item, idx) => {
-            const amountStr = (item.amount ?? 0).toFixed(2).replace('.', ',');
-            return `${idx + 1}. ${item.name}: ${amountStr} kr`;
+
+          // Total kostnad för Elhandel (inkl. både nödvändiga och onödiga poster)
+          const totalElhandel = parsed
+            .filter((item) => item.section && item.section.toLowerCase() === 'elhandel' && typeof item.amount === 'number')
+            .reduce((sum, item) => sum + (item.amount || 0), 0);
+
+          const costWithoutUnnecessary = Math.max(totalElhandel - monthlyTotal, 0);
+
+          const formatAmount = (value: number) => value.toFixed(2).replace('.', ',');
+
+          const unnecessaryLines = unnecessaryItems.map((item) => {
+            const amountStr = formatAmount(item.amount ?? 0);
+            return `- **${item.name}**: ${amountStr} kr`;
           });
-          
-          const monthlyStr = monthlyTotal.toFixed(2).replace('.', ',');
-          const yearlyStr = yearlyTotal.toFixed(2).replace('.', ',');
-          
+
+          const monthlyStr = formatAmount(monthlyTotal);
+          const yearlyStr = formatAmount(yearlyTotal);
+          const elhandelStr = formatAmount(totalElhandel);
+          const withoutUnnecessaryStr = formatAmount(costWithoutUnnecessary);
+          const cheapEnergyMonthlyStr = withoutUnnecessaryStr;
+
           gptAnswer = [
-            '🚨 Dina onödiga elavgifter upptäckta!',
+            '## Dina onödiga elavgifter',
             '',
-            `Jag har hittat ${unnecessaryItems.length} onödiga avgifter på din elräkning som kostar dig pengar varje månad:`,
+            `**Nuvarande elhandel:** ${elhandelStr} kr/mån`,
+            `**Onödiga avgifter:** ${monthlyStr} kr/mån (≈ ${yearlyStr} kr/år)`,
             '',
-            '💸 Onödiga kostnader denna månad:',
-            ...lines,
+            '### Onödiga avgifter i din elhandel',
+            ...unnecessaryLines,
             '',
-            '💰 Din årliga besparing:',
-            `Du betalar ${monthlyStr} kr/månad i onödiga avgifter (inklusive moms om beloppen i fakturan är inklusive moms) = ${yearlyStr} kr/år!`,
+            '### Så skulle kostnaden se ut utan onödiga avgifter',
+            `- Med nuvarande avtal: **${elhandelStr} kr/mån**`,
+            `- Utan onödiga avgifter: **${withoutUnnecessaryStr} kr/mån**`,
+            `- Möjlig besparing: **${monthlyStr} kr/mån** (≈ **${yearlyStr} kr/år**)`,
             '',
-            'Detta är pengar som går direkt till din elleverantör utan att du får något extra för dem.',
+            '### Din besparing',
+            `Du betalar idag **${monthlyStr} kr/månad** i onödiga avgifter (inklusive moms) = **${yearlyStr} kr/år**.`,
             '',
-            '✅ Lösningen:',
-            `Byt till ett avtal utan dessa avgifter och spara ${yearlyStr} kr/år (inklusive moms)!`,
+            '### Billigaste alternativ (beräknat)',
+            `Om du byter till ett rörligt avtal utan dessa avgifter (t.ex. hos Cheap Energy) uppskattar vi att din elhandel skulle kosta cirka **${cheapEnergyMonthlyStr} kr/mån** istället för **${elhandelStr} kr/mån** – en besparing på **${monthlyStr} kr/mån** (≈ **${yearlyStr} kr/år**).`,
             '',
-            '🎯 Välj ditt nya avtal:',
-            `- Rörligt avtal: 0 kr i avgifter första året – spara ${yearlyStr} kr/år`,
-            `- Fastpris med prisgaranti: Prisgaranti med valfri bindningstid`,
+            '### Byt till ett billigare avtal',
+            `- **Rörligt avtal hos Cheap Energy:** [Teckna rörligt elavtal](https://www.cheapenergy.se/teckna-elavtal/?src=Elchef)`,
+            '- **Fastpris med prisgaranti:** Passar dig som vill ha tryggare prisnivå under en vald bindningstid',
             '',
-            '⏰ Byt idag – det tar bara 2 minuter och vi fixar allt åt dig!'
-          ].join('\n');
+            '⏰ Bytet tar ca 2 minuter – din nya leverantör sköter allt med den gamla.',
+          ]
+            .filter((line) => line !== '')
+            .join('\n');
           
           console.log('Extracted JSON preview:', cleanJson.substring(0, 500));
         } catch (parseError) {
@@ -462,56 +480,6 @@ Svara på svenska och var hjälpsam och pedagogisk.`;
       }
     } catch {
       console.log('Two-step approach failed, falling back to single-step approach');
-    }
-
-    // Fallback till original single-step-analys om tvåstegsflödet misslyckades helt
-    if (!gptAnswer) {
-      const singleStepPayloadBase = {
-        messages: [
-          { role: 'system', content: systemPrompt },
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: 'Vad betalar jag i onödiga kostnader? Analysera denna elräkning enligt instruktionerna. SVARA ENDAST PÅ SVENSKA - oavsett vilket språk fakturan är på.' },
-              { type: 'image_url', image_url: { url: base64Image } }
-            ]
-          }
-        ],
-        temperature: 0.1,
-      };
-
-      // Försök först med gpt-5.4
-      let openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${openaiApiKey}`,
-        },
-        body: JSON.stringify({ model: 'gpt-5.4', ...singleStepPayloadBase, max_completion_tokens: 1200 }),
-      });
-
-      if (!openaiRes.ok) {
-        console.log('gpt-5.4 single-step failed, status:', openaiRes.status);
-        try {
-          const text = await openaiRes.text();
-          console.log('gpt-5.4 single-step body:', text);
-        } catch {}
-
-        // Fallback till gpt-4o för single-step
-        openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${openaiApiKey}`,
-          },
-          body: JSON.stringify({ model: 'gpt-4o', ...singleStepPayloadBase, max_tokens: 1200 }),
-        });
-      }
-
-      if (openaiRes.ok) {
-        const gptData = await openaiRes.json();
-        gptAnswer = gptData.choices?.[0]?.message?.content || '';
-      }
     }
 
     if (!gptAnswer) {
