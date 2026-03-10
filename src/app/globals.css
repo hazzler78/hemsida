@@ -420,6 +420,33 @@ p {
   animation: shimmer 2s infinite;
 }
 
+/* Otovo Care section */
+.otovo-care-section {
+  padding: 4rem 1.5rem;
+  background: linear-gradient(135deg, #0f172a, #020617);
+  color: #f9fafb;
+}
+
+.otovo-care-layout {
+  max-width: 960px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 2.5rem;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .otovo-care-section {
+    padding: 3rem 1.25rem;
+  }
+
+  .otovo-care-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+  }
+}
+
 /* Cookie banner adjustments - Minimal interference, let Cookiebot work naturally */
 #CybotCookiebotDialog,
 [id^="CybotCookiebot"],

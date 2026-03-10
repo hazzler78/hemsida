@@ -8,6 +8,7 @@ import ContactForm from '@/components/ContactForm';
 import FAQ from '@/components/FAQ';
 import SolarQuoteForm from '@/components/SolarQuoteForm';
 import NewsletterHero from '@/components/NewsletterHero';
+import OtovoCareSection from '@/components/OtovoCareSection';
 import { usePageView } from '@/lib/usePageView';
 
 export default function Home() {
@@ -32,6 +33,7 @@ export default function Home() {
       {/* <PriceCalculator /> */}
       <Testimonials />
       <ContactForm />
+      <OtovoCareSection />
       <FAQ />
       <HeroPriceWidget />
       <NewsletterHero />
