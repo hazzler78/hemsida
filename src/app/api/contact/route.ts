@@ -9,6 +9,12 @@ const TELEGRAM_CHAT_IDS = process.env.TELEGRAM_CHAT_IDS?.split(',').map(id => id
 const rawSUPABASE_URL = process.env.SUPABASE_URL;
 const rawSUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+// Otovo Lead API configuration
+const OTOVO_API_BASE_URL = process.env.OTOVO_API_BASE_URL ?? 'https://api.otovo.com';
+const OTOVO_API_TOKEN = process.env.OTOVO_API_TOKEN;
+const OTOVO_UTM_SOURCE = process.env.OTOVO_UTM_SOURCE ?? 'elchef_se';
+const OTOVO_UTM_CAMPAIGN = process.env.OTOVO_UTM_CAMPAIGN ?? 'elchef_CPS_newbuilds';
+
 function sanitizeEnv(value: string | undefined): string | undefined {
   if (!value) return value;
   const trimmed = value.trim();
@@ -25,7 +31,10 @@ function getSupabaseClient() {
   return createClient(url, key);
 }
 
-async function sendTelegramNotification(data: ContactFormData & { formType?: string }) {
+async function sendTelegramNotification(
+  data: ContactFormData & { formType?: string },
+  contactId: number | null
+) {
   if (!TELEGRAM_BOT_TOKEN || TELEGRAM_CHAT_IDS.length === 0) {
     console.warn('Telegram credentials not configured');
     return;
@@ -63,7 +72,7 @@ ${data.phone ? `📞 *Telefon:* ${data.phone}\n` : ''}${data.city ? `🏙️ *St
 ⏰ *Tidpunkt:* ${new Date().toLocaleString('sv-SE')}
 🌐 *Källa:* Elchef.se kontaktformulär
 
-🆔 *ID:* ${pending.id}
+🆔 *Kontakt-ID (contacts):* ${contactId ?? '-'}
 
 💡 *Svara på detta meddelande* eller skriv t.ex. "12m #${pending.id}" för att koppla rätt kund.
 *Exempel:* "12m" eller "12m cheap" eller "12m fastavtal" (vi ringer kunden om 11 månader)
@@ -140,6 +149,95 @@ async function addToMailerlite(email: string) {
   }
 }
 
+function parseYearlyConsumptionKwh(raw?: string | null): number | null {
+  if (!raw) return null;
+  const digitsOnly = raw.replace(/[^\d]/g, '');
+  if (!digitsOnly) return null;
+  const value = Number(digitsOnly);
+  if (!Number.isFinite(value) || value <= 0) return null;
+  return value;
+}
+
+async function sendOtovoInterest(data: ContactFormData & { ref?: string; campaignCode?: string; formType?: string }) {
+  if (!OTOVO_API_TOKEN) {
+    console.warn('OTOVO_API_TOKEN is not configured, skipping Otovo lead creation');
+    return;
+  }
+
+  try {
+    const addressParts: string[] = [];
+    if (data.address && data.address.trim()) addressParts.push(data.address.trim());
+    if (data.city && data.city.trim()) addressParts.push(data.city.trim());
+    const address = addressParts.join(', ');
+
+    const yearlyConsumptionKwh = parseYearlyConsumptionKwh((data as any).consumption);
+
+    const utm_data = {
+      utm_campaign: OTOVO_UTM_CAMPAIGN,
+      utm_medium: 'lead-generation',
+      utm_source: OTOVO_UTM_SOURCE,
+      utm_term: '',
+      utm_id: data.campaignCode || data.ref || '',
+    };
+
+    const body: Record<string, unknown> = {
+      name: data.name || '',
+      email: data.email,
+      phone_number: data.phone || '',
+      utm_data,
+    };
+
+    if (address) {
+      body.address = address;
+    }
+
+    if (yearlyConsumptionKwh) {
+      body.extra_information = {
+        yearly_consumption_kwh: yearlyConsumptionKwh,
+      };
+    }
+
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: `Token ${OTOVO_API_TOKEN}`,
+    };
+
+    const validateRes = await fetch(`${OTOVO_API_BASE_URL}/partner/v1/interests/validate_data`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+    });
+
+    if (!validateRes.ok) {
+      console.error('Otovo validate_data request failed:', validateRes.status, await validateRes.text());
+      return;
+    }
+
+    const validateJson = await validateRes.json() as { is_valid?: boolean; result?: unknown; message?: string };
+
+    if (!validateJson.is_valid) {
+      console.warn('Otovo validate_data reported invalid payload:', validateJson);
+      return;
+    }
+
+    const createRes = await fetch(`${OTOVO_API_BASE_URL}/partner/v1/interests/`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+    });
+
+    if (!createRes.ok) {
+      console.error('Otovo interest creation failed:', createRes.status, await createRes.text());
+      return;
+    }
+
+    const created = await createRes.json();
+    console.log('Otovo interest created successfully:', created);
+  } catch (error) {
+    console.error('Error while sending Otovo interest:', error);
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const data: ContactFormData & { ref?: string; campaignCode?: string; formType?: string } = await request.json();
@@ -159,13 +257,13 @@ export async function POST(request: NextRequest) {
     if (data.ref?.includes('affiliate')) formType = 'affiliate';
     if (data.ref?.includes('partner')) formType = 'partner';
 
-    // Skapa pending-reminder och skicka Telegram-notifiering (med ID)
-    await sendTelegramNotification(data);
-
-    // Store contact with enhanced tracking
+    // Store contact with enhanced tracking and capture ID
+    let contactId: number | null = null;
     try {
       const supabase = getSupabaseClient();
-      await supabase.from('contacts').insert([{
+      const { data: contactRow, error } = await supabase
+        .from('contacts')
+        .insert([{
           name: data.name || null,
           email: data.email,
           phone: data.phone || null,
@@ -177,15 +275,31 @@ export async function POST(request: NextRequest) {
           city: data.city?.trim() || null,
           address: data.address?.trim() || null,
           created_at: new Date().toISOString(),
-        }]);
+        }])
+        .select('id')
+        .single();
+
+      if (!error && contactRow) {
+        contactId = contactRow.id as number;
+      } else if (error) {
+        console.warn('Failed to store contact with ref (optional):', error);
+      }
     } catch (e) {
       console.warn('Failed to store contact with ref (optional):', e);
     }
+
+    // Skapa pending-reminder och skicka Telegram-notifiering (med ID)
+    await sendTelegramNotification({ ...data, formType }, contactId);
 
     // Lägg till i Mailerlite om användaren vill prenumerera
     let newsletterSuccess = true;
     if (data.subscribeNewsletter) {
       newsletterSuccess = await addToMailerlite(data.email);
+    }
+
+    // Skicka solcells-lead till Otovos Lead API för relevanta formulär
+    if (formType === 'sol_laddbox') {
+      await sendOtovoInterest({ ...data, formType });
     }
 
     return NextResponse.json(

@@ -333,7 +333,7 @@ export default function SolarQuoteForm() {
 
         {submitStatus === 'success' && (
           <SuccessMessage>
-            Tack! Vi har tagit emot din förfrågan. Vår partner återkommer med en offert.
+            Tack! Vi har tagit emot din förfrågan. Vår partner kontaktar dig först och tar sedan fram en offert.
           </SuccessMessage>
         )}
         {submitStatus === 'error' && (
