@@ -170,7 +170,7 @@ async function sendOtovoInterest(data: ContactFormData & { ref?: string; campaig
     if (data.city && data.city.trim()) addressParts.push(data.city.trim());
     const address = addressParts.join(', ');
 
-    const yearlyConsumptionKwh = parseYearlyConsumptionKwh((data as any).consumption);
+    const yearlyConsumptionKwh = parseYearlyConsumptionKwh(data.consumption);
 
     const utm_data = {
       utm_campaign: OTOVO_UTM_CAMPAIGN,

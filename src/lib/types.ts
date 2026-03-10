@@ -84,6 +84,8 @@ export interface ContactFormData {
   city?: string;
   /** Gatuadress (valfritt) */
   address?: string;
+  /** Årsförbrukning som fri text (t.ex. "10 000 kWh/år") – används bl.a. för Otovo-leads */
+  consumption?: string;
   contractType?: '12_months' | '24_months' | '36_months' | 'variable';
   contractStartDate?: string;
 }
