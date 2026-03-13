@@ -543,7 +543,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     type: 'rorligt',
     logo_url: '/cheap-logo.png',
     description:
-      'Billigast just nu för många kunder som byter från Eon, Fortum eller Vattenfall. Passar dig som vill sänka elkostnaden maximalt och sköta allt digitalt utan krångel – ingen bindningstid och enkelt byte.',
+      'Billigast just nu för många som byter från Eon, Fortum eller Vattenfall. Enkelt digitalt byte utan bindningstid.',
     url: 'https://www.cheapenergy.se/teckna-elavtal/?src=Elchef',
     is_recommended: true,
     display_order: 1,
@@ -555,7 +555,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     type: 'rorligt',
     logo_url: '/svekraft-logo.png',
     description:
-      '0 kr/månad första tiden och flexibelt rörligt pris. Bra om du inte bytt elavtal tidigare och vill ha ett billigt startpris och tydlig hjälp genom hela processen.',
+      '0 kr/månad i början och flexibelt rörligt pris – bra om du vill komma igång billigt vid ditt första byte.',
     url: 'https://www.svekraft.com/elavtal/?src=Elchef',
     is_recommended: false,
     display_order: 2,
@@ -567,7 +567,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     type: 'rorligt',
     logo_url: '/tibber.png',
     description:
-      'Smart timpris via app – perfekt om du har elbil, solceller eller kan styra tvätt, laddning och värme till billigare timmar. Bra ersättning för överskottsel och inga onödiga påslag utöver timpriset.',
+      'Smart timpris via app – perfekt om du har elbil, solceller eller kan styra din el till billigare timmar.',
     url: 'https://go.adt242.com/t/t?a=1590956516&as=2012933659&t=2&tk=1',
     is_recommended: false,
     display_order: 3,
@@ -579,7 +579,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     type: 'rorligt',
     logo_url: '/telinet.png',
     description:
-      'Grönt elavtal från en aktör som funnits länge på marknaden. Passar dig som vill kunna nå kundservice enkelt, få hjälp om något känns oklart och ändå ha ett konkurrenskraftigt rörligt pris.',
+      'Grönt elavtal från en aktör som funnits länge – för dig som vill ha enkel kundservice och ett konkurrenskraftigt rörligt pris.',
     url: 'https://at.telinet.se/t/t?a=1870484942&as=2012933659&t=2&tk=1',
     is_recommended: false,
     display_order: 4,
@@ -591,7 +591,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     type: 'rorligt',
     logo_url: '/fortum.png',
     description:
-      'Stor och etablerad leverantör som många byter till från Vattenfall eller andra stora bolag för att sänka kostnaden. Passar både villa och lägenhet om du prioriterar trygghet, fossilfri el och ett smidigt byte utan avbrott.',
+      'Stor och etablerad leverantör med fossilfri el – passar villa och lägenhet om du vill ha ett tryggt byte från t.ex. Vattenfall.',
     url: 'https://ion.fortum.com/t/t?a=1312475339&as=2012933659&t=2&tk=1',
     is_recommended: false,
     display_order: 5,
@@ -603,7 +603,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     type: 'rorligt',
     logo_url: MOTALA_LOGO_SRC,
     description:
-      'Mindre svensk leverantör med personlig känsla. Bra för dig som vill ha ett modernt rörligt avtal men också kunna prata med en kundtjänst nära till hands om du har frågor kring byte eller faktura.',
+      'Mindre svensk leverantör med personlig service – bra om du vill kunna ringa någon och ändå ha ett modernt rörligt avtal.',
     url: 'https://motalaenergi.se/privatperson/?src=Elchef',
     is_recommended: false,
     display_order: 6,
