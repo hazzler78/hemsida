@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "chatlog": "node scripts/fetch-chatlog.mjs",
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "cf:build": "npx @cloudflare/next-on-pages build",
     "cf:preview": "wrangler pages dev .vercel/output",

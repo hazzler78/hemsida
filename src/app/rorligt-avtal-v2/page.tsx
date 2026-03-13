@@ -406,6 +406,20 @@ const ProviderCard = styled.div<{ recommended?: boolean }>`
   }
 `;
 
+const ProviderTag = styled.div`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 9999px;
+  background: rgba(34, 197, 94, 0.08);
+  color: #047857;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+`;
+
 const RecommendedBadge = styled.div`
   position: absolute;
   top: -16px;
@@ -528,7 +542,8 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     name: 'Cheap Energy',
     type: 'rorligt',
     logo_url: '/cheap-logo.png',
-    description: 'Passar dig som framför allt vill ha så lågt pris som möjligt och gärna sköter allt digitalt.',
+    description:
+      'Billigast just nu för många kunder som byter från Eon, Fortum eller Vattenfall. Passar dig som vill sänka elkostnaden maximalt och sköta allt digitalt utan krångel – ingen bindningstid och enkelt byte.',
     url: 'https://www.cheapenergy.se/teckna-elavtal/?src=Elchef',
     is_recommended: true,
     display_order: 1,
@@ -539,7 +554,8 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     name: 'Svekraft',
     type: 'rorligt',
     logo_url: '/svekraft-logo.png',
-    description: 'Bra val om du vill komma igång billigt första tiden och vill ha ett flexibelt rörligt avtal. Passar dig som inte bytt elavtal tidigare och vill ha hjälp genom hela processen.',
+    description:
+      '0 kr/månad första tiden och flexibelt rörligt pris. Bra om du inte bytt elavtal tidigare och vill ha ett billigt startpris och tydlig hjälp genom hela processen.',
     url: 'https://www.svekraft.com/elavtal/?src=Elchef',
     is_recommended: false,
     display_order: 2,
@@ -550,7 +566,8 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     name: 'Tibber',
     type: 'rorligt',
     logo_url: '/tibber.png',
-    description: 'För dig som gillar teknik och vill styra din förbrukning via app. Timpris och smarta funktioner som passar om du kan flytta delar av din elanvändning till billigare timmar.',
+    description:
+      'Smart timpris via app – perfekt om du har elbil, solceller eller kan styra tvätt, laddning och värme till billigare timmar. Bra ersättning för överskottsel och inga onödiga påslag utöver timpriset.',
     url: 'https://go.adt242.com/t/t?a=1590956516&as=2012933659&t=2&tk=1',
     is_recommended: false,
     display_order: 3,
@@ -561,7 +578,8 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     name: 'Telinet Energi',
     type: 'rorligt',
     logo_url: '/telinet.png',
-    description: 'Passar dig som vill ha ett grönt elavtal från en aktör som funnits länge på marknaden. Bra om du vill kunna nå kundservice enkelt och få hjälp om något känns oklart.',
+    description:
+      'Grönt elavtal från en aktör som funnits länge på marknaden. Passar dig som vill kunna nå kundservice enkelt, få hjälp om något känns oklart och ändå ha ett konkurrenskraftigt rörligt pris.',
     url: 'https://at.telinet.se/t/t?a=1870484942&as=2012933659&t=2&tk=1',
     is_recommended: false,
     display_order: 4,
@@ -572,7 +590,8 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     name: 'Fortum',
     type: 'rorligt',
     logo_url: '/fortum.png',
-    description: 'Större, etablerad leverantör med många kunder i Sverige. Ett alternativ för dig som prioriterar trygghet och stabilitet före att jaga varje öre i pris.',
+    description:
+      'Stor och etablerad leverantör som många byter till från Vattenfall eller andra stora bolag för att sänka kostnaden. Passar både villa och lägenhet om du prioriterar trygghet, fossilfri el och ett smidigt byte utan avbrott.',
     url: 'https://ion.fortum.com/t/t?a=1312475339&as=2012933659&t=2&tk=1',
     is_recommended: false,
     display_order: 5,
@@ -583,13 +602,25 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     name: 'Motala',
     type: 'rorligt',
     logo_url: MOTALA_LOGO_SRC,
-    description: 'Mindre svensk leverantör med personlig känsla. Bra val om du vill kunna prata med en kundtjänst nära till hands och ändå ha ett modernt rörligt avtal.',
+    description:
+      'Mindre svensk leverantör med personlig känsla. Bra för dig som vill ha ett modernt rörligt avtal men också kunna prata med en kundtjänst nära till hands om du har frågor kring byte eller faktura.',
     url: 'https://motalaenergi.se/privatperson/?src=Elchef',
     is_recommended: false,
     display_order: 6,
     active: true,
   },
 ];
+
+const SOLAR_PROVIDERS = new Set(['Tibber', 'Fortum', 'Greenely']);
+
+const PROVIDER_CTA_LABELS: Record<string, string> = {
+  'Cheap Energy': 'Byt till Cheap Energy och spara',
+  Svekraft: 'Välj Svekraft och kom igång billigt',
+  Tibber: 'Välj Tibber – smart timpris',
+  'Telinet Energi': 'Välj Telinet Energi',
+  Fortum: 'Välj Fortum – tryggt byte',
+  Motala: 'Välj Motala – personlig service',
+};
 
 // Kända leverantörer (t.ex. Motala) använder alltid mappningen så loggan visas även i produktion.
 function getLogoUrl(providerName: string, existingLogoUrl?: string): string {
@@ -916,14 +947,6 @@ export default function RorligtAvtalV2Page() {
           </StepContainer>
         ) : (
           <>
-            <TrustSection>
-              <TrustBadge>✓ 100% säkert</TrustBadge>
-              <TrustBadge>✓ Ingen bindningstid</TrustBadge>
-              <TrustBadge>✓ Vi hjälper till hela vägen</TrustBadge>
-              <TrustBadge>✓ Din gamla avtal sägs upp automatiskt</TrustBadge>
-            </TrustSection>
-
-
             <StepContainer>
               <QuestionTitle>Leverantörer som matchar dina preferenser</QuestionTitle>
               <QuestionText>
@@ -933,6 +956,37 @@ export default function RorligtAvtalV2Page() {
                 {preferences.priority === 'flexibility' && ' Vi har sorterat med fokus på flexibla avtal utan bindningstid först.'}
                 {' '}När du klickar vidare till en leverantör kan du själv välja fast eller rörligt pris hos dem. Läs gärna igenom alla alternativ innan du väljer.
               </QuestionText>
+
+              <TrustSection>
+                <TrustBadge>✓ 100% säkert – du betalar bara till det nya elbolaget</TrustBadge>
+                <TrustBadge>✓ Din gamla elavtal sägs upp automatiskt vid bytet</TrustBadge>
+                <TrustBadge>✓ De flesta avtal har 0–3 månaders uppsägningstid</TrustBadge>
+                <TrustBadge>✓ Vi hjälper dig om något känns oklart</TrustBadge>
+              </TrustSection>
+
+              <div style={{ marginBottom: '2rem', background: '#f9fafb', borderRadius: '16px', padding: '1.5rem', border: '1px solid #e5e7eb' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#111827', marginBottom: '0.75rem', textAlign: 'center' }}>
+                  Vanliga frågor innan du byter
+                </h3>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, color: '#374151', fontSize: '0.95rem', display: 'grid', gap: '0.5rem' }}>
+                  <li>
+                    <strong>Vilket avtal passar mig?</strong>{' '}
+                    Vi rekommenderar alltid de avtal som ger lägst total kostnad för din förbrukning och ditt elområde – baserat på dina svar ovan.
+                  </li>
+                  <li>
+                    <strong>Har du solceller eller batteri?</strong>{' '}
+                    Välj en leverantör med bra ersättning för överskottsel. Vi visar flera alternativ som fungerar bra för solcellsägare, och du ser detaljerna hos leverantören innan du tecknar.
+                  </li>
+                  <li>
+                    <strong>Hur fungerar bytet?</strong>{' '}
+                    Ditt nuvarande avtal sägs normalt upp automatiskt av den nya leverantören. Elen fortsätter fungera som vanligt – inget avbrott.
+                  </li>
+                  <li>
+                    <strong>Är det bindningstid?</strong>{' '}
+                    Många avtal har ingen bindningstid och 0–3 månaders uppsägningstid. Det står tydligt hos leverantören innan du bekräftar.
+                  </li>
+                </ul>
+              </div>
 
               {loading ? (
                 <div style={{ textAlign: 'center', color: '#374151', padding: '2rem' }}>
@@ -962,6 +1016,9 @@ export default function RorligtAvtalV2Page() {
                         />
                       )}
                       <ProviderName>{provider.name}</ProviderName>
+                      {SOLAR_PROVIDERS.has(provider.name) && (
+                        <ProviderTag>☀️ Extra bra för dig med solceller eller batteri</ProviderTag>
+                      )}
                       {(() => {
                         const fromApi = getProviderPriceFromApi(provider.name, providerPrices);
                         const månadKr = fromApi?.monthly_fee_kr ?? provider.manual_monthly_fee_kr ?? getMånadskostnadKr(provider.name);
@@ -1012,7 +1069,7 @@ export default function RorligtAvtalV2Page() {
                             handleProviderClick(provider.name, provider.url);
                           }}
                         >
-                          Välj {provider.name}
+                          {PROVIDER_CTA_LABELS[provider.name] ?? `Välj ${provider.name}`}
                         </ProviderButton>
                       </ProviderButtonRow>
                     </ProviderCard>
