@@ -110,6 +110,18 @@ function getProviderPriceFromApi(providerName: string, providers: ProviderPrices
   return key ? providers[key] : null;
 }
 
+/** Årskostnad (SEK) för sortering – lägre = billigare. Samma logik som rorligt-avtal (v1). */
+function getAnnualCostForSort(
+  provider: PageProvider,
+  providerPrices: ProviderPricesMap | null,
+  consumptionKwhPerYear: number
+): number {
+  const fromApi = getProviderPriceFromApi(provider.name, providerPrices);
+  const monthly = fromApi?.monthly_fee_kr ?? provider.manual_monthly_fee_kr ?? getMånadskostnadKr(provider.name);
+  const surcharge = fromApi?.surcharge_ore_per_kwh ?? provider.manual_surcharge_ore_per_kwh ?? getPåslagÖrePerKwh(provider.name);
+  return monthly * 12 + (surcharge * consumptionKwhPerYear) / 100;
+}
+
 const PageContainer = styled.div`
   min-height: 100vh;
   background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
@@ -611,6 +623,83 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
   },
 ];
 
+/** Rörliga leverantörer som kan finnas i API men inte i FALLBACK – undvik tomma kort. */
+const RORLIGT_EXTRA_DESCRIPTION_BY_NAME: Record<string, string> = {
+  Eon: 'Stor och välkänd leverantör med många kunder. Bra om du vill ha ett rörligt avtal från ett etablerat elbolag.',
+  'E.ON': 'Stor och välkänd leverantör med många kunder. Bra om du vill ha ett rörligt avtal från ett etablerat elbolag.',
+  Greenely: 'Appstyrd el med fokus på lägre kostnad och klimat – extra bra om du har solceller eller vill optimera förbrukningen.',
+  Vattenfall: 'Stor svensk leverantör med brett utbud. Passar om du vill ha en välkänd aktör med etablerad kundservice.',
+  Bixia: 'Svenskt elbolag – ofta smidigt byte och enkel kontakt med kundtjänst.',
+  'Skellefteå Kraft': 'Regional leverantör med lång erfarenhet – tryggt val om du vill ha rörligt pris från ett bolag i norr.',
+  Skellefteå: 'Regional leverantör med lång erfarenhet – tryggt val om du vill ha rörligt pris från ett bolag i norr.',
+  'Stockholms Elbolag': 'Lokal förankring och personlig service – bra om du vill ha rörligt avtal från ett mindre bolag.',
+};
+
+const RORLIGT_GENERIC_DESCRIPTION =
+  'Rörligt elavtal – du betalar marknadspriset för el med leverantörens påslag. Se aktuella villkor och uppsägningstid hos leverantören innan du tecknar.';
+
+/** Fastpris – samma texter som fastpris-sidan när API saknar beskrivning. */
+const FASTPRIS_DESCRIPTION_BY_NAME: Record<string, string> = {
+  'Svealands Elbolag':
+    'Om du hittar ett billigare fastprisavtal på elmarknaden matchas priset – och du får dessutom 1 öre/kWh i extra rabatt. Ett pålitligt val för dig som vill ha kontroll över elkostnaderna.',
+  'Cheap Energy': 'Konkurrenskraftiga fastpriser. Trygghet och förutsägbarhet för din elförbrukning.',
+  'Stockholms Elbolag': 'Fast elpris med tydliga villkor. Perfekt för dig som vill ha förutsägbara elkostnader.',
+  Svekraft: 'Stabila fastpriser för din trygghet. Låsta priser som ger dig kontroll över din elbudget.',
+  Motala: 'Konkurrenskraftiga elavtal för privatpersoner.',
+};
+
+const FASTPRIS_GENERIC_DESCRIPTION =
+  'Fastpris med låst elpris under avtalstiden – kontrollera bindningstid och villkor hos leverantören innan du tecknar.';
+
+function lookupDescriptionMap(map: Record<string, string>, name: string): string | undefined {
+  if (map[name]) return map[name];
+  const key = Object.keys(map).find((k) => k.toLowerCase() === name.toLowerCase());
+  return key ? map[key] : undefined;
+}
+
+function resolveRorligtDescription(provider: PageProvider, fallback?: PageProvider): string {
+  const fromApi = provider.description?.trim();
+  if (fromApi) return fromApi;
+  const fromFallback = fallback?.description?.trim();
+  if (fromFallback) return fromFallback;
+  const extra = lookupDescriptionMap(RORLIGT_EXTRA_DESCRIPTION_BY_NAME, provider.name);
+  if (extra) return extra;
+  return RORLIGT_GENERIC_DESCRIPTION;
+}
+
+function resolveFastprisDescription(provider: PageProvider): string {
+  const fromApi = provider.description?.trim();
+  if (fromApi) return fromApi;
+  const fromMap = lookupDescriptionMap(FASTPRIS_DESCRIPTION_BY_NAME, provider.name);
+  if (fromMap) return fromMap;
+  return FASTPRIS_GENERIC_DESCRIPTION;
+}
+
+/** Ordning för flexibilitet: enkla, ofta uppsagda rörliga avtal och tydlig digital hantering först (redaktionell prioritering). */
+const FLEXIBILITY_ORDER: string[] = [
+  'Cheap Energy',
+  'Svekraft',
+  'Motala',
+  'Telinet Energi',
+  'Tibber',
+  'Fortum',
+  'Eon',
+  'E.ON',
+  'Greenely',
+  'Vattenfall',
+  'Bixia',
+  'Skellefteå Kraft',
+  'Skellefteå',
+  'Stockholms Elbolag',
+];
+
+function flexibilityRank(name: string): number {
+  const exact = FLEXIBILITY_ORDER.indexOf(name);
+  if (exact >= 0) return exact;
+  const ci = FLEXIBILITY_ORDER.findIndex((n) => n.toLowerCase() === name.toLowerCase());
+  return ci >= 0 ? ci : 999;
+}
+
 const SOLAR_PROVIDERS = new Set(['Tibber', 'Fortum', 'Greenely']);
 
 const PROVIDER_CTA_LABELS: Record<string, string> = {
@@ -631,29 +720,41 @@ function getLogoUrl(providerName: string, existingLogoUrl?: string): string {
   return '';
 }
 
-function getRecommendedProviders(providers: PageProvider[], preferences: UserPreferences): PageProvider[] {
-  // Sortera baserat på preferenser
+function getRecommendedProviders(
+  providers: PageProvider[],
+  preferences: UserPreferences,
+  providerPrices: ProviderPricesMap | null,
+  consumptionKwhPerYear: number
+): PageProvider[] {
   const sorted = [...providers];
-  
+
   if (preferences.priority === 'price') {
-    // Prioritera billigaste (Cheap Energy först)
     sorted.sort((a, b) => {
-      if (a.is_recommended) return -1;
-      if (b.is_recommended) return 1;
+      const ca = getAnnualCostForSort(a, providerPrices, consumptionKwhPerYear);
+      const cb = getAnnualCostForSort(b, providerPrices, consumptionKwhPerYear);
+      if (ca !== cb) return ca - cb;
       return a.display_order - b.display_order;
     });
   } else if (preferences.priority === 'security') {
-    // Prioritera större, etablerade leverantörer
+    const established = ['Tibber', 'Fortum', 'Eon', 'E.ON', 'Vattenfall'];
+    const isEst = (n: string) =>
+      established.includes(n) || established.some((e) => e.toLowerCase() === n.toLowerCase());
     sorted.sort((a, b) => {
-      const established = ['Tibber', 'Fortum', 'Eon', 'E.ON'];
-      const aEstablished = established.includes(a.name);
-      const bEstablished = established.includes(b.name);
+      const aEstablished = isEst(a.name);
+      const bEstablished = isEst(b.name);
       if (aEstablished && !bEstablished) return -1;
       if (!aEstablished && bEstablished) return 1;
       return a.display_order - b.display_order;
     });
+  } else if (preferences.priority === 'flexibility') {
+    sorted.sort((a, b) => {
+      const ra = flexibilityRank(a.name);
+      const rb = flexibilityRank(b.name);
+      if (ra !== rb) return ra - rb;
+      return a.display_order - b.display_order;
+    });
   }
-  
+
   return sorted;
 }
 
@@ -688,8 +789,7 @@ export default function RorligtAvtalV2Page() {
                 ? provider.logo_url 
                 : fallbackProvider?.logo_url
             );
-            // Använd alltid de nyaste, guidande texterna från FALLBACK_PROVIDERS när de finns
-            const description = fallbackProvider?.description ?? provider.description;
+            const description = resolveRorligtDescription(provider, fallbackProvider);
             return {
               ...provider,
               description,
@@ -726,7 +826,14 @@ export default function RorligtAvtalV2Page() {
           throw new Error(result.error || 'Kunde inte hämta fastprisleverantörer');
         }
 
-        setFastProviders(result.providers || []);
+        const list = result.providers || [];
+        setFastProviders(
+          list.map((p: PageProvider) => ({
+            ...p,
+            description: resolveFastprisDescription(p),
+            logo_url: getLogoUrl(p.name, p.logo_url && p.logo_url.trim() !== '' ? p.logo_url : undefined),
+          }))
+        );
       } catch (error) {
         console.error('Error fetching fast providers:', error);
         setFastProviders([]);
@@ -861,7 +968,13 @@ export default function RorligtAvtalV2Page() {
     } catch { /* no-op */ }
   };
 
-  const recommendedProviders = step === 'results' ? getRecommendedProviders(providers, preferences) : providers;
+  const recommendedProviders = React.useMemo(
+    () =>
+      step === 'results'
+        ? getRecommendedProviders(providers, preferences, providerPrices, consumptionKwhPerYear)
+        : providers,
+    [step, providers, preferences, providerPrices, consumptionKwhPerYear]
+  );
   const progress = step === 'questions' ? 50 : 100;
 
   return (
@@ -951,9 +1064,11 @@ export default function RorligtAvtalV2Page() {
               <QuestionTitle>Leverantörer som matchar dina preferenser</QuestionTitle>
               <QuestionText>
                 Här är leverantörer som matchar vad du söker efter.
-                {preferences.priority === 'price' && ' Vi har sorterat med fokus på lägsta pris först.'}
-                {preferences.priority === 'security' && ' Vi har sorterat med fokus på etablerade leverantörer först.'}
-                {preferences.priority === 'flexibility' && ' Vi har sorterat med fokus på flexibla avtal utan bindningstid först.'}
+                {preferences.priority === 'price' &&
+                  ' Vi har sorterat på lägst beräknad årskostnad utifrån din angivna förbrukning och aktuell månadskostnad/påslag (lägst först).'}
+                {preferences.priority === 'security' && ' Vi har sorterat med fokus på större, etablerade leverantörer först.'}
+                {preferences.priority === 'flexibility' &&
+                  ' Vi har sorterat med fokus på leverantörer som ofta lyfter fram flexibla villkor och enkel hantering först – kontrollera alltid exakta villkor hos leverantören.'}
                 {' '}När du klickar vidare till en leverantör kan du själv välja fast eller rörligt pris hos dem. Läs gärna igenom alla alternativ innan du väljer.
               </QuestionText>
 
