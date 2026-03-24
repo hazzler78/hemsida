@@ -657,21 +657,26 @@ function lookupDescriptionMap(map: Record<string, string>, name: string): string
   return key ? map[key] : undefined;
 }
 
+/**
+ * Beskrivning under leverantören: kuraterad text i repot ska gälla före D1/API så att
+ * produktion matchar det ni ser lokalt (lokalt utan DB används bara FALLBACK-listan).
+ * API används när namnet saknas i fallback och extra-mappningen.
+ */
 function resolveRorligtDescription(provider: PageProvider, fallback?: PageProvider): string {
-  const fromApi = provider.description?.trim();
-  if (fromApi) return fromApi;
   const fromFallback = fallback?.description?.trim();
   if (fromFallback) return fromFallback;
   const extra = lookupDescriptionMap(RORLIGT_EXTRA_DESCRIPTION_BY_NAME, provider.name);
   if (extra) return extra;
+  const fromApi = provider.description?.trim();
+  if (fromApi) return fromApi;
   return RORLIGT_GENERIC_DESCRIPTION;
 }
 
 function resolveFastprisDescription(provider: PageProvider): string {
-  const fromApi = provider.description?.trim();
-  if (fromApi) return fromApi;
   const fromMap = lookupDescriptionMap(FASTPRIS_DESCRIPTION_BY_NAME, provider.name);
   if (fromMap) return fromMap;
+  const fromApi = provider.description?.trim();
+  if (fromApi) return fromApi;
   return FASTPRIS_GENERIC_DESCRIPTION;
 }
 
