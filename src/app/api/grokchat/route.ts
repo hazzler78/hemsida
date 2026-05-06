@@ -43,6 +43,7 @@ interface PageProviderApi {
 
 const XAI_API_KEY = process.env.XAI_API_KEY;
 const XAI_API_URL = 'https://api.x.ai/v1/chat/completions';
+const XAI_CHAT_MODEL = process.env.XAI_CHAT_MODEL || 'grok-4.20-non-reasoning';
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -478,7 +479,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         messages: fullMessages,
-        model: 'grok-3-latest',
+        model: XAI_CHAT_MODEL,
         stream: false,
         temperature: 0.3,
       }),
