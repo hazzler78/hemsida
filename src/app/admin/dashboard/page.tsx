@@ -2,10 +2,13 @@
 import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
+import HomepageFunnelPanel from '@/components/admin/HomepageFunnelPanel';
+import { buildHomepageFunnel, type HomepageFunnelStats } from '@/lib/homepageFunnel';
 
 const ADMIN_PASSWORD = "grodan2025";
 
 interface DashboardStats {
+  homepageFunnel: HomepageFunnelStats;
   // Funnel metrics
   pageViews: number;
   aiAnalyses: number;
@@ -246,6 +249,47 @@ export default function AdminDashboard() {
             : { variant: 'B', ctr: ctrB * 100 };
         }
       }
+
+      // 6b. Startsida-funnel (volym per steg)
+      const humanPageViewFilter = 'is_bot.eq.false,is_bot.is.null';
+
+      const { count: homepageViews } = await supabase
+        .from('page_views')
+        .select('*', { count: 'exact', head: true })
+        .eq('path', '/')
+        .or(humanPageViewFilter)
+        .gte('created_at', fromISO);
+
+      const { count: homepageHeroImpressions } = await supabase
+        .from('hero_impressions')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', fromISO);
+
+      const { count: homepageHeroClicks } = await supabase
+        .from('hero_clicks')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', fromISO);
+
+      const { count: contractPageViews } = await supabase
+        .from('page_views')
+        .select('*', { count: 'exact', head: true })
+        .in('path', ['/rorligt-avtal-v2', '/rorligt-avtal'])
+        .or(humanPageViewFilter)
+        .gte('created_at', fromISO);
+
+      const { count: affiliateRorligtClicks } = await supabase
+        .from('affiliate_clicks')
+        .select('*', { count: 'exact', head: true })
+        .eq('contract_type', 'rorligt')
+        .gte('created_at', fromISO);
+
+      const homepageFunnel = buildHomepageFunnel({
+        homepageViews: homepageViews || 0,
+        heroImpressions: homepageHeroImpressions || 0,
+        heroClicks: homepageHeroClicks || 0,
+        contractPageViews: contractPageViews || 0,
+        affiliateRorligtClicks: affiliateRorligtClicks || 0,
+      });
 
       // 7. A/B Test Results - Banner
       const { data: bannerImpressions } = await supabase
@@ -532,6 +576,7 @@ export default function AdminDashboard() {
         : 0;
 
       setStats({
+        homepageFunnel,
         pageViews: pageViews || 0,
         aiAnalyses: aiAnalyses || 0,
         contractClicks,
@@ -782,6 +827,21 @@ export default function AdminDashboard() {
               </div>
             </div>
           )}
+
+          <HomepageFunnelPanel
+            funnel={stats.homepageFunnel}
+            dateRangeLabel={
+              dateRange === '24h'
+                ? 'Senaste 24 timmarna'
+                : dateRange === '4d'
+                  ? 'Senaste 4 dagarna'
+                  : dateRange === '7d'
+                    ? 'Senaste 7 dagarna'
+                    : dateRange === '30d'
+                      ? 'Senaste 30 dagarna'
+                      : 'Senaste 90 dagarna'
+            }
+          />
 
           {/* Hero Metrics */}
           <div style={{ 

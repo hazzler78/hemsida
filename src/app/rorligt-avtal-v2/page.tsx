@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { MOTALA_LOGO_SRC } from '@/lib/providerLogos';
 import { getElectricityArea, type ElectricityArea } from '@/lib/types';
+import { usePageView } from '@/lib/usePageView';
 
 interface PageProvider {
   id: number;
@@ -764,6 +765,8 @@ function getRecommendedProviders(
 }
 
 export default function RorligtAvtalV2Page() {
+  usePageView('/rorligt-avtal-v2');
+
   const [step, setStep] = useState<'questions' | 'results'>('questions');
   const [providers, setProviders] = React.useState<PageProvider[]>([]);
   const [loading, setLoading] = React.useState(true);
