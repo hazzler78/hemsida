@@ -324,7 +324,7 @@ export default function Hero() {
                   gap: '0.75rem',
                   minWidth: 0,
                   width: '100%',
-                  maxWidth: 320,
+                  maxWidth: 360,
                 }}
               >
                 <div
@@ -372,69 +372,13 @@ export default function Hero() {
                     size="lg"
                     background={buttonBackground}
                     color={buttonTextColor}
-                    aria-label="Se rörligt elavtal och byt från dyrt avtal"
+                    aria-label="Byt elavtal och kom igång"
                     disableScrollEffect={true}
                     disableHoverEffect={true}
                   >
-                    Se rörligt avtal för mitt hem
+                    Byt elavtal – kom igång
                   </GlassButton>
                 </div>
-                <div
-                  style={{
-                    cursor: 'pointer',
-                    position: 'relative',
-                    zIndex: 10,
-                    transition: 'all 0.3s ease',
-                    width: '100%',
-                  }}
-                  onMouseEnter={useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-                    e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
-                    e.currentTarget.style.filter = 'brightness(1.02)';
-                  }, [])}
-                  onMouseLeave={useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-                    e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                    e.currentTarget.style.filter = 'brightness(1)';
-                  }, [])}
-                  onClick={() => {
-                    trackHeroClick('fastpris', '/fastpris-avtal');
-                    const sid =
-                      typeof window !== 'undefined' ? window.localStorage.getItem('invoice_session_id') || '' : '';
-                    const url = '/fastpris-avtal' + (sid ? `?sid=${encodeURIComponent(sid)}` : '');
-                    window.location.href = url;
-                  }}
-                >
-                  <GlassButton
-                    variant="secondary"
-                    size="md"
-                    aria-label="Se fastprisavtal för mitt hem"
-                    disableScrollEffect={true}
-                    disableHoverEffect={true}
-                  >
-                    Se fastprisavtal för mitt hem
-                  </GlassButton>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    window.location.href = withDefaultCtaUtm(
-                      '/fakturaanalys',
-                      'hero',
-                      'secondary-fakturaanalys'
-                    );
-                  }}
-                  style={{
-                    marginTop: '0.25rem',
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#ffffff',
-                    fontSize: '0.9rem',
-                    textDecoration: 'underline',
-                    cursor: 'pointer',
-                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
-                  }}
-                >
-                  Vill du förstå din elräkning först? Ladda upp faktura
-                </button>
               </div>
             </ButtonRow>
           </TextContent>
