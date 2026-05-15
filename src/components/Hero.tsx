@@ -163,34 +163,17 @@ const USPList = styled.ul`
   }
 `;
 
-function getInitialHeroVariant(): 'A' | 'B' {
-  if (typeof window === 'undefined') {
-    return 'A';
-  }
-  try {
-    const stored = window.localStorage.getItem('hero_variant_v1');
-    const storedExpiry = window.localStorage.getItem('hero_variant_expiry_v1');
-    const now = Date.now();
-    const isExpired = storedExpiry ? now > Number(storedExpiry) : true;
-    if (stored && (stored === 'A' || stored === 'B') && !isExpired) {
-      return stored as 'A' | 'B';
-    }
-    const newVariant: 'A' | 'B' = Math.random() < 0.5 ? 'A' : 'B';
-    const expiry = now + 30 * 24 * 60 * 60 * 1000;
-    window.localStorage.setItem('hero_variant_v1', newVariant);
-    window.localStorage.setItem('hero_variant_expiry_v1', String(expiry));
-    return newVariant;
-  } catch {
-    return 'A';
-  }
-}
+/** Vinnare i hero A/B (maj 2026): variant B – grön CTA, högre CTR. */
+const HERO_WINNER_VARIANT = 'B' as const;
+const HERO_CTA_BACKGROUND = 'linear-gradient(135deg, #22c55e, #16a34a)';
+const HERO_CTA_TEXT_COLOR = 'white';
+const HERO_TITLE = 'Trött på elräkningar som rusar?';
+const HERO_SUB = 'Billigare el väntar – se avtal som lönar sig just nu!';
 
 export default function Hero() {
-  const [variant] = useState<'A' | 'B'>(getInitialHeroVariant);
   const [videoStarted, setVideoStarted] = useState(false);
   const videoContainerRef = useRef<HTMLDivElement | null>(null);
   const [isMobile, setIsMobile] = useState(false);
-  const [ctaStyleReady, setCtaStyleReady] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -202,21 +185,17 @@ export default function Hero() {
     return () => window.removeEventListener('resize', update);
   }, []);
 
-  // Förhindra färg-blink vid första render: använd neutral stil tills klienten är redo
-  useEffect(() => {
-    setCtaStyleReady(true);
-  }, []);
-
   useEffect(() => {
     try {
       if (typeof window === 'undefined') return;
-      const key = `hero_impression_${variant}`;
+      window.localStorage.setItem('hero_variant_v1', HERO_WINNER_VARIANT);
+      const key = `hero_impression_${HERO_WINNER_VARIANT}`;
       const last = Number(window.localStorage.getItem(key) || '0');
       const now = Date.now();
       const dayMs = 24 * 60 * 60 * 1000;
       if (!last || now - last > dayMs) {
         const sessionId = window.localStorage.getItem('invoice_session_id') || '';
-        const payload = JSON.stringify({ variant, sessionId });
+        const payload = JSON.stringify({ variant: HERO_WINNER_VARIANT, sessionId });
         const url = '/api/events/hero-impression';
         if (navigator.sendBeacon) {
           const blob = new Blob([payload], { type: 'application/json' });
@@ -231,38 +210,15 @@ export default function Hero() {
     } catch {
       // no-op
     }
-  }, [variant]);
-
-  const heroTitle: string =
-    variant === 'A'
-      ? 'Sluta betala för dyra elräkningar – byt nu!'
-      : 'Trött på elräkningar som rusar?';
-  const heroSub: string =
-    variant === 'A'
-      ? 'Välj ett elavtal vi själva skulle rekommendera till familj och vänner.'
-      : 'Billigare el väntar – se avtal som lönar sig just nu!';
-
-  // A/B-test: gul CTA-knapp vs grön CTA-knapp
-  // Första frame: neutral brand-gradient för att undvika blink mellan varianter
-  const neutralBackground = 'linear-gradient(135deg, var(--primary), var(--secondary))';
-  const neutralTextColor = 'white';
-  const buttonBackground = ctaStyleReady
-    ? (variant === 'A'
-        ? 'linear-gradient(135deg, #fbbf24, #fde68a)' // gul
-        : 'linear-gradient(135deg, #22c55e, #16a34a)' // grön
-      )
-    : neutralBackground;
-  const buttonTextColor = ctaStyleReady
-    ? (variant === 'A' ? '#1f2937' : 'white')
-    : neutralTextColor;
+  }, []);
 
   const trackHeroClick = useCallback((target: 'rorligt' | 'fastpris', href: string) => {
     try {
       const sessionId = (typeof window !== 'undefined') ? (window.localStorage.getItem('invoice_session_id') || '') : '';
       const sid = (typeof window !== 'undefined') ? (window.localStorage.getItem('invoice_session_id') || '') : '';
       const withSid = href + (href.includes('?') ? `&sid=${encodeURIComponent(sid)}` : `?sid=${encodeURIComponent(sid)}`);
-      const finalUrl = withDefaultCtaUtm(withSid, 'hero', `variant${variant}`, 'hero-ab');
-      const payload = JSON.stringify({ variant, sessionId, target, href: finalUrl });
+      const finalUrl = withDefaultCtaUtm(withSid, 'hero', 'cta', 'hero');
+      const payload = JSON.stringify({ variant: HERO_WINNER_VARIANT, sessionId, target, href: finalUrl });
       const url = '/api/events/hero-click';
       if (navigator.sendBeacon) {
         const blob = new Blob([payload], { type: 'application/json' });
@@ -298,7 +254,7 @@ export default function Hero() {
         window.open(href, '_blank');
       }
     }
-  }, [variant]);
+  }, []);
   
   const handleStartVideo = useCallback(() => {
     setVideoStarted(true);
@@ -313,8 +269,8 @@ export default function Hero() {
       <div className="container">
         <HeroContent>
           <TextContent>
-            <h1>{String(heroTitle)}</h1>
-            <p>{String(heroSub)}</p>
+            <h1>{HERO_TITLE}</h1>
+            <p>{HERO_SUB}</p>
             <ButtonRow>
               <div
                 style={{
@@ -370,8 +326,8 @@ export default function Hero() {
                   <GlassButton
                     variant="primary"
                     size="lg"
-                    background={buttonBackground}
-                    color={buttonTextColor}
+                    background={HERO_CTA_BACKGROUND}
+                    color={HERO_CTA_TEXT_COLOR}
                     aria-label="Byt elavtal och kom igång"
                     disableScrollEffect={true}
                     disableHoverEffect={true}
