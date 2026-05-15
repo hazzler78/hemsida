@@ -5,6 +5,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { MOTALA_LOGO_SRC } from '@/lib/providerLogos';
 import { getElectricityArea, type ElectricityArea } from '@/lib/types';
+import { getOrCreateSessionId } from '@/lib/sessionId';
 
 /** Månadskostnad, påslag och pristyp från /api/prices/providers (prisfiler). */
 type ProviderPriceItem = {
@@ -672,7 +673,7 @@ export default function RorligtAvtalPage() {
       const trackingId = `elchef_${Date.now()}_${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
       
       // Track affiliate link click
-      const sessionId = typeof window !== 'undefined' ? (window.localStorage.getItem('invoice_session_id') || '') : '';
+      const sessionId = typeof window !== 'undefined' ? getOrCreateSessionId() : '';
       const heroVariant = typeof window !== 'undefined' ? window.localStorage.getItem('hero_variant_v1') || null : null;
       // Check if user came via robinhood link (within 24 hours)
       const cameViaRobinhood = typeof window !== 'undefined' ? (() => {

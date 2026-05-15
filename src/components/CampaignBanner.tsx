@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Image from "next/image";
 import { withDefaultCtaUtm } from '@/lib/utm';
+import { getOrCreateSessionId } from '@/lib/sessionId';
 
 const Banner = styled.div`
   width: 100%;
@@ -84,7 +85,7 @@ export default function CampaignBanner() {
       const now = Date.now();
       const dayMs = 24 * 60 * 60 * 1000;
       if (!last || now - last > dayMs) {
-        const sessionId = window.localStorage.getItem('invoice_session_id') || '';
+        const sessionId = getOrCreateSessionId();
         const payload = JSON.stringify({ variant, sessionId });
         const url = '/api/events/banner-impression';
         if (navigator.sendBeacon) {
@@ -105,7 +106,7 @@ export default function CampaignBanner() {
   const handleClickA = (e: React.MouseEvent) => {
     e.preventDefault();
     try {
-      const sessionId = (typeof window !== 'undefined') ? (window.localStorage.getItem('invoice_session_id') || '') : '';
+      const sessionId = getOrCreateSessionId();
       const payload = JSON.stringify({ variant: 'A', href: hrefA, sessionId });
       const url = '/api/events/banner-click';
       if (navigator.sendBeacon) {
@@ -123,7 +124,7 @@ export default function CampaignBanner() {
   const handleClickB = (e: React.MouseEvent) => {
     e.preventDefault();
     try {
-      const sessionId = (typeof window !== 'undefined') ? (window.localStorage.getItem('invoice_session_id') || '') : '';
+      const sessionId = getOrCreateSessionId();
       const payload = JSON.stringify({ variant: 'B', href: hrefB, sessionId });
       const url = '/api/events/banner-click';
       if (navigator.sendBeacon) {

@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { persistSessionId } from '@/lib/sessionId';
 
 export default function TackPage() {
   // Avoid hydration mismatch: server has no window; read search params only after mount
@@ -18,7 +19,7 @@ export default function TackPage() {
     try {
       // Spara sid för eventuell uppföljning i vår egen funnel
       if (sid) {
-        localStorage.setItem('invoice_session_id', sid);
+        persistSessionId(sid);
       }
 
       // TikTok Lead efter Cookiebot-samtycke

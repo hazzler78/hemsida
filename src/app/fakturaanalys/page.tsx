@@ -5,6 +5,8 @@ import GlassButton from '@/components/GlassButton';
 import ContactForm from '@/components/ContactForm';
 import ShareResults from '@/components/ShareResults';
 import { withDefaultCtaUtm } from '@/lib/utm';
+import { usePageView } from '@/lib/usePageView';
+import { getOrCreateSessionId } from '@/lib/sessionId';
 import Script from 'next/script';
 
 // SVG Ikoner i glassmorphism-stil
@@ -119,45 +121,10 @@ export default function Fakturaanalys() {
   const sessionIdRef = useRef<string>('');
   const [consentToStore, setConsentToStore] = useState(false);
 
-  useEffect(() => {
-    try {
-      const existing = typeof window !== 'undefined' ? localStorage.getItem('invoiceSessionId') : null;
-      if (existing) {
-        sessionIdRef.current = existing;
-      } else {
-        const generated = `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
-        sessionIdRef.current = generated;
-        if (typeof window !== 'undefined') localStorage.setItem('invoiceSessionId', generated);
-      }
-    } catch {}
-  }, []);
+  usePageView('/fakturaanalys');
 
-  // Spåra sidvisning med UTM-parametrar (uppdaterad path)
   useEffect(() => {
-    try {
-      if (typeof window === 'undefined') return;
-      const sid = sessionIdRef.current || localStorage.getItem('invoiceSessionId') || '';
-      const params = new URLSearchParams(window.location.search);
-      const utmSource = params.get('utm_source') || undefined;
-      const utmMedium = params.get('utm_medium') || undefined;
-      const utmCampaign = params.get('utm_campaign') || undefined;
-      const landingReferrer = typeof document.referrer === 'string' ? document.referrer : '';
-      const payload = JSON.stringify({ 
-        path: '/fakturaanalys', 
-        sessionId: sid,
-        utmSource,
-        utmMedium,
-        utmCampaign,
-        referrer: landingReferrer
-      });
-      const url = '/api/events/page-view';
-      if (navigator.sendBeacon) {
-        const blob = new Blob([payload], { type: 'application/json' });
-        navigator.sendBeacon(url, blob);
-      } else {
-        fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload }).catch(() => {});
-      }
-    } catch {}
+    sessionIdRef.current = getOrCreateSessionId();
   }, []);
 
   // Funktion för att spåra kontraktsklick från AI-användare (uppdaterad source)

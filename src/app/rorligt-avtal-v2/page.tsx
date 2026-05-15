@@ -6,6 +6,7 @@ import styled, { keyframes } from 'styled-components';
 import { MOTALA_LOGO_SRC } from '@/lib/providerLogos';
 import { getElectricityArea, type ElectricityArea } from '@/lib/types';
 import { usePageView } from '@/lib/usePageView';
+import { getOrCreateSessionId } from '@/lib/sessionId';
 
 interface PageProvider {
   id: number;
@@ -922,7 +923,7 @@ export default function RorligtAvtalV2Page() {
       // Generera unikt tracking-ID för att koppla försäljningar till klick
       const trackingId = `elchef_${Date.now()}_${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
       
-      const sessionId = typeof window !== 'undefined' ? (window.localStorage.getItem('invoice_session_id') || '') : '';
+      const sessionId = getOrCreateSessionId();
       const heroVariant = typeof window !== 'undefined' ? window.localStorage.getItem('hero_variant_v1') || null : null;
       const cameViaRobinhood = typeof window !== 'undefined' ? (() => {
         const flag = localStorage.getItem('came_via_robinhood');

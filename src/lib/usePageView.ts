@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { getOrCreateSessionId } from '@/lib/sessionId';
 
 /**
  * Hook för att spåra sidvisningar med UTM-parametrar
@@ -9,20 +10,7 @@ export function usePageView(path: string) {
     try {
       if (typeof window === 'undefined') return;
       
-      // Hämta eller skapa session ID
-      const getSessionId = () => {
-        try {
-          const existing = localStorage.getItem('invoiceSessionId');
-          if (existing) return existing;
-          const generated = `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
-          localStorage.setItem('invoiceSessionId', generated);
-          return generated;
-        } catch {
-          return `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
-        }
-      };
-      
-      const sid = getSessionId();
+      const sid = getOrCreateSessionId();
       
       // Hämta UTM-parametrar från URL
       const params = new URLSearchParams(window.location.search);

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { FaFacebook, FaInstagram, FaLinkedin, FaTwitter, FaCopy, FaShare } from 'react-icons/fa';
 import GlassButton from './GlassButton';
+import { getOrCreateSessionId } from '@/lib/sessionId';
 
 interface ShareResultsProps {
   analysisResult: string;
@@ -85,7 +86,7 @@ export default function ShareResults({ analysisResult, savingsAmount, logId, onS
           platform,
           logId,
           savingsAmount: detectedSavings,
-          sessionId: typeof window !== 'undefined' ? localStorage.getItem('invoiceSessionId') : null
+          sessionId: typeof window !== 'undefined' ? getOrCreateSessionId() : null
         })
       }).catch(() => {});
     } catch {}

@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
 import HomepageFunnelPanel from '@/components/admin/HomepageFunnelPanel';
-import { buildHomepageFunnel, type HomepageFunnelStats } from '@/lib/homepageFunnel';
+import { buildHomepageFunnel, HUMAN_PAGE_VIEW_OR, type HomepageFunnelStats } from '@/lib/homepageFunnel';
 
 const ADMIN_PASSWORD = "grodan2025";
 
@@ -127,10 +127,13 @@ export default function AdminDashboard() {
       }
       const prevFromISO = prevFromDate.toISOString();
 
-      // 1. Page Views
+      // 1. Page Views (giltig path, exkl. botar – undvik historiska null-rader)
       const { count: pageViews, error: pageViewsError } = await supabase
         .from('page_views')
         .select('*', { count: 'exact', head: true })
+        .not('path', 'is', null)
+        .neq('path', '')
+        .or(HUMAN_PAGE_VIEW_OR)
         .gte('created_at', fromISO);
 
       if (pageViewsError) {
@@ -141,6 +144,9 @@ export default function AdminDashboard() {
       const { count: prevPageViews } = await supabase
         .from('page_views')
         .select('*', { count: 'exact', head: true })
+        .not('path', 'is', null)
+        .neq('path', '')
+        .or(HUMAN_PAGE_VIEW_OR)
         .gte('created_at', prevFromISO)
         .lt('created_at', fromISO);
 
@@ -251,13 +257,17 @@ export default function AdminDashboard() {
       }
 
       // 6b. Startsida-funnel (volym per steg)
-      const humanPageViewFilter = 'is_bot.eq.false,is_bot.is.null';
-
       const { count: homepageViews } = await supabase
         .from('page_views')
         .select('*', { count: 'exact', head: true })
         .eq('path', '/')
-        .or(humanPageViewFilter)
+        .or(HUMAN_PAGE_VIEW_OR)
+        .gte('created_at', fromISO);
+
+      const { count: nullPathPageViews } = await supabase
+        .from('page_views')
+        .select('*', { count: 'exact', head: true })
+        .is('path', null)
         .gte('created_at', fromISO);
 
       const { count: homepageHeroImpressions } = await supabase
@@ -274,7 +284,7 @@ export default function AdminDashboard() {
         .from('page_views')
         .select('*', { count: 'exact', head: true })
         .in('path', ['/rorligt-avtal-v2', '/rorligt-avtal'])
-        .or(humanPageViewFilter)
+        .or(HUMAN_PAGE_VIEW_OR)
         .gte('created_at', fromISO);
 
       const { count: affiliateRorligtClicks } = await supabase
@@ -289,6 +299,7 @@ export default function AdminDashboard() {
         heroClicks: homepageHeroClicks || 0,
         contractPageViews: contractPageViews || 0,
         affiliateRorligtClicks: affiliateRorligtClicks || 0,
+        nullPathPageViews: nullPathPageViews || 0,
       });
 
       // 7. A/B Test Results - Banner
@@ -323,6 +334,9 @@ export default function AdminDashboard() {
       const { data: pageViewsData } = await supabase
         .from('page_views')
         .select('utm_source, utm_campaign, session_id, referer')
+        .not('path', 'is', null)
+        .neq('path', '')
+        .or(HUMAN_PAGE_VIEW_OR)
         .gte('created_at', fromISO);
 
       // Hjälpfunktion: härled social kanal från utm_source eller referer
@@ -405,6 +419,9 @@ export default function AdminDashboard() {
       const { data: recentPageViews } = await supabase
         .from('page_views')
         .select('created_at')
+        .not('path', 'is', null)
+        .neq('path', '')
+        .or(HUMAN_PAGE_VIEW_OR)
         .gte('created_at', last7Days.toISOString());
 
       const { data: recentAnalyses } = await supabase
@@ -854,6 +871,7 @@ export default function AdminDashboard() {
               title="Besökare"
               value={stats.pageViews}
               growth={stats.pageViewsGrowth}
+              subtitle="Giltiga sidvisningar (path satt, ej bot)"
               icon="👥"
               color="#3b82f6"
             />
@@ -880,7 +898,11 @@ export default function AdminDashboard() {
             <MetricCard 
               title="Affiliate-klick (totalt)"
               value={stats.affiliateClicks}
-              subtitle={stats.pageViews > 0 ? `CTR: ${((stats.affiliateClicks / stats.pageViews) * 100).toFixed(1)}% (besök → klick)` : 'CTR: —'}
+              subtitle={
+                stats.homepageFunnel.homepageViews > 0
+                  ? `Startsida → affiliate: ${((stats.affiliateClicks / stats.homepageFunnel.homepageViews) * 100).toFixed(1)}%`
+                  : 'CTR: —'
+              }
               icon="🔗"
               color="#ec4899"
             />
@@ -963,7 +985,10 @@ export default function AdminDashboard() {
                   Alla klick på affiliate-länkar
                 </div>
                 <div style={{ fontSize: '0.75rem', color: '#92400e', marginTop: 6, fontWeight: 500 }}>
-                  CTR: {stats.pageViews > 0 ? `${((stats.affiliateClicks / stats.pageViews) * 100).toFixed(1)}%` : '—'} (besök → klick)
+                  Startsida → affiliate:{' '}
+                  {stats.homepageFunnel.homepageViews > 0
+                    ? `${((stats.affiliateClicks / stats.homepageFunnel.homepageViews) * 100).toFixed(1)}%`
+                    : '—'}
                 </div>
               </div>
               <div style={{ 

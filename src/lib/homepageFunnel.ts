@@ -23,8 +23,17 @@ export type HomepageFunnelStats = {
   heroClicks: number;
   contractPageViews: number;
   affiliateRorligtClicks: number;
+  /** page_views utan path (historisk skräpdata) */
+  nullPathPageViews: number;
   steps: HomepageFunnelStep[];
 };
+
+/** Filter för mänskliga besök med giltig path i Supabase-queries */
+export const HUMAN_PAGE_VIEW_OR = 'is_bot.eq.false,is_bot.is.null';
+
+export function hasValidPageViewPath(path: string | null | undefined): boolean {
+  return typeof path === 'string' && path.trim().length > 0;
+}
 
 function pct(numerator: number, denominator: number): number | null {
   if (denominator <= 0) return null;
@@ -37,9 +46,16 @@ export function buildHomepageFunnel(stats: {
   heroClicks: number;
   contractPageViews: number;
   affiliateRorligtClicks: number;
+  nullPathPageViews: number;
 }): HomepageFunnelStats {
-  const { homepageViews, heroImpressions, heroClicks, contractPageViews, affiliateRorligtClicks } =
-    stats;
+  const {
+    homepageViews,
+    heroImpressions,
+    heroClicks,
+    contractPageViews,
+    affiliateRorligtClicks,
+    nullPathPageViews,
+  } = stats;
 
   const rawSteps: Array<Omit<HomepageFunnelStep, 'rateFromPrevious' | 'rateFromStart'>> = [
     {
@@ -83,6 +99,7 @@ export function buildHomepageFunnel(stats: {
     heroClicks,
     contractPageViews,
     affiliateRorligtClicks,
+    nullPathPageViews,
     steps,
   };
 }

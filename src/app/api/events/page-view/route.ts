@@ -49,6 +49,23 @@ function isPreviewDeployment(referer: string): boolean {
   return referer.includes('preview') || referer.includes('localhost') || referer.includes('127.0.0.1');
 }
 
+function resolvePagePath(path: unknown, referer: string): string | null {
+  if (typeof path === 'string' && path.trim().length > 0) {
+    return path.trim();
+  }
+  if (referer) {
+    try {
+      const u = new URL(referer);
+      if (u.hostname.includes('elchef')) {
+        return u.pathname || '/';
+      }
+    } catch {
+      /* no-op */
+    }
+  }
+  return null;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const SUPABASE_URL = process.env.SUPABASE_URL as string;
@@ -75,8 +92,13 @@ export async function POST(req: NextRequest) {
     const bot = isBot(ua);
     const isPreview = isPreviewDeployment(effectiveReferrer);
 
+    const effectivePath = resolvePagePath(path, effectiveReferrer);
+    if (!effectivePath) {
+      return NextResponse.json({ ok: true, skipped: 'missing_path' });
+    }
+
     const { error } = await supabase.from('page_views').insert({
-      path: typeof path === 'string' ? path : null,
+      path: effectivePath,
       session_id: typeof sessionId === 'string' ? sessionId : null,
       utm_source: typeof utmSource === 'string' ? utmSource : null,
       utm_medium: typeof utmMedium === 'string' ? utmMedium : null,

@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import GlassButton from './GlassButton';
 import { withDefaultCtaUtm } from '@/lib/utm';
+import { getOrCreateSessionId } from '@/lib/sessionId';
 
 const HeroSection = styled.section`
   padding: var(--section-spacing) 0;
@@ -194,7 +195,7 @@ export default function Hero() {
       const now = Date.now();
       const dayMs = 24 * 60 * 60 * 1000;
       if (!last || now - last > dayMs) {
-        const sessionId = window.localStorage.getItem('invoice_session_id') || '';
+        const sessionId = getOrCreateSessionId();
         const payload = JSON.stringify({ variant: HERO_WINNER_VARIANT, sessionId });
         const url = '/api/events/hero-impression';
         if (navigator.sendBeacon) {
@@ -214,8 +215,8 @@ export default function Hero() {
 
   const trackHeroClick = useCallback((target: 'rorligt' | 'fastpris', href: string) => {
     try {
-      const sessionId = (typeof window !== 'undefined') ? (window.localStorage.getItem('invoice_session_id') || '') : '';
-      const sid = (typeof window !== 'undefined') ? (window.localStorage.getItem('invoice_session_id') || '') : '';
+      const sessionId = getOrCreateSessionId();
+      const sid = sessionId;
       const withSid = href + (href.includes('?') ? `&sid=${encodeURIComponent(sid)}` : `?sid=${encodeURIComponent(sid)}`);
       const finalUrl = withDefaultCtaUtm(withSid, 'hero', 'cta', 'hero');
       const payload = JSON.stringify({ variant: HERO_WINNER_VARIANT, sessionId, target, href: finalUrl });
@@ -318,7 +319,7 @@ export default function Hero() {
                       /* no-op */
                     }
                     const sid =
-                      typeof window !== 'undefined' ? window.localStorage.getItem('invoice_session_id') || '' : '';
+                      typeof window !== 'undefined' ? getOrCreateSessionId() : '';
                     const url = '/rorligt-avtal-v2' + (sid ? `?sid=${encodeURIComponent(sid)}` : '');
                     window.location.href = url;
                   }}

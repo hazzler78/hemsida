@@ -16,6 +16,10 @@ export default function HomepageFunnelPanel({ funnel, dateRangeLabel }: Props) {
   const maxCount = Math.max(...funnel.steps.map((s) => s.count), 1);
   const missingContractTracking =
     funnel.heroClicks > 0 && funnel.contractPageViews === 0;
+  const trackedPageViews = funnel.homepageViews + funnel.nullPathPageViews;
+  const nullPathShare =
+    trackedPageViews > 0 ? funnel.nullPathPageViews / trackedPageViews : 0;
+  const showNullPathWarning = funnel.nullPathPageViews > 0 && nullPathShare > 0.1;
 
   return React.createElement(
     el('section'),
@@ -77,6 +81,24 @@ export default function HomepageFunnelPanel({ funnel, dateRangeLabel }: Props) {
           : ''
       )
     ),
+    showNullPathWarning
+      ? React.createElement(
+          el('div'),
+          {
+            style: {
+              marginBottom: 16,
+              padding: 12,
+              background: '#fef2f2',
+              border: '1px solid #fecaca',
+              borderRadius: 8,
+              fontSize: '0.875rem',
+              color: '#991b1b',
+            },
+          },
+          React.createElement(el('strong'), null, 'Datakvalitet: '),
+          `${funnel.nullPathPageViews.toLocaleString('sv-SE')} sidvisningar utan path (${formatFunnelRate(nullPathShare * 100)}) – exkluderas från KPI "Besökare". Nya rader ska inte tillkomma efter senaste deploy.`
+        )
+      : null,
     missingContractTracking
       ? React.createElement(
           el('div'),
