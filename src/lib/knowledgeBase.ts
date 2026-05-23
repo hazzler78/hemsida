@@ -69,6 +69,34 @@ export const faqKnowledge: KnowledgeItem[] = [
     answer: "Ja, enligt distansavtalslagen har du ångerrätt i 14 dagar när du tecknar ett avtal på distans. Det innebär att du kan ångra avtalet utan kostnad inom denna period. Undantag: betald förbrukad el under ångerperioden.",
     keywords: ["ångra", "avtal", "14 dagar", "distansavtalslagen", "kostnad"],
     lastUpdated: "2025-01-20"
+  },
+  {
+    category: "leverantorer",
+    question: "Vad gäller för Cheap Energy, Stockholms Elbolag och Svealands Elbolag?",
+    answer: "Alla tre ingår i **Elify Energy Group** (samma koncern). Konsumentombudsmannen har drivit mål mot dem och domstolen har bl.a. funnit vilseledande marknadsföring kring elpris efter 12 månader. De har också figurerat på Konsumenternas Energimarknadsbyrås klagomålslista. elchef.se samarbetar med dem, men om du uttrycker misstro ska vi inte rekommendera dem – vi kan i stället tipsa om t.ex. Skellefteå Kraft, Tibber eller Greenely.",
+    keywords: ["cheap energy", "stockholms elbolag", "svealands", "elify", "klagomål", "konsumentverket", "ko", "svartlist"],
+    lastUpdated: "2026-05-23"
+  },
+  {
+    category: "leverantorer",
+    question: "Vad menar folk med att elbolag är svartlistade?",
+    answer: "Det finns ingen officiell svartlista, men **Konsumenternas Energimarknadsbyrå** publicerar en **klagomålslista** med elbolag som fått ovanligt många klagomål i relation till antal kunder. Cheap Energy, Stockholms Elbolag och Svealands Elbolag har både klagomål och domstolsärenden kopplade till sig. Avfärda inte kundens invändning – erkänn vad som stämmer.",
+    keywords: ["svartlist", "klagomålslist", "energimarknadsbyrån", "klagomål", "varning"],
+    lastUpdated: "2026-05-23"
+  },
+  {
+    category: "leverantorer",
+    question: "Vad är förhållandet mellan Enkla Elbolaget och Elify Group?",
+    answer: "**Enkla Elbolaget i Sverige AB** tillhör **Dalakraft AB** – det ingår **inte** i Elify Energy Group. Koppla aldrig ihop dem utan verifierad källa. Elify-koncernen driver bl.a. Cheap Energy, Stockholms Elbolag och Svealands Elbolag.",
+    keywords: ["enkla elbolaget", "elify", "dalakraft", "ägare", "koncern"],
+    lastUpdated: "2026-05-23"
+  },
+  {
+    category: "priser",
+    question: "Vad är rimlig elkostnad för en liten lägenhet?",
+    answer: "För en liten lägenhet (t.ex. 40 kvm) med **bara hushållsel** (ej eluppvärmning) brukar elhandelskostnaden ofta ligga runt några hundralappar per månad – exakt nivå beror på förbrukning och avtal. **2 000+ kr/mån** enbart för hushållsel i en sådan lägenhet låter orimligt högt och kan tyda på höga påslag, fel avtal eller att andra kostnader råkat ingå.",
+    keywords: ["dyrt", "hög räkning", "2400", "liten lägenhet", "40 kvm", "hushållsel", "för mycket"],
+    lastUpdated: "2026-05-23"
   }
 ];
 
