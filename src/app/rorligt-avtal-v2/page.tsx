@@ -556,8 +556,7 @@ const FALLBACK_PROVIDERS: PageProvider[] = [
     name: 'Cheap Energy',
     type: 'rorligt',
     logo_url: '/cheap-logo.png',
-    description:
-      'Billigast just nu för många som byter från Eon, Fortum eller Vattenfall. Enkelt digitalt byte utan bindningstid.',
+    description: 'Vårt billigaste avtal just nu.',
     url: 'https://www.cheapenergy.se/teckna-elavtal/?src=Elchef',
     is_recommended: true,
     display_order: 1,
