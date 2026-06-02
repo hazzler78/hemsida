@@ -40,41 +40,6 @@ const Lead = styled.p`
   text-shadow: var(--text-shadow);
 `;
 
-const Phone = styled.div`
-  margin-top: 1rem;
-  font-size: 1.1rem;
-  color: white;
-  font-weight: 600;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  text-shadow: var(--text-shadow);
-`;
-
-const PhoneNumber = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-`;
-
-const PhoneLink = styled.a`
-  color: var(--primary);
-  text-decoration: underline;
-  font-weight: 700;
-  transition: color var(--transition-normal) ease;
-  
-  &:hover {
-    color: var(--primary-dark);
-  }
-`;
-
-const OpeningHours = styled.div`
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.7);
-  font-weight: 400;
-`;
-
 export default function Kontakt() {
   return (
     <Section>
@@ -82,15 +47,9 @@ export default function Kontakt() {
         <ContactInfo>
           <Title>Kontakta oss</Title>
           <Lead>
-            Har du frågor eller vill komma i kontakt med oss? 
-            Fyll i formuläret nedan eller ring oss direkt så återkommer vi så snart vi kan.
+            Har du frågor eller vill komma i kontakt med oss?
+            Fyll i formuläret nedan så återkommer vi så snart vi kan.
           </Lead>
-          <Phone>
-            <PhoneNumber>
-              Ring oss direkt: <PhoneLink href="tel:0736862360">073-686 23 60</PhoneLink>
-            </PhoneNumber>
-            <OpeningHours>09:00-18:00 Vardagar</OpeningHours>
-          </Phone>
         </ContactInfo>
         
         <ContactForm />

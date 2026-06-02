@@ -121,7 +121,6 @@ interface ChatContactFormProps {
 export default function ChatContactForm({ onClose, onSubmitted }: ChatContactFormProps) {
   const [formData, setFormData] = useState({
     email: '',
-    phone: '',
     subscribeNewsletter: true
   });
   const [ref, setRef] = useState<string | null>(null);
@@ -167,7 +166,7 @@ export default function ChatContactForm({ onClose, onSubmitted }: ChatContactFor
 
       if (response.ok) {
         setSubmitStatus('success');
-        setFormData({ email: '', phone: '', subscribeNewsletter: true });
+        setFormData({ email: '', subscribeNewsletter: true });
         // Notify parent that form was submitted
         if (onSubmitted) {
           onSubmitted();
@@ -190,7 +189,7 @@ export default function ChatContactForm({ onClose, onSubmitted }: ChatContactFor
 
   return (
     <ContactFormContainer>
-      <Title>📞 Kontakta oss</Title>
+      <Title>Kontakta oss</Title>
       
       {submitStatus === 'success' && (
         <Message $type="success">
@@ -214,14 +213,6 @@ export default function ChatContactForm({ onClose, onSubmitted }: ChatContactFor
           required
         />
         
-        <Input
-          type="tel"
-          name="phone"
-          placeholder="Telefonnummer (valfritt)"
-          value={formData.phone}
-          onChange={handleInputChange}
-        />
-
         <CheckboxGroup>
           <Checkbox
             type="checkbox"

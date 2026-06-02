@@ -207,7 +207,6 @@ export default function ContactForm() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phone: '',
     message: '',
     newsletter: false
   });
@@ -227,8 +226,7 @@ export default function ContactForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Validation: phone and email are required
-    if (!formData.email || !formData.phone) {
+    if (!formData.email) {
       setSubmitStatus('error');
       setIsSubmitting(false);
       return;
@@ -251,11 +249,10 @@ export default function ContactForm() {
 
       if (response.ok) {
         setSubmitStatus('success');
-        setFormData({ 
-          name: '', 
-          email: '', 
-          phone: '', 
-          message: '', 
+        setFormData({
+          name: '',
+          email: '',
+          message: '',
           newsletter: false
         });
 
@@ -320,18 +317,6 @@ export default function ContactForm() {
               id="email"
               name="email"
               value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </FormGroup>
-
-          <FormGroup>
-            <Label htmlFor="phone">Telefon *</Label>
-            <Input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={formData.phone}
               onChange={handleChange}
               required
             />
