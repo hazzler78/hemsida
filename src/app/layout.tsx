@@ -54,7 +54,7 @@ export default function RootLayout({
             "logo": "https://elchef.se/elchef-logo.png",
             "contactPoint": [{
               "@type": "ContactPoint",
-              "telephone": "+46-73-686-23-66",
+              "email": "info@elchef.se",
               "contactType": "customer service",
               "areaServed": "SE",
               "availableLanguage": ["Swedish", "English"]
