@@ -78,7 +78,10 @@ export default function RootLayout({
           property="og:description"
           content="Trött på elräkningar som rusar? Elchef.se hjälper dig välja rätt rörligt elavtal, analysera din elräkning med AI och ta nästa steg mot total energibesparing med solceller och batteri."
         />
-        <meta property="og:image" content="https://www.elchef.se/elchef-logo.png" />
+        <meta property="og:image" content="https://www.elchef.se/og-share.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Betalar du för mycket för elen? Byt gratis på elchef.se" />
         <meta property="og:url" content="https://www.elchef.se" />
         <meta property="og:type" content="website" />
         {/* Twitter Card metadata */}
@@ -91,7 +94,7 @@ export default function RootLayout({
           name="twitter:description"
           content="Trött på elräkningar som rusar? Elchef.se hjälper dig välja rätt rörligt elavtal, analysera din elräkning med AI och ta nästa steg mot total energibesparing med solceller och batteri."
         />
-        <meta name="twitter:image" content="https://www.elchef.se/elchef-logo.png" />
+        <meta name="twitter:image" content="https://www.elchef.se/og-share.png" />
         <meta name="facebook-domain-verification" content="in9xjxefhkl6pbe4g33zjwrsnkliin" />
         <meta name="tiktok-developers-site-verification" content="i7h859t0QF0G6Dua8q4h9qJUXwuPQoof" />
         

@@ -13,10 +13,10 @@ export const metadata: Metadata = {
     siteName: 'Elchef',
     images: [
       {
-        url: 'https://www.elchef.se/elchef-logo.png',
+        url: 'https://www.elchef.se/og-share.png',
         width: 1200,
         height: 630,
-        alt: 'Elchef Logo',
+        alt: 'Betalar du för mycket för elen? Byt gratis på elchef.se',
       },
     ],
     locale: 'sv_SE',
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Elchef – gör det enkelt att välja rätt elavtal',
     description: 'Elchef.se hjälper dig att snabbt, gratis och utan krångel hitta och byta till det elavtal som passar dig bäst.',
-    images: ['https://www.elchef.se/elchef-logo.png'],
+    images: ['https://www.elchef.se/og-share.png'],
   },
 };
 
