@@ -113,6 +113,10 @@ function generateSessionId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
+// Persistens: spara pågående konversation lokalt så Grodan minns vid återbesök/omladdning
+const CHAT_STORAGE_KEY = 'elchef_grok_chat_v1';
+const CHAT_TTL_MS = 24 * 60 * 60 * 1000; // 24 timmar
+
 export default function GrokChat() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState(initialMessages);
@@ -134,12 +138,45 @@ export default function GrokChat() {
   const chatWindowRef = useRef<HTMLDivElement>(null);
   const prevOpenRef = useRef(false);
 
-  // Generera session ID när komponenten mountas
+  // Återställ tidigare konversation vid montering (inom 24h), annars starta ny session
   useEffect(() => {
-    if (!sessionId) {
-      setSessionId(generateSessionId());
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = window.localStorage.getItem(CHAT_STORAGE_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw) as {
+          sessionId?: string;
+          messages?: typeof initialMessages;
+          updatedAt?: number;
+        };
+        const isFresh = typeof saved.updatedAt === 'number' && Date.now() - saved.updatedAt < CHAT_TTL_MS;
+        if (isFresh && saved.sessionId && Array.isArray(saved.messages) && saved.messages.length > 1) {
+          setSessionId(saved.sessionId);
+          setMessages(saved.messages);
+          return;
+        }
+        window.localStorage.removeItem(CHAT_STORAGE_KEY);
+      }
+    } catch {
+      // Ignorera trasig/oläsbar storage och starta ny session
     }
-  }, [sessionId]);
+    setSessionId(generateSessionId());
+  }, []);
+
+  // Spara konversationen lokalt så Grodan minns över omladdning/återbesök (24h)
+  useEffect(() => {
+    if (typeof window === 'undefined' || !sessionId) return;
+    try {
+      // Spara inte enbart inledande hälsningen – vänta tills något faktiskt sagts
+      if (messages.length <= 1) return;
+      window.localStorage.setItem(
+        CHAT_STORAGE_KEY,
+        JSON.stringify({ sessionId, messages, updatedAt: Date.now() })
+      );
+    } catch {
+      // Storage kan vara full/blockerad – chatten ska fungera ändå
+    }
+  }, [messages, sessionId]);
 
   // Responsiv bottom-position för chatbubblan och chat window
   const [chatBottom, setChatBottom] = useState(104); // 80px nav + 24px margin
@@ -345,6 +382,14 @@ export default function GrokChat() {
     setContractChoiceSubmitted(false);
     setShowBillUpload(false);
     setBillUploadSubmitted(false);
+    // Rensa även sparad konversation så den inte återställs vid omladdning
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.removeItem(CHAT_STORAGE_KEY);
+      } catch {
+        // Ignorera om storage inte är tillgänglig
+      }
+    }
   };
 
   // Funktion för att hantera avtalsval
