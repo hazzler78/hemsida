@@ -4,6 +4,9 @@ export const metadata: Metadata = {
   title: 'Rörligt elavtal – jämför bästa rörliga elavtal 2026 | Elchef.se',
   description:
     'Jämför rörliga elavtal i Sverige, se påslag och månadsavgifter och hitta bästa rörliga elavtal 2026 för din ekonomi i elområden som SE3 och SE4.',
+  alternates: {
+    canonical: '/rorligt-avtal',
+  },
   openGraph: {
     title: 'Rörligt elavtal – jämför bästa rörliga elavtal 2026 | Elchef.se',
     description:

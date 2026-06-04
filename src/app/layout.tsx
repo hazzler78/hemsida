@@ -19,6 +19,10 @@ export const viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.elchef.se"),
+  alternates: {
+    canonical: "/",
+  },
   title: "Elchef – sänk elräkningen med rätt rörligt elavtal 2026",
   description:
     "Trött på elräkningar som rusar? Elchef.se hjälper dig välja rätt rörligt elavtal, analysera din elräkning med AI och ta nästa steg mot total energibesparing med solceller och batteri.",
@@ -50,8 +54,8 @@ export default function RootLayout({
             "@context": "https://schema.org",
             "@type": "Organization",
             "name": "Elchef",
-            "url": "https://elchef.se",
-            "logo": "https://elchef.se/elchef-logo.png",
+            "url": "https://www.elchef.se",
+            "logo": "https://www.elchef.se/elchef-logo.png",
             "contactPoint": [{
               "@type": "ContactPoint",
               "email": "info@elchef.se",
@@ -74,8 +78,8 @@ export default function RootLayout({
           property="og:description"
           content="Trött på elräkningar som rusar? Elchef.se hjälper dig välja rätt rörligt elavtal, analysera din elräkning med AI och ta nästa steg mot total energibesparing med solceller och batteri."
         />
-        <meta property="og:image" content="https://elchef.se/elchef-logo.png" />
-        <meta property="og:url" content="https://elchef.se" />
+        <meta property="og:image" content="https://www.elchef.se/elchef-logo.png" />
+        <meta property="og:url" content="https://www.elchef.se" />
         <meta property="og:type" content="website" />
         {/* Twitter Card metadata */}
         <meta name="twitter:card" content="summary_large_image" />
@@ -87,7 +91,7 @@ export default function RootLayout({
           name="twitter:description"
           content="Trött på elräkningar som rusar? Elchef.se hjälper dig välja rätt rörligt elavtal, analysera din elräkning med AI och ta nästa steg mot total energibesparing med solceller och batteri."
         />
-        <meta name="twitter:image" content="https://elchef.se/elchef-logo.png" />
+        <meta name="twitter:image" content="https://www.elchef.se/elchef-logo.png" />
         <meta name="facebook-domain-verification" content="in9xjxefhkl6pbe4g33zjwrsnkliin" />
         <meta name="tiktok-developers-site-verification" content="i7h859t0QF0G6Dua8q4h9qJUXwuPQoof" />
         

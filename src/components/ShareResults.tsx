@@ -53,8 +53,8 @@ export default function ShareResults({ analysisResult, savingsAmount, logId, onS
     const encodedText = encodeURIComponent(text);
     // Generera unik delningslänk baserat på logId
     const shareUrl = logId 
-      ? `https://elchef.se/delad-kalkyl?id=${logId}`
-      : 'https://elchef.se/fakturaanalys';
+      ? `https://www.elchef.se/delad-kalkyl?id=${logId}`
+      : 'https://www.elchef.se/fakturaanalys';
     const url = encodeURIComponent(shareUrl);
     
     const urls = {
@@ -100,8 +100,8 @@ export default function ShareResults({ analysisResult, savingsAmount, logId, onS
     } else if (platform === 'facebook') {
       // Facebook - kopiera text och öppna
       const shareUrl = logId 
-        ? `https://elchef.se/delad-kalkyl?id=${logId}`
-        : 'https://elchef.se/fakturaanalys';
+        ? `https://www.elchef.se/delad-kalkyl?id=${logId}`
+        : 'https://www.elchef.se/fakturaanalys';
       
       try {
         navigator.clipboard.writeText(text);
@@ -198,8 +198,8 @@ export default function ShareResults({ analysisResult, savingsAmount, logId, onS
               onClick={async () => {
                 const text = generateShareText('facebook');
                 const shareUrl = logId 
-                  ? `https://elchef.se/delad-kalkyl?id=${logId}`
-                  : 'https://elchef.se/fakturaanalys';
+                  ? `https://www.elchef.se/delad-kalkyl?id=${logId}`
+                  : 'https://www.elchef.se/fakturaanalys';
                 
                 try {
                   // Kopiera texten automatiskt

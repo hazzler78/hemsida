@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { blogPosts } from '@/lib/blogPosts';
 
-const BASE_URL = 'https://elchef.se';
+const BASE_URL = 'https://www.elchef.se';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -10,7 +10,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '',
     '/rorligt-avtal',
     '/fastpris-avtal',
-    '/jamfor-elpriser',
     '/byt-elavtal',
     '/elpriskollen',
     '/fakturaanalys',

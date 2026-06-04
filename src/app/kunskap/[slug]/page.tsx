@@ -26,6 +26,9 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     title: `${post.title} | Elchef.se`,
     description: post.description,
     keywords: post.keywords,
+    alternates: {
+      canonical: `/kunskap/${post.slug}`,
+    },
     openGraph: {
       title: `${post.title} | Elchef.se`,
       description: post.description,

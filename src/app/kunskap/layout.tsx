@@ -4,6 +4,9 @@ export const metadata: Metadata = {
   title: 'Kunskap om elavtal och elpriser | Elchef.se',
   description:
     'Förstå elavtal, elpriser och spotpris på el. Guider om bästa elavtal 2026, hur du sänker elräkningen och vad som påverkar elpriset i Sverige.',
+  alternates: {
+    canonical: '/kunskap',
+  },
   openGraph: {
     title: 'Kunskap om elavtal och elpriser | Elchef.se',
     description:

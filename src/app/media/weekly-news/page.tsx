@@ -325,7 +325,7 @@ export default function WeeklyNews() {
             
             <div style={{ textAlign: 'center' }}>
               <CTAButton 
-                href="https://elchef.se" 
+                href="https://www.elchef.se" 
                 target="_blank" 
                 rel="noopener noreferrer"
               >

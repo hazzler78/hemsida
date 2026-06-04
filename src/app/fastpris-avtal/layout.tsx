@@ -4,6 +4,9 @@ export const metadata: Metadata = {
   title: 'Fast elpris – jämför fastprisavtal 2026 | Elchef.se',
   description:
     'Jämför fastprisavtal för el i Sverige och lås elpriset. Se kampanjer, prisgaranti och månadsavgift och hitta bästa fastprisavtal 2026 för en trygg elkostnad.',
+  alternates: {
+    canonical: '/fastpris-avtal',
+  },
   openGraph: {
     title: 'Fast elpris – jämför fastprisavtal 2026 | Elchef.se',
     description:
