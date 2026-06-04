@@ -18,16 +18,53 @@ export const viewport = {
   viewportFit: "cover" as const,
 };
 
+const SITE_TITLE = "Elchef – sänk elräkningen med rätt rörligt elavtal 2026";
+const SITE_DESCRIPTION =
+  "Trött på elräkningar som rusar? Elchef.se hjälper dig välja rätt rörligt elavtal, analysera din elräkning med AI och ta nästa steg mot total energibesparing med solceller och batteri.";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.elchef.se"),
   alternates: {
     canonical: "/",
   },
-  title: "Elchef – sänk elräkningen med rätt rörligt elavtal 2026",
-  description:
-    "Trött på elräkningar som rusar? Elchef.se hjälper dig välja rätt rörligt elavtal, analysera din elräkning med AI och ta nästa steg mot total energibesparing med solceller och batteri.",
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
   keywords:
     "rörligt elavtal, sänka elräkning, bästa elavtal 2026, elavtal, elpriser, byta elavtal, jämför elpriser, solceller, batteri",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+  },
+  openGraph: {
+    type: "website",
+    locale: "sv_SE",
+    url: "/",
+    siteName: "Elchef",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: [
+      {
+        url: "/og-share.png",
+        width: 1200,
+        height: 630,
+        alt: "Betalar du för mycket för elen? Byt gratis på elchef.se",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: ["/og-share.png"],
+  },
+  verification: {
+    other: {
+      "facebook-domain-verification": "in9xjxefhkl6pbe4g33zjwrsnkliin",
+      "tiktok-developers-site-verification": "i7h859t0QF0G6Dua8q4h9qJUXwuPQoof",
+    },
+  },
 };
 
 export default function RootLayout({
@@ -47,8 +84,6 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
         
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <script type="application/ld+json" suppressHydrationWarning>{`
           {
             "@context": "https://schema.org",
@@ -69,34 +104,6 @@ export default function RootLayout({
             ]
           }
         `}</script>
-        {/* Open Graph metadata */}
-        <meta
-          property="og:title"
-          content="Elchef – sänk elräkningen med rätt rörligt elavtal 2026"
-        />
-        <meta
-          property="og:description"
-          content="Trött på elräkningar som rusar? Elchef.se hjälper dig välja rätt rörligt elavtal, analysera din elräkning med AI och ta nästa steg mot total energibesparing med solceller och batteri."
-        />
-        <meta property="og:image" content="https://www.elchef.se/og-share.png" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content="Betalar du för mycket för elen? Byt gratis på elchef.se" />
-        <meta property="og:url" content="https://www.elchef.se" />
-        <meta property="og:type" content="website" />
-        {/* Twitter Card metadata */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta
-          name="twitter:title"
-          content="Elchef – sänk elräkningen med rätt rörligt elavtal 2026"
-        />
-        <meta
-          name="twitter:description"
-          content="Trött på elräkningar som rusar? Elchef.se hjälper dig välja rätt rörligt elavtal, analysera din elräkning med AI och ta nästa steg mot total energibesparing med solceller och batteri."
-        />
-        <meta name="twitter:image" content="https://www.elchef.se/og-share.png" />
-        <meta name="facebook-domain-verification" content="in9xjxefhkl6pbe4g33zjwrsnkliin" />
-        <meta name="tiktok-developers-site-verification" content="i7h859t0QF0G6Dua8q4h9qJUXwuPQoof" />
         
         {/* Facebook Meta Pixel Code – respekterar Cookiebot (marketing) */}
         <Script id="facebook-pixel" strategy="afterInteractive">
