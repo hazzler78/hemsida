@@ -190,7 +190,7 @@ export default async function BlogPostPage({ params }: { params: Promise<Params>
           >
             <p>
               Vill du se hur mycket du kan spara med rätt elavtal? Börja med att testa{' '}
-              <Link href="/jamfor-elpriser">vår AI-analys av elräkningen</Link> och gå sedan vidare till{' '}
+              <Link href="/fakturaanalys">vår AI-analys av elräkningen</Link> och gå sedan vidare till{' '}
               <Link href="/byt-elavtal">Byt elavtal</Link> om du vill byta till ett mer fördelaktigt avtal.
             </p>
           </section>

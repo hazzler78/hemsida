@@ -122,7 +122,7 @@ export default function KunskapIndexPage() {
 
           <p style={{ marginTop: '2rem', fontSize: '0.95rem', color: 'var(--gray-600)' }}>
             Vill du direkt se om du kan spara pengar på ditt nuvarande avtal? Testa{' '}
-            <Link href="/jamfor-elpriser">vår AI-analys av elräkningen</Link> eller gå vidare till{' '}
+            <Link href="/fakturaanalys">vår AI-analys av elräkningen</Link> eller gå vidare till{' '}
             <Link href="/byt-elavtal">Byt elavtal</Link> när du är redo att ta nästa steg.
           </p>
         </Container>

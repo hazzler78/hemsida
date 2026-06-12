@@ -43,7 +43,7 @@ export const blogPosts: BlogPost[] = [
         <p>
           Vill du se hur ditt nuvarande avtal står sig mot ett rörligt pris? Testa att ladda upp din faktura i
           vår{' '}
-          <Link href="/jamfor-elpriser">
+          <Link href="/fakturaanalys">
             AI-baserade elräkningsanalys
           </Link>{' '}
           och få en uppskattad besparing innan du byter.
@@ -122,7 +122,7 @@ export const blogPosts: BlogPost[] = [
           <li>Undvik tillsvidareavtal – de är nästan alltid bland de dyraste.</li>
           <li>
             Använd vår{' '}
-            <Link href="/jamfor-elpriser">
+            <Link href="/fakturaanalys">
               AI-analys av elräkningen
             </Link>{' '}
             för att snabbt se om ditt nuvarande avtal verkar rimligt.
@@ -173,7 +173,7 @@ export const blogPosts: BlogPost[] = [
         </p>
         <p>
           Vill du ha en snabb bild av din potential att spara? Ladda upp din faktura på{' '}
-          <Link href="/jamfor-elpriser">Jämför elpriser med AI</Link> och se var de största läckagen finns –
+          <Link href="/fakturaanalys">Jämför elpriser med AI</Link> och se var de största läckagen finns –
           därefter kan du, om det är rätt läge, ta nästa steg och <Link href="/byt-elavtal">byta elavtal</Link>.
         </p>
       </>
@@ -255,7 +255,7 @@ export const blogPosts: BlogPost[] = [
           <li>Analysera din faktiska kostnad per kWh inklusive alla avgifter.</li>
           <li>
             Låta vår{' '}
-            <Link href="/jamfor-elpriser">
+            <Link href="/fakturaanalys">
               AI-tjänst för elräkningsanalys
             </Link>{' '}
             ge en bild av din besparingspotential.

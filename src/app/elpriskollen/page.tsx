@@ -286,7 +286,7 @@ export default function ElpriskollenPage() {
                 Med{' '}
                 <a
                   href={withDefaultCtaUtm(
-                    `/jamfor-elpriser${postalCode ? `?postal=${postalCode}` : ''}`,
+                    `/fakturaanalys${postalCode ? `?postal=${postalCode}` : ''}`,
                     'elpriskollen',
                     'step-fakturaanalys'
                   )}
@@ -337,7 +337,7 @@ export default function ElpriskollenPage() {
           <div style={{ marginTop: '1rem', textAlign: 'center' }}>
             <a
               href={withDefaultCtaUtm(
-                `/jamfor-elpriser${postalCode ? `?postal=${postalCode}` : ''}`,
+                `/fakturaanalys${postalCode ? `?postal=${postalCode}` : ''}`,
                 'elpriskollen',
                 'cta-fakturaanalys'
               )}
