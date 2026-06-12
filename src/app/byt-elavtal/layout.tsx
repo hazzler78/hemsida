@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import BreadcrumbJsonLd from '@/components/BreadcrumbJsonLd';
+import ServiceJsonLd from '@/components/ServiceJsonLd';
 
 export const metadata: Metadata = {
   title: 'Byt elavtal enkelt – jämför rörligt och fastpris | Elchef.se',
@@ -20,6 +22,23 @@ export default function BytElavtalLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <BreadcrumbJsonLd
+        id="breadcrumb-byt-elavtal"
+        items={[
+          { name: 'Hem', path: '/' },
+          { name: 'Byt elavtal', path: '/byt-elavtal' },
+        ]}
+      />
+      <ServiceJsonLd
+        id="service-byt-elavtal"
+        name="Byt elavtal online"
+        description="Byt elavtal enkelt online med hjälp av Elchef – jämför rörligt och fastpris och hitta rätt avtal."
+        path="/byt-elavtal"
+      />
+      {children}
+    </>
+  );
 }
 

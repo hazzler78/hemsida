@@ -43,7 +43,7 @@ export const blogPosts: BlogPost[] = [
         <p>
           Vill du se hur ditt nuvarande avtal står sig mot ett rörligt pris? Testa att ladda upp din faktura i
           vår{' '}
-          <Link href="/jamfor-elpriser">
+          <Link href="/fakturaanalys">
             AI-baserade elräkningsanalys
           </Link>{' '}
           och få en uppskattad besparing innan du byter.
@@ -122,7 +122,7 @@ export const blogPosts: BlogPost[] = [
           <li>Undvik tillsvidareavtal – de är nästan alltid bland de dyraste.</li>
           <li>
             Använd vår{' '}
-            <Link href="/jamfor-elpriser">
+            <Link href="/fakturaanalys">
               AI-analys av elräkningen
             </Link>{' '}
             för att snabbt se om ditt nuvarande avtal verkar rimligt.
@@ -173,7 +173,7 @@ export const blogPosts: BlogPost[] = [
         </p>
         <p>
           Vill du ha en snabb bild av din potential att spara? Ladda upp din faktura på{' '}
-          <Link href="/jamfor-elpriser">Jämför elpriser med AI</Link> och se var de största läckagen finns –
+          <Link href="/fakturaanalys">Jämför elpriser med AI</Link> och se var de största läckagen finns –
           därefter kan du, om det är rätt läge, ta nästa steg och <Link href="/byt-elavtal">byta elavtal</Link>.
         </p>
       </>
@@ -255,7 +255,7 @@ export const blogPosts: BlogPost[] = [
           <li>Analysera din faktiska kostnad per kWh inklusive alla avgifter.</li>
           <li>
             Låta vår{' '}
-            <Link href="/jamfor-elpriser">
+            <Link href="/fakturaanalys">
               AI-tjänst för elräkningsanalys
             </Link>{' '}
             ge en bild av din besparingspotential.
@@ -266,6 +266,494 @@ export const blogPosts: BlogPost[] = [
           När du vet hur du ligger till idag blir det mycket enklare att ta nästa steg – antingen genom att{' '}
           <Link href="/byt-elavtal">byta elavtal</Link> eller justera din förbrukning för att utnyttja
           prisvariationerna på ett smartare sätt.
+        </p>
+      </>
+    ),
+  },
+  {
+    slug: 'hur-byter-man-elavtal-steg-for-steg',
+    title: 'Hur byter man elavtal? Steg-för-steg-guide 2026',
+    description:
+      'Komplett guide till hur du byter elavtal i Sverige 2026. Lär dig om uppsägningstid, ångerrätt, vad som händer med nätägaren och hur Elchef gör bytet enkelt.',
+    keywords:
+      'byta elavtal, hur byter man elavtal, byte av elleverantör, elavtal uppsägning, byta elbolag Sverige',
+    date: '2026-01-15',
+    readTime: '6 min lästid',
+    content: (
+      <>
+        <p>
+          Att <strong>byta elavtal</strong> är enklare än många tror – men det finns några steg som är bra att
+          känna till innan du trycker på knappen. Här går vi igenom processen steg för steg så att du kan byta
+          tryggt inför 2026.
+        </p>
+
+        <h2>Steg 1: Kontrollera ditt nuvarande avtal</h2>
+        <p>
+          Börja med att ta reda på vilken typ av avtal du har idag och vilka villkor som gäller:
+        </p>
+        <ul>
+          <li>Är det rörligt, fastpris eller tillsvidareavtal?</li>
+          <li>När löper avtalet ut – och finns det brytavgift?</li>
+          <li>Vad betalar du totalt per kWh inklusive påslag och avgifter?</li>
+        </ul>
+        <p>
+          Osäker? Ladda upp din faktura i vår{' '}
+          <Link href="/fakturaanalys">AI-fakturaanalys</Link> så får du en tydlig bild av dina faktiska
+          kostnader.
+        </p>
+
+        <h2>Steg 2: Jämför alternativ</h2>
+        <p>
+          När du vet vad du betalar idag kan du jämföra mot marknadens erbjudanden. Titta på:
+        </p>
+        <ul>
+          <li>Elpris per kWh (spotpris eller fastpris)</li>
+          <li>Påslag och månadsavgift</li>
+          <li>Avtalslängd och villkor efter kampanjperiod</li>
+        </ul>
+        <p>
+          Jämför konkreta erbjudanden på våra sidor för{' '}
+          <Link href="/rorligt-avtal">rörligt elavtal</Link> och{' '}
+          <Link href="/fastpris-avtal">fastprisavtal</Link>, eller använd{' '}
+          <Link href="/elpriskollen">Elpriskollen</Link> för att se prisnivåer i ditt elområde.
+        </p>
+
+        <h2>Steg 3: Teckna nytt avtal</h2>
+        <p>
+          När du hittat ett avtal som passar går du vidare via{' '}
+          <Link href="/byt-elavtal">Byt elavtal</Link>. Den nya leverantören sköter i regel uppsägningen av
+          ditt gamla elavtal – du behöver alltså sällan kontakta din nuvarande leverantör själv.
+        </p>
+        <p>
+          <strong>Viktigt:</strong> Ditt elnät (nätägaren) ändras aldrig när du byter elleverantör. Du får
+          samma el via samma stolpar och kablar som tidigare.
+        </p>
+
+        <h2>Steg 4: Ångerrätt och uppföljning</h2>
+        <p>
+          Enligt distansavtalslagen har du 14 dagars ångerrätt när du tecknar avtal på distans. Läs villkoren
+          noggrant och spara bekräftelsen du får via e-post.
+        </p>
+        <p>
+          Efter bytet bör du få en bekräftelse med startdatum. Kontrollera din första faktura från den nya
+          leverantören så att priset stämmer med vad du blev lovad.
+        </p>
+
+        <h2>Vanliga frågor om elavtalsbyte</h2>
+        <ul>
+          <li>
+            <strong>Kostar det att byta?</strong> Ofta nej – rörliga avtal har vanligtvis ingen brytavgift.
+            Fastpris kan ha det om du bryter i förtid.
+          </li>
+          <li>
+            <strong>Hur lång tid tar det?</strong> Vanligtvis några veckor, beroende på uppsägningstid hos din
+            gamla leverantör.
+          </li>
+          <li>
+            <strong>Kan jag byta om jag har elbilsladdning eller värmepump?</strong> Ja – förbrukningen spelar
+            ingen roll för själva bytet, bara för vilket avtal som passar bäst ekonomiskt.
+          </li>
+        </ul>
+
+        <p>
+          Redo att ta steget? Börja med en{' '}
+          <Link href="/fakturaanalys">gratis fakturaanalys</Link> och se hur mycket du kan spara – sedan hjälper
+          vi dig vidare till rätt avtal.
+        </p>
+      </>
+    ),
+  },
+  {
+    slug: 'elomraden-se1-se4-vad-betyder-de-for-ditt-elpris',
+    title: 'Elområden SE1–SE4 – vad betyder de för ditt elpris?',
+    description:
+      'Förklaring av elområdena SE1, SE2, SE3 och SE4 i Sverige. Lär dig varför elpriset skiljer sig mellan regioner och hur det påverkar ditt elavtal.',
+    keywords:
+      'elområde SE1 SE2 SE3 SE4, elpris per region, elområde Sverige, spotpris elområde, elavtal elområde',
+    date: '2026-02-01',
+    readTime: '7 min lästid',
+    content: (
+      <>
+        <p>
+          Sverige är indelat i fyra <strong>elområden</strong> – SE1, SE2, SE3 och SE4. Ditt postnummer avgör
+          vilket elområde du tillhör, och det påverkar direkt vilket spotpris du betalar om du har rörligt
+          elavtal.
+        </p>
+
+        <h2>Översikt: Sveriges fyra elområden</h2>
+        <ul>
+          <li>
+            <strong>SE1 – Norra Sverige:</strong> Norrbotten och Västerbotten. Ofta lägst elpris tack vare
+            riklig vattenkraft och relativt låg efterfrågan.{' '}
+            <Link href="/kunskap/elomrade-se1-elpris-och-elavtal">Läs mer om SE1</Link>.
+          </li>
+          <li>
+            <strong>SE2 – Norra Mellansverige:</strong> Jämtland, Västernorrland och delar av Dalarna och
+            Gävleborg. Fortfarande ofta låga priser men något högre än SE1.{' '}
+            <Link href="/kunskap/elomrade-se2-elpris-och-elavtal">Läs mer om SE2</Link>.
+          </li>
+          <li>
+            <strong>SE3 – Södra Mellansverige:</strong> Stockholm, Uppsala, Örebro, Jönköping med flera. Större
+            befolkning ger högre efterfrågan och mer prisvariation.{' '}
+            <Link href="/kunskap/elomrade-se3-elpris-och-elavtal">Läs mer om SE3</Link>.
+          </li>
+          <li>
+            <strong>SE4 – Södra Sverige:</strong> Skåne, Halland, Blekinge, Småland och Gotland. Ofta högst
+            elpris på grund av flaskhalsar i överföringen från norr och hög lokal efterfrågan.{' '}
+            <Link href="/kunskap/elomrade-se4-elpris-och-elavtal">Läs mer om SE4</Link>.
+          </li>
+        </ul>
+
+        <h2>Varför skiljer sig priserna mellan elområden?</h2>
+        <p>
+          Elområdena speglar hur mycket el som kan produceras och transporteras i varje del av landet. När det
+          blåser mycket i norr och det är kallt i söder kan prisskillnaden mellan SE1 och SE4 bli stor –
+          ibland flera kronor per kWh under enskilda timmar.
+        </p>
+        <p>Faktorer som driver skillnaderna:</p>
+        <ul>
+          <li>Begränsad överföringskapacitet i stamnätet mellan norr och söder</li>
+          <li>Lokal efterfrågan – fler invånare och industri i söder</li>
+          <li>Väder och vind – mer vindkraft i norr, mer uppvärmningsbehov i söder vintertid</li>
+        </ul>
+
+        <h2>Hur hittar jag mitt elområde?</h2>
+        <p>
+          Ditt elområde framgår av din elräkning, men du kan också slå upp det direkt i vår{' '}
+          <Link href="/elpriskollen">Elpriskollen</Link> genom att ange postnummer. Då ser du aktuella
+          prisnivåer och kan avgöra om ditt nuvarande avtal verkar rimligt.
+        </p>
+
+        <h2>Vad betyder elområdet för valet av avtal?</h2>
+        <p>
+          Bor du i SE3 eller SE4 är prisvariationerna ofta större, vilket gör valet mellan rörligt och fastpris
+          extra viktigt:
+        </p>
+        <ul>
+          <li>
+            <strong>Rörligt i SE3/SE4</strong> kan ge lägre snittpris över tid, men du måste tåla höga
+            toppar vintertid.
+          </li>
+          <li>
+            <strong>Fastpris i SE3/SE4</strong> ger förutsägbarhet och skydd mot extrema prishöjningar.
+          </li>
+        </ul>
+        <p>
+          Läs mer i vår guide om{' '}
+          <Link href="/kunskap/basta-elavtal-2026-rorligt-vs-fastpris-se3-se4">
+            bästa elavtal i SE3 och SE4
+          </Link>{' '}
+          eller jämför konkreta erbjudanden på{' '}
+          <Link href="/rorligt-avtal">rörligt elavtal</Link> respektive{' '}
+          <Link href="/fastpris-avtal">fastprisavtal</Link>.
+        </p>
+
+        <p>
+          Vill du veta exakt hur ditt nuvarande avtal står sig? Testa vår{' '}
+          <Link href="/fakturaanalys">AI-fakturaanalys</Link> – den tar hänsyn till dina faktiska kostnader
+          oavsett elområde.
+        </p>
+      </>
+    ),
+  },
+  {
+    slug: 'fastpris-vs-rorligt-vilket-elavtal-passar-dig',
+    title: 'Fastpris vs rörligt – vilket elavtal passar dig?',
+    description:
+      'Jämförelse mellan fastpris och rörligt elavtal. För- och nackdelar, riskprofil och praktiska tips för att välja rätt elavtal 2026.',
+    keywords:
+      'fastpris vs rörligt, rörligt elavtal fördelar, fastprisavtal nackdelar, välja elavtal, elavtal jämförelse 2026',
+    date: '2026-03-01',
+    readTime: '7 min lästid',
+    content: (
+      <>
+        <p>
+          Valet mellan <strong>fastpris</strong> och <strong>rörligt elavtal</strong> är den vanligaste frågan
+          vi får. Det finns inget universellt rätt svar – det beror på din ekonomi, din risktolerans och hur du
+          använder el.
+        </p>
+
+        <h2>Rörligt elavtal – fördelar och nackdelar</h2>
+        <p>
+          Med rörligt elavtal följer ditt pris spotpriset på elbörsen, plus leverantörens påslag och eventuella
+          avgifter.
+        </p>
+        <p><strong>Fördelar:</strong></p>
+        <ul>
+          <li>Historiskt ofta lägre snittpris över längre perioder</li>
+          <li>Flexibelt – kort uppsägningstid, lätt att byta</li>
+          <li>Du kan dra nytta av billiga timmar om du har timmätning</li>
+        </ul>
+        <p><strong>Nackdelar:</strong></p>
+        <ul>
+          <li>Priset kan stiga kraftigt under kalla vintrar eller kriser</li>
+          <li>Svårare att budgetera exakt månad för månad</li>
+          <li>Kräver att du har marginal i ekonomin för variationer</li>
+        </ul>
+        <p>
+          Se aktuella rörliga erbjudanden på vår sida{' '}
+          <Link href="/rorligt-avtal">Jämför rörliga elavtal</Link>.
+        </p>
+
+        <h2>Fastprisavtal – fördelar och nackdelar</h2>
+        <p>
+          Med fastpris låser du elpriset under en bestämd period – vanligtvis 1–3 år. Du vet ungefär vad
+          varje kWh kostar oavsett vad som händer på marknaden.
+        </p>
+        <p><strong>Fördelar:</strong></p>
+        <ul>
+          <li>Förutsägbar månadskostnad – lättare att budgetera</li>
+          <li>Skydd mot plötsliga prishöjningar och marknadskriser</li>
+          <li>Bra val om du har tajt ekonomi eller vill sova gott om nätterna</li>
+        </ul>
+        <p><strong>Nackdelar:</strong></p>
+        <ul>
+          <li>Du betalar ofta en premie för tryggheten</li>
+          <li>Om marknaden blir billigare missar du besparingen</li>
+          <li>Brytavgift kan tillkomma om du vill avsluta i förtid</li>
+        </ul>
+        <p>
+          Jämför fastpriser på{' '}
+          <Link href="/fastpris-avtal">vår sida för fastprisavtal</Link>.
+        </p>
+
+        <h2>Vem passar vad?</h2>
+        <ul>
+          <li>
+            <strong>Välj rörligt</strong> om du har ekonomisk marginal, kan tåla variationer och gärna följer
+            elmarknaden – eller om du kan styra förbrukning till billiga timmar.
+          </li>
+          <li>
+            <strong>Välj fastpris</strong> om du prioriterar trygghet, har tajt budget eller bor i SE3/SE4 där
+            prisvariationerna ofta är störst.
+          </li>
+          <li>
+            <strong>Osäker?</strong> Börja med att analysera din nuvarande faktura – du kanske redan sitter i
+            det dyraste alternativet utan att veta om det.
+          </li>
+        </ul>
+
+        <h2>Så tar du beslutet – praktiskt</h2>
+        <ol>
+          <li>
+            Ladda upp din elräkning i vår{' '}
+            <Link href="/fakturaanalys">AI-fakturaanalys</Link> och se vad du betalar idag.
+          </li>
+          <li>Fundera på hur viktig förutsägbarhet är för din hushållsekonomi.</li>
+          <li>Jämför konkreta erbjudanden för båda typerna – priserna ändras löpande.</li>
+          <li>
+            När du är redo, gå vidare via <Link href="/byt-elavtal">Byt elavtal</Link>.
+          </li>
+        </ol>
+
+        <p>
+          Oavsett vad du väljer är det viktigaste att du inte sitter kvar i ett dyrt tillsvidareavtal av vana.
+          Marknaden förändras – och med rätt avtal kan skillnaden bli tusentals kronor per år.
+        </p>
+      </>
+    ),
+  },
+  {
+    slug: 'elomrade-se1-elpris-och-elavtal',
+    title: 'Elområde SE1 – elpris och val av elavtal i norra Sverige',
+    description:
+      'Guide till elområde SE1 (Norrbotten och Västerbotten). Lär dig varför elpriset ofta är lägre i norr och hur du väljer rätt elavtal.',
+    keywords: 'elområde SE1, elpris SE1, elavtal Norrbotten, elavtal Västerbotten, spotpris norra Sverige',
+    date: '2026-03-15',
+    readTime: '5 min lästid',
+    content: (
+      <>
+        <p>
+          <strong>Elområde SE1</strong> omfattar Norrbotten och Västerbotten – Sveriges nordligaste delar. Här
+          produceras mycket billig vattenkraft och vindkraft, vilket ofta ger lägre spotpris än i södra Sverige.
+        </p>
+
+        <h2>Varför är elpriset ofta lägre i SE1?</h2>
+        <ul>
+          <li>Stor produktion av vattenkraft och vindkraft i regionen</li>
+          <li>Relativt låg befolkning jämfört med tillgången på el</li>
+          <li>Mindre flaskhalsar än i södra elområden</li>
+        </ul>
+        <p>
+          Det betyder inte att alla i SE1 automatiskt har billigt elavtal – påslag, månadsavgift och avtalstyp
+          spelar fortfarande stor roll.
+        </p>
+
+        <h2>Rörligt eller fastpris i SE1?</h2>
+        <p>
+          I SE1 har rörligt elavtal historiskt ofta varit fördelaktigt tack vare lägre spotprisnivåer. Men även
+          här kan priset svänga kraftigt under kalla perioder eller vid export till andra marknader.
+        </p>
+        <p>
+          Jämför aktuella erbjudanden på{' '}
+          <Link href="/rorligt-avtal">rörligt elavtal</Link> och{' '}
+          <Link href="/fastpris-avtal">fastprisavtal</Link> innan du bestämmer dig.
+        </p>
+
+        <h2>Så kontrollerar du ditt elområde och pris</h2>
+        <p>
+          Ange ditt postnummer i <Link href="/elpriskollen">Elpriskollen</Link> för att bekräfta elområde och
+          se aktuella prisnivåer. Ladda sedan upp din faktura i vår{' '}
+          <Link href="/fakturaanalys">AI-fakturaanalys</Link> för att se om du betalar mer än nödvändigt.
+        </p>
+        <p>
+          Läs även vår översikt:{' '}
+          <Link href="/kunskap/elomraden-se1-se4-vad-betyder-de-for-ditt-elpris">
+            Elområden SE1–SE4 förklarat
+          </Link>
+          .
+        </p>
+      </>
+    ),
+  },
+  {
+    slug: 'elomrade-se2-elpris-och-elavtal',
+    title: 'Elområde SE2 – elpris och elavtal i norra Mellansverige',
+    description:
+      'Allt om elområde SE2 (Jämtland, Västernorrland m.fl.). Förstå elprisnivåer, prisvariationer och hur du hittar bättre elavtal.',
+    keywords: 'elområde SE2, elpris SE2, elavtal Jämtland, elavtal Sundsvall, spotpris Mellansverige',
+    date: '2026-03-20',
+    readTime: '5 min lästid',
+    content: (
+      <>
+        <p>
+          <strong>Elområde SE2</strong> täcker norra Mellansverige – bland annat Jämtland, Västernorrland och
+          delar av Dalarna och Gävleborg. Prisnivån ligger ofta mellan SE1 och de södra elområdena.
+        </p>
+
+        <h2>Karakteristika för SE2</h2>
+        <ul>
+          <li>Betydande vattenkraft och vindkraft i regionen</li>
+          <li>Priser som påverkas av både lokal produktion och överföring söderut</li>
+          <li>Större variation vintertid när efterfrågan ökar i hela landet</li>
+        </ul>
+
+        <h2>Tips för att sänka elkostnaden i SE2</h2>
+        <ol>
+          <li>Undvik dyra tillsvidareavtal – de är sällan konkurrenskraftiga.</li>
+          <li>Jämför påslag och månadsavgift, inte bara spotpriset.</li>
+          <li>Om du har timmätning, försök styra förbrukning till billigare timmar.</li>
+        </ol>
+        <p>
+          Testa vår <Link href="/fakturaanalys">AI-fakturaanalys</Link> för att snabbt se om ditt nuvarande
+          avtal är dyrt jämfört med marknaden.
+        </p>
+
+        <h2>Nästa steg</h2>
+        <p>
+          När du vet vad du betalar idag kan du jämföra konkreta avtal via{' '}
+          <Link href="/rorligt-avtal">rörligt elavtal</Link> eller{' '}
+          <Link href="/byt-elavtal">Byt elavtal</Link>. Använd{' '}
+          <Link href="/elpriskollen">Elpriskollen</Link> för att bekräfta ditt elområde.
+        </p>
+      </>
+    ),
+  },
+  {
+    slug: 'elomrade-se3-elpris-och-elavtal',
+    title: 'Elområde SE3 – elpris och elavtal i Södra Mellansverige',
+    description:
+      'Guide till elområde SE3 (Stockholm, Uppsala, Örebro m.fl.). Förstå prisvariationer och välj rätt elavtal i ett av Sveriges största elområden.',
+    keywords: 'elområde SE3, elpris SE3, elavtal Stockholm, elavtal Uppsala, spotpris Södra Mellansverige',
+    date: '2026-04-01',
+    readTime: '6 min lästid',
+    content: (
+      <>
+        <p>
+          <strong>Elområde SE3</strong> är ett av Sveriges mest befolkade elområden och omfattar bland annat
+          Stockholm, Uppsala, Örebro och Jönköping. Här är efterfrågan hög och prisvariationerna ofta tydliga.
+        </p>
+
+        <h2>Varför svänger priset mer i SE3?</h2>
+        <ul>
+          <li>Hög befolkningstäthet och stor industriell efterfrågan</li>
+          <li>Begränsad överföringskapacitet från norra Sverige under toppar</li>
+          <li>Känslighet för väder – kalla vintrar driver upp priset snabbt</li>
+        </ul>
+
+        <h2>Rörligt vs fastpris i SE3</h2>
+        <p>
+          I SE3 är valet mellan rörligt och fastpris extra viktigt. Rörligt kan ge lägre snittpris över tid,
+          men du måste klara perioder med höga månadsfakturor. Fastpris ger trygghet men kostar ofta mer om
+          marknaden blir billigare.
+        </p>
+        <p>
+          Läs vår jämförelse:{' '}
+          <Link href="/kunskap/fastpris-vs-rorligt-vilket-elavtal-passar-dig">
+            Fastpris vs rörligt – vilket passar dig?
+          </Link>
+        </p>
+
+        <h2>Praktiska steg för dig i SE3</h2>
+        <ol>
+          <li>
+            Analysera din faktura med <Link href="/fakturaanalys">AI-fakturaanalys</Link>.
+          </li>
+          <li>
+            Jämför erbjudanden på <Link href="/rorligt-avtal">rörligt</Link> och{' '}
+            <Link href="/fastpris-avtal">fastpris</Link>.
+          </li>
+          <li>
+            Byt enkelt via <Link href="/byt-elavtal">Byt elavtal</Link> när du hittat rätt alternativ.
+          </li>
+        </ol>
+        <p>
+          Se även vår guide om{' '}
+          <Link href="/kunskap/basta-elavtal-2026-rorligt-vs-fastpris-se3-se4">
+            bästa elavtal i SE3 och SE4
+          </Link>
+          .
+        </p>
+      </>
+    ),
+  },
+  {
+    slug: 'elomrade-se4-elpris-och-elavtal',
+    title: 'Elområde SE4 – elpris och elavtal i södra Sverige',
+    description:
+      'Allt om elområde SE4 (Skåne, Halland, Småland m.fl.). Varför elpriset ofta är högst i söder och hur du hittar bättre elavtal.',
+    keywords: 'elområde SE4, elpris SE4, elavtal Skåne, elavtal Halland, spotpris södra Sverige',
+    date: '2026-04-10',
+    readTime: '6 min lästid',
+    content: (
+      <>
+        <p>
+          <strong>Elområde SE4</strong> omfattar södra Sverige – Skåne, Halland, Blekinge, Småland och Gotland.
+          Det är ofta det elområde där spotpriset ligger högst, särskilt under kalla vintrar och perioder med
+          hög efterfrågan.
+        </p>
+
+        <h2>Varför är SE4 ofta dyrast?</h2>
+        <ul>
+          <li>Stor lokal efterfrågan kombinerat med begränsad import från norr</li>
+          <li>Flaskhalsar i överföringen gör att billig el från SE1/SE2 inte alltid når söder</li>
+          <li>Hög andel hushåll med elvärme och elbilsladdning ökar toppbelastningen</li>
+        </ul>
+
+        <h2>Vad kan du göra som bor i SE4?</h2>
+        <p>
+          Du kan inte ändra elområde, men du kan påverka vad du betalar:
+        </p>
+        <ol>
+          <li>Byt från dyrt tillsvidareavtal till ett konkurrenskraftigt rörligt eller fastprisavtal.</li>
+          <li>Analysera din faktura – många betalar onödigt höga påslag och avgifter.</li>
+          <li>Överväg fastpris om du vill skydda dig mot framtida pristoppar.</li>
+        </ol>
+        <p>
+          Börja med <Link href="/fakturaanalys">gratis AI-fakturaanalys</Link> och se din uppskattade
+          besparing.
+        </p>
+
+        <h2>Jämför avtal för SE4</h2>
+        <p>
+          Vi hjälper dig jämföra marknadens erbjudanden oavsett om du vill ha{' '}
+          <Link href="/rorligt-avtal">rörligt elavtal</Link> eller{' '}
+          <Link href="/fastpris-avtal">fastpris</Link>. När du är redo går du vidare via{' '}
+          <Link href="/byt-elavtal">Byt elavtal</Link>.
+        </p>
+        <p>
+          Kontrollera ditt elområde och prisnivå i <Link href="/elpriskollen">Elpriskollen</Link> med ditt
+          postnummer.
         </p>
       </>
     ),

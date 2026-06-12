@@ -118,10 +118,11 @@ export default function Footer() {
           <FooterColumn>
             <h3>Tjänster</h3>
             <ul>
+              <li><Link href={withDefaultCtaUtm('/rorligt-avtal', 'footer', 'services-rorligt')}>Rörligt elavtal</Link></li>
+              <li><Link href={withDefaultCtaUtm('/fastpris-avtal', 'footer', 'services-fastpris')}>Fastprisavtal</Link></li>
               <li><Link href={withDefaultCtaUtm('/byt-elavtal', 'footer', 'services-byt')}>Byt elavtal</Link></li>
               <li><Link href={withDefaultCtaUtm('/fakturaanalys', 'footer', 'services-jamfor')}>Fakturaanalys</Link></li>
               <li><Link href={withDefaultCtaUtm('/elpriskollen', 'footer', 'services-elpriskollen')}>Elpriskollen</Link></li>
-              <li><Link href={withDefaultCtaUtm('/energiradgivning', 'footer', 'services-energiradgivning')}>Energirådgivning</Link></li>
               <li><Link href={withDefaultCtaUtm('/foretag', 'footer', 'services-foretag')}>Företag</Link></li>
               <li><Link href="/#solceller">Solceller – begär offert</Link></li>
             </ul>

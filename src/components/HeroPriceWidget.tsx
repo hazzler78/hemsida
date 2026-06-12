@@ -224,7 +224,7 @@ export default function HeroPriceWidget() {
                   genomgång kan du{' '}
                   <a
                     href={withDefaultCtaUtm(
-                      `/jamfor-elpriser${postalCode ? `?postal=${postalCode}` : ''}`,
+                      `/fakturaanalys${postalCode ? `?postal=${postalCode}` : ''}`,
                       'hero',
                       'postal-prices-ai'
                     )}

@@ -13,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/byt-elavtal',
     '/elpriskollen',
     '/fakturaanalys',
+    '/robinhood',
     '/foretag',
     '/om-oss',
     '/kontakt',
@@ -22,12 +23,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/gdpr',
     '/villkor',
     '/media',
+    '/media/weekly-news',
+    '/media/weather-electricity-prices',
+    '/media/robin-hood-electricity',
     '/kunskap',
+    '/affiliate',
+    '/partner',
   ].map((path) => ({
     url: `${BASE_URL}${path}`,
     lastModified: now,
     changeFrequency: path === '' ? 'daily' : 'weekly',
-    priority: path === '' ? 1 : 0.7,
+    priority: path === '' ? 1 : path === '/fakturaanalys' || path === '/rorligt-avtal' ? 0.9 : 0.7,
   }));
 
   const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => ({
@@ -39,4 +45,3 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [...staticRoutes, ...blogRoutes];
 }
-

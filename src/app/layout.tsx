@@ -8,6 +8,7 @@ import CampaignBanner from '@/components/CampaignBanner';
 import GrokChat from '@/components/GrokChat';
 import CheapEnergyChat from '@/components/CheapEnergyChat';
 import Footer from '@/components/Footer';
+import { websiteJsonLd } from '@/lib/seo';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,9 +25,6 @@ const SITE_DESCRIPTION =
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.elchef.se"),
-  alternates: {
-    canonical: "/",
-  },
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
   keywords:
@@ -104,6 +102,9 @@ export default function RootLayout({
             ]
           }
         `}</script>
+        <script type="application/ld+json" suppressHydrationWarning>
+          {JSON.stringify(websiteJsonLd)}
+        </script>
         
         {/* Facebook Meta Pixel Code – respekterar Cookiebot (marketing) */}
         <Script id="facebook-pixel" strategy="afterInteractive">

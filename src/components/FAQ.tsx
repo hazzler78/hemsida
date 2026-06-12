@@ -23,6 +23,13 @@ const Title = styled.h2`
   font-size: 2rem;
 `;
 
+const PageTitle = styled.h1`
+  text-align: center;
+  margin-bottom: 3rem;
+  color: white;
+  font-size: 2rem;
+`;
+
 const AccordionItem = styled.div`
   margin-bottom: 1rem;
   background: rgba(255, 255, 255, 0.08);
@@ -136,8 +143,9 @@ Vilket elområde du tillhör beror på var du bor och påverkar elpriset i din r
   }
 ];
 
-export default function FAQ() {
+export default function FAQ({ headingLevel = 'h2' }: { headingLevel?: 'h1' | 'h2' }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const Heading = headingLevel === 'h1' ? PageTitle : Title;
 
   const toggleAccordion = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -162,7 +170,7 @@ export default function FAQ() {
   return (
     <FAQSection>
       <Container>
-        <Title>Vanliga frågor</Title>
+        <Heading>Vanliga frågor</Heading>
         <Script id="faq-json-ld" type="application/ld+json">
           {JSON.stringify(faqJsonLd)}
         </Script>
