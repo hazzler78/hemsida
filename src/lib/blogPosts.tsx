@@ -115,7 +115,14 @@ export const blogPosts: BlogPost[] = [
         <h2>1. Börja med rätt elavtal</h2>
         <p>
           Innan du byter lampor och tätar fönster är det klokt att säkerställa att du inte betalar onödigt
-          mycket för själva elavtalet:
+          mycket för själva elavtalet – särskilt dolda avgifter som påslag och månadsavgift. Läs vår guide om{' '}
+          <Link href="/kunskap/extra-kostnader-elrakningen-dolda-avgifter-forklaring">
+            extra kostnader på elräkningen
+          </Link>
+          .
+        </p>
+        <p>
+          Kontrollera också:
         </p>
         <ul>
           <li>Se över om du har onödigt hög månadsavgift eller dyra påslag.</li>
@@ -754,6 +761,162 @@ export const blogPosts: BlogPost[] = [
         <p>
           Kontrollera ditt elområde och prisnivå i <Link href="/elpriskollen">Elpriskollen</Link> med ditt
           postnummer.
+        </p>
+      </>
+    ),
+  },
+  {
+    slug: 'extra-kostnader-elrakningen-dolda-avgifter-forklaring',
+    title: 'Extra kostnader på elräkningen – dolda avgifter förklarade',
+    description:
+      'Guide till alla extra kostnader på elräkningen: påslag, månadsavgift, elcertifikat, energiskatt och nätavgift. Lär dig vad du faktiskt betalar för och hur du undviker dyra fällor.',
+    keywords:
+      'extra kostnader elräkning, dolda avgifter el, påslag elavtal, månadsavgift el, elcertifikat, energiskatt el, förstå elräkningen',
+    date: '2026-04-20',
+    readTime: '8 min lästid',
+    content: (
+      <>
+        <p>
+          Många fokuserar bara på <strong>elpriset per kWh</strong> – men det är sällan det enda som avgör hur
+          hög elräkningen blir. Påslag, fasta avgifter, skatter och tillägg kan lägga hundratals eller tusentals
+          kronor extra per år. Här går vi igenom de vanligaste kostnaderna och hur du upptäcker dem.
+        </p>
+
+        <h2>1. Elpris (spotpris eller fastpris)</h2>
+        <p>
+          Detta är själva kostnaden för den el du förbrukar. Vid <strong>rörligt elavtal</strong> följer priset
+          spotpriset på elbörsen. Vid <strong>fastpris</strong> är priset låst under avtalsperioden.
+        </p>
+        <p>
+          Elpriset står ofta tydligt på fakturan – men det säger inget om hur mycket du betalar totalt per kWh
+          när alla tillägg är inräknade.
+        </p>
+
+        <h2>2. Påslag – den vanligaste dolda kostnaden</h2>
+        <p>
+          Elleverantören lägger nästan alltid ett <strong>påslag</strong> ovanpå spotpriset (eller inkluderar det
+          i ett högre fastpris). Påslag på 3–10 öre/kWh låter lite, men över ett år med normal förbrukning kan det
+          bli 500–2 000 kr extra.
+        </p>
+        <ul>
+          <li>Jämför alltid <em>totalkostnad per kWh</em>, inte bara spotpris eller kampanjrubrik.</li>
+          <li>Var extra uppmärksam efter att en kampanjperiod löpt ut – påslaget kan då höjas kraftigt.</li>
+          <li>Tillsvidareavtal har ofta bland de högsta påslagen på marknaden.</li>
+        </ul>
+
+        <h2>3. Månadsavgift och fasta avgifter</h2>
+        <p>
+          Många avtal har en <strong>månadsavgift</strong> (abonnemangsavgift) oavsett hur mycket el du använder.
+          30–60 kr/månad blir 360–720 kr per år – helt utan att du förbrukat en enda kWh extra.
+        </p>
+        <p>
+          Vissa leverantörer kallar det &quot;serviceavgift&quot;, &quot;administrationsavgift&quot; eller liknande.
+          Leta efter raden på fakturan och räkna om den till årskostnad.
+        </p>
+
+        <h2>4. Elcertifikat</h2>
+        <p>
+          <strong>Elcertifikat</strong> är ett lagkrav som säkerställer att en viss andel el kommer från
+          förnybar energi. Kostnaden förs vidare till dig som konsument och syns ofta som en separat rad på
+          fakturan eller ingår i påslaget.
+        </p>
+        <p>
+          Beloppet varierar över tid men är en fast del av elkostnaden – du kan inte välja bort det, men du bör
+          känna till att det finns.
+        </p>
+
+        <h2>5. Energiskatt</h2>
+        <p>
+          Staten tar ut <strong>energiskatt</strong> på den el du förbrukar. Skatten är densamma oavsett
+          leverantör och syns på fakturan. Nivån kan ändras vid budgetbeslut, så den påverkar din totala
+          kostnad över tid.
+        </p>
+        <p>
+          Energiskatten är inte något elleverantören styr över – men den ingår i den summa du betalar varje månad.
+        </p>
+
+        <h2>6. Moms (25 %)</h2>
+        <p>
+          På de flesta kostnader ovan tillkommer <strong>moms</strong>. Det innebär att en del av det du ser som
+          &quot;dyrt elpris&quot; faktiskt är skatt – men påslag och månadsavgift momsbeläggs också.
+        </p>
+
+        <h2>7. Nätavgift – inte samma sak som elavtal</h2>
+        <p>
+          <strong>Nätavgiften</strong> betalar du till ditt <em>nätägande bolag</em> (elnätet), inte till din
+          elleverantör. Den täcker överföring av el till ditt hem och underhåll av nätet.
+        </p>
+        <p>
+          Du kan inte byta nätägare genom att byta elavtal – men nätavgiften står ofta på samma faktura och kan
+          ge intryck av att allt är leverantörens pris. Titta på vilka rader som gäller <em>elhandel</em> vs{' '}
+          <em>elnät</em>.
+        </p>
+
+        <h2>8. Kampanjfällor och tilläggspaket</h2>
+        <p>
+          Vissa avtal verkar billiga första året tack vare kampanj, men blir dyrare när:
+        </p>
+        <ul>
+          <li>Kampanjpriset går ut och påslaget höjs till &quot;ordinarie&quot; nivå</li>
+          <li>Du råkar ligga kvar i ett tillsvidareavtal efter att bindningstiden löpt ut</li>
+          <li>Tillägg som &quot;miljöpaket&quot; eller &quot;trygghetstjänst&quot; aktiveras automatiskt</li>
+        </ul>
+        <p>
+          Läs alltid villkoren för vad som gäller <strong>efter</strong> kampanjperioden – inte bara introduktionspriset.
+        </p>
+
+        <h2>Så räknar du ut din verkliga kostnad per kWh</h2>
+        <ol>
+          <li>Ta fakturans totala kostnad för elhandel (exklusive nät om du vill jämföra avtal).</li>
+          <li>Dela med din förbrukning i kWh för samma period.</li>
+          <li>Jämför resultatet med erbjudanden på marknaden – inte bara spotpris eller kampanjrubrik.</li>
+        </ol>
+        <p>
+          Vill du slippa räkna själv? Vår{' '}
+          <Link href="/fakturaanalys">AI-fakturaanalys</Link> läser av din faktura och lyfter fram påslag,
+          avgifter och uppskattad besparing om du byter till ett bättre avtal.
+        </p>
+
+        <h2>Vad kan du påverka – och vad kan du inte?</h2>
+        <ul>
+          <li>
+            <strong>Kan påverka:</strong> elleverantör, avtalstyp (rörligt/fast), påslag, månadsavgift, att undvika
+            dyra tillsvidareavtal.
+          </li>
+          <li>
+            <strong>Svårare att påverka:</strong> nätavgift, energiskatt, elcertifikat, moms.
+          </li>
+          <li>
+            <strong>Kan påverka indirekt:</strong> förbrukning – mindre el ger lägre total kostnad oavsett pris.
+          </li>
+        </ul>
+
+        <h2>Nästa steg om du misstänker att du betalar för mycket</h2>
+        <p>
+          Börja med att analysera din senaste faktura. Om totalkostnaden per kWh är hög jämfört med marknaden är
+          nästa steg att jämföra konkreta avtal:
+        </p>
+        <ul>
+          <li>
+            <Link href="/rorligt-avtal">Jämför rörliga elavtal</Link>
+          </li>
+          <li>
+            <Link href="/fastpris-avtal">Jämför fastprisavtal</Link>
+          </li>
+          <li>
+            <Link href="/byt-elavtal">Byt elavtal</Link> när du hittat ett bättre alternativ
+          </li>
+        </ul>
+        <p>
+          Läs även vår guide om{' '}
+          <Link href="/kunskap/fastpris-vs-rorligt-vilket-elavtal-passar-dig">
+            fastpris vs rörligt
+          </Link>{' '}
+          och{' '}
+          <Link href="/kunskap/hur-sanka-elrakningen-vinter-2026-praktiska-tips">
+            praktiska tips för att sänka elräkningen
+          </Link>
+          .
         </p>
       </>
     ),
