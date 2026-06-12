@@ -31,3 +31,26 @@ export const websiteJsonLd = {
     url: SITE_URL,
   },
 };
+
+export function serviceJsonLd(options: {
+  name: string;
+  description: string;
+  path: string;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: options.name,
+    description: options.description,
+    url: `${SITE_URL}${options.path}`,
+    provider: {
+      '@type': 'Organization',
+      name: 'Elchef',
+      url: SITE_URL,
+    },
+    areaServed: {
+      '@type': 'Country',
+      name: 'Sweden',
+    },
+  };
+}

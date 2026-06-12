@@ -384,19 +384,23 @@ export const blogPosts: BlogPost[] = [
         <ul>
           <li>
             <strong>SE1 – Norra Sverige:</strong> Norrbotten och Västerbotten. Ofta lägst elpris tack vare
-            riklig vattenkraft och relativt låg efterfrågan.
+            riklig vattenkraft och relativt låg efterfrågan.{' '}
+            <Link href="/kunskap/elomrade-se1-elpris-och-elavtal">Läs mer om SE1</Link>.
           </li>
           <li>
             <strong>SE2 – Norra Mellansverige:</strong> Jämtland, Västernorrland och delar av Dalarna och
-            Gävleborg. Fortfarande ofta låga priser men något högre än SE1.
+            Gävleborg. Fortfarande ofta låga priser men något högre än SE1.{' '}
+            <Link href="/kunskap/elomrade-se2-elpris-och-elavtal">Läs mer om SE2</Link>.
           </li>
           <li>
             <strong>SE3 – Södra Mellansverige:</strong> Stockholm, Uppsala, Örebro, Jönköping med flera. Större
-            befolkning ger högre efterfrågan och mer prisvariation.
+            befolkning ger högre efterfrågan och mer prisvariation.{' '}
+            <Link href="/kunskap/elomrade-se3-elpris-och-elavtal">Läs mer om SE3</Link>.
           </li>
           <li>
             <strong>SE4 – Södra Sverige:</strong> Skåne, Halland, Blekinge, Småland och Gotland. Ofta högst
-            elpris på grund av flaskhalsar i överföringen från norr och hög lokal efterfrågan.
+            elpris på grund av flaskhalsar i överföringen från norr och hög lokal efterfrågan.{' '}
+            <Link href="/kunskap/elomrade-se4-elpris-och-elavtal">Läs mer om SE4</Link>.
           </li>
         </ul>
 
@@ -545,6 +549,211 @@ export const blogPosts: BlogPost[] = [
         <p>
           Oavsett vad du väljer är det viktigaste att du inte sitter kvar i ett dyrt tillsvidareavtal av vana.
           Marknaden förändras – och med rätt avtal kan skillnaden bli tusentals kronor per år.
+        </p>
+      </>
+    ),
+  },
+  {
+    slug: 'elomrade-se1-elpris-och-elavtal',
+    title: 'Elområde SE1 – elpris och val av elavtal i norra Sverige',
+    description:
+      'Guide till elområde SE1 (Norrbotten och Västerbotten). Lär dig varför elpriset ofta är lägre i norr och hur du väljer rätt elavtal.',
+    keywords: 'elområde SE1, elpris SE1, elavtal Norrbotten, elavtal Västerbotten, spotpris norra Sverige',
+    date: '2026-03-15',
+    readTime: '5 min lästid',
+    content: (
+      <>
+        <p>
+          <strong>Elområde SE1</strong> omfattar Norrbotten och Västerbotten – Sveriges nordligaste delar. Här
+          produceras mycket billig vattenkraft och vindkraft, vilket ofta ger lägre spotpris än i södra Sverige.
+        </p>
+
+        <h2>Varför är elpriset ofta lägre i SE1?</h2>
+        <ul>
+          <li>Stor produktion av vattenkraft och vindkraft i regionen</li>
+          <li>Relativt låg befolkning jämfört med tillgången på el</li>
+          <li>Mindre flaskhalsar än i södra elområden</li>
+        </ul>
+        <p>
+          Det betyder inte att alla i SE1 automatiskt har billigt elavtal – påslag, månadsavgift och avtalstyp
+          spelar fortfarande stor roll.
+        </p>
+
+        <h2>Rörligt eller fastpris i SE1?</h2>
+        <p>
+          I SE1 har rörligt elavtal historiskt ofta varit fördelaktigt tack vare lägre spotprisnivåer. Men även
+          här kan priset svänga kraftigt under kalla perioder eller vid export till andra marknader.
+        </p>
+        <p>
+          Jämför aktuella erbjudanden på{' '}
+          <Link href="/rorligt-avtal">rörligt elavtal</Link> och{' '}
+          <Link href="/fastpris-avtal">fastprisavtal</Link> innan du bestämmer dig.
+        </p>
+
+        <h2>Så kontrollerar du ditt elområde och pris</h2>
+        <p>
+          Ange ditt postnummer i <Link href="/elpriskollen">Elpriskollen</Link> för att bekräfta elområde och
+          se aktuella prisnivåer. Ladda sedan upp din faktura i vår{' '}
+          <Link href="/fakturaanalys">AI-fakturaanalys</Link> för att se om du betalar mer än nödvändigt.
+        </p>
+        <p>
+          Läs även vår översikt:{' '}
+          <Link href="/kunskap/elomraden-se1-se4-vad-betyder-de-for-ditt-elpris">
+            Elområden SE1–SE4 förklarat
+          </Link>
+          .
+        </p>
+      </>
+    ),
+  },
+  {
+    slug: 'elomrade-se2-elpris-och-elavtal',
+    title: 'Elområde SE2 – elpris och elavtal i norra Mellansverige',
+    description:
+      'Allt om elområde SE2 (Jämtland, Västernorrland m.fl.). Förstå elprisnivåer, prisvariationer och hur du hittar bättre elavtal.',
+    keywords: 'elområde SE2, elpris SE2, elavtal Jämtland, elavtal Sundsvall, spotpris Mellansverige',
+    date: '2026-03-20',
+    readTime: '5 min lästid',
+    content: (
+      <>
+        <p>
+          <strong>Elområde SE2</strong> täcker norra Mellansverige – bland annat Jämtland, Västernorrland och
+          delar av Dalarna och Gävleborg. Prisnivån ligger ofta mellan SE1 och de södra elområdena.
+        </p>
+
+        <h2>Karakteristika för SE2</h2>
+        <ul>
+          <li>Betydande vattenkraft och vindkraft i regionen</li>
+          <li>Priser som påverkas av både lokal produktion och överföring söderut</li>
+          <li>Större variation vintertid när efterfrågan ökar i hela landet</li>
+        </ul>
+
+        <h2>Tips för att sänka elkostnaden i SE2</h2>
+        <ol>
+          <li>Undvik dyra tillsvidareavtal – de är sällan konkurrenskraftiga.</li>
+          <li>Jämför påslag och månadsavgift, inte bara spotpriset.</li>
+          <li>Om du har timmätning, försök styra förbrukning till billigare timmar.</li>
+        </ol>
+        <p>
+          Testa vår <Link href="/fakturaanalys">AI-fakturaanalys</Link> för att snabbt se om ditt nuvarande
+          avtal är dyrt jämfört med marknaden.
+        </p>
+
+        <h2>Nästa steg</h2>
+        <p>
+          När du vet vad du betalar idag kan du jämföra konkreta avtal via{' '}
+          <Link href="/rorligt-avtal">rörligt elavtal</Link> eller{' '}
+          <Link href="/byt-elavtal">Byt elavtal</Link>. Använd{' '}
+          <Link href="/elpriskollen">Elpriskollen</Link> för att bekräfta ditt elområde.
+        </p>
+      </>
+    ),
+  },
+  {
+    slug: 'elomrade-se3-elpris-och-elavtal',
+    title: 'Elområde SE3 – elpris och elavtal i Södra Mellansverige',
+    description:
+      'Guide till elområde SE3 (Stockholm, Uppsala, Örebro m.fl.). Förstå prisvariationer och välj rätt elavtal i ett av Sveriges största elområden.',
+    keywords: 'elområde SE3, elpris SE3, elavtal Stockholm, elavtal Uppsala, spotpris Södra Mellansverige',
+    date: '2026-04-01',
+    readTime: '6 min lästid',
+    content: (
+      <>
+        <p>
+          <strong>Elområde SE3</strong> är ett av Sveriges mest befolkade elområden och omfattar bland annat
+          Stockholm, Uppsala, Örebro och Jönköping. Här är efterfrågan hög och prisvariationerna ofta tydliga.
+        </p>
+
+        <h2>Varför svänger priset mer i SE3?</h2>
+        <ul>
+          <li>Hög befolkningstäthet och stor industriell efterfrågan</li>
+          <li>Begränsad överföringskapacitet från norra Sverige under toppar</li>
+          <li>Känslighet för väder – kalla vintrar driver upp priset snabbt</li>
+        </ul>
+
+        <h2>Rörligt vs fastpris i SE3</h2>
+        <p>
+          I SE3 är valet mellan rörligt och fastpris extra viktigt. Rörligt kan ge lägre snittpris över tid,
+          men du måste klara perioder med höga månadsfakturor. Fastpris ger trygghet men kostar ofta mer om
+          marknaden blir billigare.
+        </p>
+        <p>
+          Läs vår jämförelse:{' '}
+          <Link href="/kunskap/fastpris-vs-rorligt-vilket-elavtal-passar-dig">
+            Fastpris vs rörligt – vilket passar dig?
+          </Link>
+        </p>
+
+        <h2>Praktiska steg för dig i SE3</h2>
+        <ol>
+          <li>
+            Analysera din faktura med <Link href="/fakturaanalys">AI-fakturaanalys</Link>.
+          </li>
+          <li>
+            Jämför erbjudanden på <Link href="/rorligt-avtal">rörligt</Link> och{' '}
+            <Link href="/fastpris-avtal">fastpris</Link>.
+          </li>
+          <li>
+            Byt enkelt via <Link href="/byt-elavtal">Byt elavtal</Link> när du hittat rätt alternativ.
+          </li>
+        </ol>
+        <p>
+          Se även vår guide om{' '}
+          <Link href="/kunskap/basta-elavtal-2026-rorligt-vs-fastpris-se3-se4">
+            bästa elavtal i SE3 och SE4
+          </Link>
+          .
+        </p>
+      </>
+    ),
+  },
+  {
+    slug: 'elomrade-se4-elpris-och-elavtal',
+    title: 'Elområde SE4 – elpris och elavtal i södra Sverige',
+    description:
+      'Allt om elområde SE4 (Skåne, Halland, Småland m.fl.). Varför elpriset ofta är högst i söder och hur du hittar bättre elavtal.',
+    keywords: 'elområde SE4, elpris SE4, elavtal Skåne, elavtal Halland, spotpris södra Sverige',
+    date: '2026-04-10',
+    readTime: '6 min lästid',
+    content: (
+      <>
+        <p>
+          <strong>Elområde SE4</strong> omfattar södra Sverige – Skåne, Halland, Blekinge, Småland och Gotland.
+          Det är ofta det elområde där spotpriset ligger högst, särskilt under kalla vintrar och perioder med
+          hög efterfrågan.
+        </p>
+
+        <h2>Varför är SE4 ofta dyrast?</h2>
+        <ul>
+          <li>Stor lokal efterfrågan kombinerat med begränsad import från norr</li>
+          <li>Flaskhalsar i överföringen gör att billig el från SE1/SE2 inte alltid når söder</li>
+          <li>Hög andel hushåll med elvärme och elbilsladdning ökar toppbelastningen</li>
+        </ul>
+
+        <h2>Vad kan du göra som bor i SE4?</h2>
+        <p>
+          Du kan inte ändra elområde, men du kan påverka vad du betalar:
+        </p>
+        <ol>
+          <li>Byt från dyrt tillsvidareavtal till ett konkurrenskraftigt rörligt eller fastprisavtal.</li>
+          <li>Analysera din faktura – många betalar onödigt höga påslag och avgifter.</li>
+          <li>Överväg fastpris om du vill skydda dig mot framtida pristoppar.</li>
+        </ol>
+        <p>
+          Börja med <Link href="/fakturaanalys">gratis AI-fakturaanalys</Link> och se din uppskattade
+          besparing.
+        </p>
+
+        <h2>Jämför avtal för SE4</h2>
+        <p>
+          Vi hjälper dig jämföra marknadens erbjudanden oavsett om du vill ha{' '}
+          <Link href="/rorligt-avtal">rörligt elavtal</Link> eller{' '}
+          <Link href="/fastpris-avtal">fastpris</Link>. När du är redo går du vidare via{' '}
+          <Link href="/byt-elavtal">Byt elavtal</Link>.
+        </p>
+        <p>
+          Kontrollera ditt elområde och prisnivå i <Link href="/elpriskollen">Elpriskollen</Link> med ditt
+          postnummer.
         </p>
       </>
     ),

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Script from 'next/script';
 import BreadcrumbJsonLd from '@/components/BreadcrumbJsonLd';
+import BreadcrumbNav from '@/components/BreadcrumbNav';
 import { blogPosts, getBlogPostBySlug } from '@/lib/blogPosts';
 
 type Params = {
@@ -82,16 +83,15 @@ export default async function BlogPostPage({ params }: { params: Promise<Params>
     },
   };
 
+  const breadcrumbItems = [
+    { name: 'Hem', path: '/' },
+    { name: 'Kunskap', path: '/kunskap' },
+    { name: post.title, path: `/kunskap/${post.slug}` },
+  ];
+
   return (
     <main className="container" style={{ maxWidth: 900, margin: '0 auto', padding: 'var(--section-spacing) 0' }}>
-      <BreadcrumbJsonLd
-        id={`breadcrumb-kunskap-${post.slug}`}
-        items={[
-          { name: 'Hem', path: '/' },
-          { name: 'Kunskap', path: '/kunskap' },
-          { name: post.title, path: `/kunskap/${post.slug}` },
-        ]}
-      />
+      <BreadcrumbJsonLd id={`breadcrumb-kunskap-${post.slug}`} items={breadcrumbItems} />
       <article
         style={{
           background: 'rgba(255,255,255,0.97)',
@@ -104,34 +104,7 @@ export default async function BlogPostPage({ params }: { params: Promise<Params>
         <Script id={`article-json-ld-${post.slug}`} type="application/ld+json">
           {JSON.stringify(articleJsonLd)}
         </Script>
-        <nav
-          aria-label="Brödsmulor för kunskapsbanken"
-          style={{
-            marginBottom: '1rem',
-            display: 'flex',
-            justifyContent: 'flex-start',
-          }}
-        >
-          <Link
-            href="/kunskap"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              padding: '0.35rem 0.85rem',
-              borderRadius: 999,
-              border: '1px solid rgba(15,23,42,0.08)',
-              background: 'rgba(255,255,255,0.9)',
-              boxShadow: '0 8px 24px rgba(15,23,42,0.1)',
-              fontSize: '0.85rem',
-              color: '#0f172a',
-              textDecoration: 'none',
-            }}
-          >
-            <span style={{ fontSize: '1rem' }}>←</span>
-            <span>Tillbaka till kunskapsbanken</span>
-          </Link>
-        </nav>
+        <BreadcrumbNav items={breadcrumbItems} />
         <header style={{ marginBottom: '1.5rem' }}>
           <p
             style={{

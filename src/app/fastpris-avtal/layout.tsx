@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import BreadcrumbJsonLd from '@/components/BreadcrumbJsonLd';
+import ServiceJsonLd from '@/components/ServiceJsonLd';
 
 export const metadata: Metadata = {
   title: 'Fast elpris – jämför fastprisavtal 2026 | Elchef.se',
@@ -29,6 +30,12 @@ export default function FastprisAvtalLayout({
           { name: 'Hem', path: '/' },
           { name: 'Fastprisavtal', path: '/fastpris-avtal' },
         ]}
+      />
+      <ServiceJsonLd
+        id="service-fastpris-avtal"
+        name="Jämför fastprisavtal för el"
+        description="Jämför fastprisavtal i Sverige och lås elpriset för en trygg och förutsägbar elkostnad."
+        path="/fastpris-avtal"
       />
       {children}
     </>
