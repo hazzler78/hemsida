@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Script from 'next/script';
+import BreadcrumbJsonLd from '@/components/BreadcrumbJsonLd';
 import { blogPosts, getBlogPostBySlug } from '@/lib/blogPosts';
 
 type Params = {
@@ -34,6 +35,14 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
       description: post.description,
       url: `https://www.elchef.se/kunskap/${post.slug}`,
       type: 'article',
+      images: [
+        {
+          url: '/og-share.png',
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
     },
 };
 }
@@ -75,6 +84,14 @@ export default async function BlogPostPage({ params }: { params: Promise<Params>
 
   return (
     <main className="container" style={{ maxWidth: 900, margin: '0 auto', padding: 'var(--section-spacing) 0' }}>
+      <BreadcrumbJsonLd
+        id={`breadcrumb-kunskap-${post.slug}`}
+        items={[
+          { name: 'Hem', path: '/' },
+          { name: 'Kunskap', path: '/kunskap' },
+          { name: post.title, path: `/kunskap/${post.slug}` },
+        ]}
+      />
       <article
         style={{
           background: 'rgba(255,255,255,0.97)',

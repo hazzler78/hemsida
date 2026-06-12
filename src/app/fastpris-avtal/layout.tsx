@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import BreadcrumbJsonLd from '@/components/BreadcrumbJsonLd';
 
 export const metadata: Metadata = {
   title: 'Fast elpris – jämför fastprisavtal 2026 | Elchef.se',
@@ -20,5 +21,16 @@ export default function FastprisAvtalLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <BreadcrumbJsonLd
+        id="breadcrumb-fastpris-avtal"
+        items={[
+          { name: 'Hem', path: '/' },
+          { name: 'Fastprisavtal', path: '/fastpris-avtal' },
+        ]}
+      />
+      {children}
+    </>
+  );
 }

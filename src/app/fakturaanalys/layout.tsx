@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import BreadcrumbJsonLd from '@/components/BreadcrumbJsonLd';
 
 export const metadata: Metadata = {
   title: 'Fakturaanalys av elräkning med AI | Elchef.se',
@@ -20,6 +21,17 @@ export default function FakturaanalysLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <BreadcrumbJsonLd
+        id="breadcrumb-fakturaanalys"
+        items={[
+          { name: 'Hem', path: '/' },
+          { name: 'Fakturaanalys', path: '/fakturaanalys' },
+        ]}
+      />
+      {children}
+    </>
+  );
 }
 

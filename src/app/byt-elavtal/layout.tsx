@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import BreadcrumbJsonLd from '@/components/BreadcrumbJsonLd';
 
 export const metadata: Metadata = {
   title: 'Byt elavtal enkelt – jämför rörligt och fastpris | Elchef.se',
@@ -20,6 +21,17 @@ export default function BytElavtalLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <BreadcrumbJsonLd
+        id="breadcrumb-byt-elavtal"
+        items={[
+          { name: 'Hem', path: '/' },
+          { name: 'Byt elavtal', path: '/byt-elavtal' },
+        ]}
+      />
+      {children}
+    </>
+  );
 }
 

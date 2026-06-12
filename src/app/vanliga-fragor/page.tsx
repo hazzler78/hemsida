@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import BreadcrumbJsonLd from '@/components/BreadcrumbJsonLd';
 import FAQ from '@/components/FAQ';
 
 export const metadata: Metadata = {
@@ -15,6 +16,13 @@ export const metadata: Metadata = {
 export default function VanligaFragor() {
   return (
     <main>
+      <BreadcrumbJsonLd
+        id="breadcrumb-vanliga-fragor"
+        items={[
+          { name: 'Hem', path: '/' },
+          { name: 'Vanliga frågor', path: '/vanliga-fragor' },
+        ]}
+      />
       <FAQ headingLevel="h1" />
     </main>
   );

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import BreadcrumbJsonLd from '@/components/BreadcrumbJsonLd';
 
 export const metadata: Metadata = {
   title: 'Elpriskollen – se elområde och prisnivå i Sverige | Elchef.se',
@@ -20,6 +21,17 @@ export default function ElpriskollenLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <BreadcrumbJsonLd
+        id="breadcrumb-elpriskollen"
+        items={[
+          { name: 'Hem', path: '/' },
+          { name: 'Elpriskollen', path: '/elpriskollen' },
+        ]}
+      />
+      {children}
+    </>
+  );
 }
 
