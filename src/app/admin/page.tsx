@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { readAdminAuthed, writeAdminAuthed } from '@/lib/adminAuth';
 
 const ADMIN_PASSWORD = "grodan2025";
 
@@ -97,16 +98,14 @@ export default function AdminPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (sessionStorage.getItem('admin_authed') === 'true') setAuthed(true);
-    }
+    if (readAdminAuthed()) setAuthed(true);
   }, []);
 
   function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     if (input === ADMIN_PASSWORD) {
       setAuthed(true);
-      sessionStorage.setItem('admin_authed', 'true');
+      writeAdminAuthed();
       setError('');
     } else {
       setError('Fel lösenord!');
