@@ -3,11 +3,7 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import StyledComponentsRegistry from '../lib/registry';
-import BottomNav from '@/components/BottomNav';
-import CampaignBanner from '@/components/CampaignBanner';
-import GrokChat from '@/components/GrokChat';
-import CheapEnergyChat from '@/components/CheapEnergyChat';
-import Footer from '@/components/Footer';
+import SiteChrome from '@/components/SiteChrome';
 import { websiteJsonLd } from '@/lib/seo';
 
 const inter = Inter({ subsets: ["latin"] });
@@ -288,17 +284,8 @@ export default function RootLayout({
               })();
             `}
           </Script>
-          <CampaignBanner />
-          <div id="app">
-            {children}
-            <div className="bottom-nav" aria-hidden="false">
-              <BottomNav />
-            </div>
-            <Footer />
-          </div>
+          <SiteChrome>{children}</SiteChrome>
         </StyledComponentsRegistry>
-        <GrokChat />
-        <CheapEnergyChat />
       </body>
     </html>
   );

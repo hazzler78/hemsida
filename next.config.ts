@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  compiler: {
+    styledComponents: true,
+  },
   async redirects() {
     return [
       // Kortlänkar för sociala medier (UTM-spårning)
