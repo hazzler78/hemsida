@@ -115,7 +115,14 @@ export const blogPosts: BlogPost[] = [
         <h2>1. Börja med rätt elavtal</h2>
         <p>
           Innan du byter lampor och tätar fönster är det klokt att säkerställa att du inte betalar onödigt
-          mycket för själva elavtalet:
+          mycket för själva elavtalet – särskilt dolda avgifter som påslag och månadsavgift. Läs vår guide om{' '}
+          <Link href="/kunskap/extra-kostnader-elrakningen-dolda-avgifter-forklaring">
+            extra kostnader på elräkningen
+          </Link>
+          .
+        </p>
+        <p>
+          Kontrollera också:
         </p>
         <ul>
           <li>Se över om du har onödigt hög månadsavgift eller dyra påslag.</li>
@@ -755,6 +762,414 @@ export const blogPosts: BlogPost[] = [
           Kontrollera ditt elområde och prisnivå i <Link href="/elpriskollen">Elpriskollen</Link> med ditt
           postnummer.
         </p>
+      </>
+    ),
+  },
+  {
+    slug: 'extra-kostnader-elrakningen-dolda-avgifter-forklaring',
+    title: 'Extra kostnader på elräkningen – dolda avgifter förklarade',
+    description:
+      'Guide till alla extra kostnader på elräkningen: påslag, månadsavgift, elcertifikat, energiskatt och nätavgift. Lär dig vad du faktiskt betalar för och hur du undviker dyra fällor.',
+    keywords:
+      'extra kostnader elräkning, dolda avgifter el, påslag elavtal, månadsavgift el, elcertifikat, energiskatt el, förstå elräkningen',
+    date: '2026-04-20',
+    readTime: '8 min lästid',
+    content: (
+      <>
+        <p>
+          Många fokuserar bara på <strong>elpriset per kWh</strong> – men det är sällan det enda som avgör hur
+          hög elräkningen blir. Påslag, fasta avgifter, skatter och tillägg kan lägga hundratals eller tusentals
+          kronor extra per år. Här går vi igenom de vanligaste kostnaderna och hur du upptäcker dem.
+        </p>
+
+        <h2>1. Elpris (spotpris eller fastpris)</h2>
+        <p>
+          Detta är själva kostnaden för den el du förbrukar. Vid <strong>rörligt elavtal</strong> följer priset
+          spotpriset på elbörsen. Vid <strong>fastpris</strong> är priset låst under avtalsperioden.
+        </p>
+        <p>
+          Elpriset står ofta tydligt på fakturan – men det säger inget om hur mycket du betalar totalt per kWh
+          när alla tillägg är inräknade.
+        </p>
+
+        <h2>2. Påslag – den vanligaste dolda kostnaden</h2>
+        <p>
+          Elleverantören lägger nästan alltid ett <strong>påslag</strong> ovanpå spotpriset (eller inkluderar det
+          i ett högre fastpris). Påslag på 3–10 öre/kWh låter lite, men över ett år med normal förbrukning kan det
+          bli 500–2 000 kr extra.
+        </p>
+        <ul>
+          <li>Jämför alltid <em>totalkostnad per kWh</em>, inte bara spotpris eller kampanjrubrik.</li>
+          <li>Var extra uppmärksam efter att en kampanjperiod löpt ut – påslaget kan då höjas kraftigt.</li>
+          <li>Tillsvidareavtal har ofta bland de högsta påslagen på marknaden.</li>
+        </ul>
+
+        <h2>3. Månadsavgift och fasta avgifter</h2>
+        <p>
+          Många avtal har en <strong>månadsavgift</strong> (abonnemangsavgift) oavsett hur mycket el du använder.
+          30–60 kr/månad blir 360–720 kr per år – helt utan att du förbrukat en enda kWh extra.
+        </p>
+        <p>
+          Vissa leverantörer kallar det &quot;serviceavgift&quot;, &quot;administrationsavgift&quot; eller liknande.
+          Leta efter raden på fakturan och räkna om den till årskostnad.
+        </p>
+
+        <h2>4. Elcertifikat</h2>
+        <p>
+          <strong>Elcertifikat</strong> är ett lagkrav som säkerställer att en viss andel el kommer från
+          förnybar energi. Kostnaden förs vidare till dig som konsument och syns ofta som en separat rad på
+          fakturan eller ingår i påslaget.
+        </p>
+        <p>
+          Beloppet varierar över tid men är en fast del av elkostnaden – du kan inte välja bort det, men du bör
+          känna till att det finns.
+        </p>
+
+        <h2>5. Energiskatt</h2>
+        <p>
+          Staten tar ut <strong>energiskatt</strong> på den el du förbrukar. Skatten är densamma oavsett
+          leverantör och syns på fakturan. Nivån kan ändras vid budgetbeslut, så den påverkar din totala
+          kostnad över tid.
+        </p>
+        <p>
+          Energiskatten är inte något elleverantören styr över – men den ingår i den summa du betalar varje månad.
+        </p>
+
+        <h2>6. Moms (25 %)</h2>
+        <p>
+          På de flesta kostnader ovan tillkommer <strong>moms</strong>. Det innebär att en del av det du ser som
+          &quot;dyrt elpris&quot; faktiskt är skatt – men påslag och månadsavgift momsbeläggs också.
+        </p>
+
+        <h2>7. Nätavgift – inte samma sak som elavtal</h2>
+        <p>
+          <strong>Nätavgiften</strong> betalar du till ditt <em>nätägande bolag</em> (elnätet), inte till din
+          elleverantör. Den täcker överföring av el till ditt hem och underhåll av nätet.
+        </p>
+        <p>
+          Du kan inte byta nätägare genom att byta elavtal – men nätavgiften står ofta på samma faktura och kan
+          ge intryck av att allt är leverantörens pris. Titta på vilka rader som gäller <em>elhandel</em> vs{' '}
+          <em>elnät</em>.
+        </p>
+
+        <h2>8. Kampanjfällor och tilläggspaket</h2>
+        <p>
+          Vissa avtal verkar billiga första året tack vare kampanj, men blir dyrare när:
+        </p>
+        <ul>
+          <li>Kampanjpriset går ut och påslaget höjs till &quot;ordinarie&quot; nivå</li>
+          <li>Du råkar ligga kvar i ett tillsvidareavtal efter att bindningstiden löpt ut</li>
+          <li>Tillägg som &quot;miljöpaket&quot; eller &quot;trygghetstjänst&quot; aktiveras automatiskt</li>
+        </ul>
+        <p>
+          Läs alltid villkoren för vad som gäller <strong>efter</strong> kampanjperioden – inte bara introduktionspriset.
+        </p>
+
+        <h2>Så räknar du ut din verkliga kostnad per kWh</h2>
+        <ol>
+          <li>Ta fakturans totala kostnad för elhandel (exklusive nät om du vill jämföra avtal).</li>
+          <li>Dela med din förbrukning i kWh för samma period.</li>
+          <li>Jämför resultatet med erbjudanden på marknaden – inte bara spotpris eller kampanjrubrik.</li>
+        </ol>
+        <p>
+          Vill du slippa räkna själv? Vår{' '}
+          <Link href="/fakturaanalys">AI-fakturaanalys</Link> läser av din faktura och lyfter fram påslag,
+          avgifter och uppskattad besparing om du byter till ett bättre avtal.
+        </p>
+
+        <h2>Vad kan du påverka – och vad kan du inte?</h2>
+        <ul>
+          <li>
+            <strong>Kan påverka:</strong> elleverantör, avtalstyp (rörligt/fast), påslag, månadsavgift, att undvika
+            dyra tillsvidareavtal.
+          </li>
+          <li>
+            <strong>Svårare att påverka:</strong> nätavgift, energiskatt, elcertifikat, moms.
+          </li>
+          <li>
+            <strong>Kan påverka indirekt:</strong> förbrukning – mindre el ger lägre total kostnad oavsett pris.
+          </li>
+        </ul>
+
+        <h2>Nästa steg om du misstänker att du betalar för mycket</h2>
+        <p>
+          Börja med att analysera din senaste faktura. Om totalkostnaden per kWh är hög jämfört med marknaden är
+          nästa steg att jämföra konkreta avtal:
+        </p>
+        <ul>
+          <li>
+            <Link href="/rorligt-avtal">Jämför rörliga elavtal</Link>
+          </li>
+          <li>
+            <Link href="/fastpris-avtal">Jämför fastprisavtal</Link>
+          </li>
+          <li>
+            <Link href="/byt-elavtal">Byt elavtal</Link> när du hittat ett bättre alternativ
+          </li>
+        </ul>
+        <p>
+          Läs även vår guide om{' '}
+          <Link href="/kunskap/fastpris-vs-rorligt-vilket-elavtal-passar-dig">
+            fastpris vs rörligt
+          </Link>{' '}
+          och{' '}
+          <Link href="/kunskap/hur-sanka-elrakningen-vinter-2026-praktiska-tips">
+            praktiska tips för att sänka elräkningen
+          </Link>
+          .
+        </p>
+      </>
+    ),
+  },
+  {
+    slug: 'spotpris-och-timpris-pa-el-forklarat',
+    title: 'Spotpris och timpris på el – så fungerar det',
+    description:
+      'Förklaring av spotpris och timpris på el. Lär dig hur priset sätts på Nord Pool, skillnaden mellan tim- och månadsavräkning och hur du drar nytta av billiga timmar.',
+    keywords:
+      'spotpris el, timpris el, vad är spotpris, Nord Pool, timavräkning, rörligt elpris timme, billiga timmar el',
+    date: '2026-04-25',
+    readTime: '7 min lästid',
+    content: (
+      <>
+        <p>
+          Har du rörligt elavtal styrs din kostnad av <strong>spotpriset</strong> – och allt oftare av{' '}
+          <strong>timpriset</strong>. Men vad betyder begreppen egentligen, och hur kan du använda dem för att
+          sänka din elkostnad? Här reder vi ut det.
+        </p>
+
+        <h2>Vad är spotpris på el?</h2>
+        <p>
+          Spotpriset är det pris som sätts på elbörsen <strong>Nord Pool</strong>. Varje dag bestäms priset för
+          nästa dygns alla 24 timmar utifrån utbud och efterfrågan. Priset varierar mellan timmar och mellan
+          elområdena SE1–SE4.
+        </p>
+        <p>
+          Ditt slutliga pris består av spotpriset plus leverantörens påslag, elcertifikat, energiskatt och moms.
+          Läs mer i vår guide om{' '}
+          <Link href="/kunskap/extra-kostnader-elrakningen-dolda-avgifter-forklaring">
+            extra kostnader på elräkningen
+          </Link>
+          .
+        </p>
+
+        <h2>Timpris vs månadsavräkning</h2>
+        <p>
+          Det finns två huvudsakliga sätt att räkna ditt rörliga pris:
+        </p>
+        <ul>
+          <li>
+            <strong>Timavräkning (timpris):</strong> du betalar det faktiska spotpriset timme för timme. Använder
+            du el när det är billigt sänker du din kostnad.
+          </li>
+          <li>
+            <strong>Månadsavräkning:</strong> du betalar ett snittpris för hela månaden, oavsett när på dygnet du
+            använt elen.
+          </li>
+        </ul>
+        <p>
+          Med timpris kan du aktivt påverka din kostnad – men det kräver att du kan flytta förbrukning till
+          billigare timmar.
+        </p>
+
+        <h2>När är elen billigast?</h2>
+        <p>
+          Priset följer ofta ett mönster, även om det varierar med väder och årstid:
+        </p>
+        <ul>
+          <li>Nätter och tidiga morgnar är ofta billigare.</li>
+          <li>Morgon (07–09) och kväll (17–20) har ofta de högsta topparna.</li>
+          <li>Blåsiga dagar med mycket vindkraft kan ge låga priser även dagtid.</li>
+        </ul>
+
+        <h2>Så drar du nytta av timpriset</h2>
+        <ol>
+          <li>Schemalägg tvätt, disk och elbilsladdning till billiga timmar.</li>
+          <li>Använd appar eller smart styrning som följer spotpriset automatiskt.</li>
+          <li>Undvik att köra flera el-intensiva apparater samtidigt under topptimmarna.</li>
+        </ol>
+        <p>
+          Bor du i ett område med stora prisvariationer, som SE3 eller SE4, kan effekten bli särskilt stor. Läs
+          mer om{' '}
+          <Link href="/kunskap/elomraden-se1-se4-vad-betyder-de-for-ditt-elpris">
+            elområden SE1–SE4
+          </Link>
+          .
+        </p>
+
+        <h2>Passar timpris alla?</h2>
+        <p>
+          Timpris passar dig som kan och vill anpassa förbrukningen. Vill du ha förutsägbarhet kan{' '}
+          <Link href="/fastpris-avtal">fastpris</Link> vara ett bättre val. Osäker? Läs vår jämförelse{' '}
+          <Link href="/kunskap/fastpris-vs-rorligt-vilket-elavtal-passar-dig">fastpris vs rörligt</Link>.
+        </p>
+        <p>
+          Vill du veta vad du betalar idag? Ladda upp din faktura i vår{' '}
+          <Link href="/fakturaanalys">AI-fakturaanalys</Link> och se din besparingspotential.
+        </p>
+      </>
+    ),
+  },
+  {
+    slug: 'elavtal-for-lagenhet-sa-valjer-du-ratt',
+    title: 'Elavtal för lägenhet – så väljer du rätt',
+    description:
+      'Guide till elavtal för dig som bor i lägenhet. Lär dig om låg förbrukning, månadsavgifter, vad som ingår i hyran och hur du hittar bästa elavtalet.',
+    keywords:
+      'elavtal lägenhet, el lägenhet, billigt elavtal lägenhet, elavtal hyresrätt, elavtal bostadsrätt, låg elförbrukning',
+    date: '2026-05-01',
+    readTime: '6 min lästid',
+    content: (
+      <>
+        <p>
+          Bor du i lägenhet har du oftast lägre elförbrukning än en villa – men det betyder inte att valet av
+          elavtal är oviktigt. Tvärtom kan fasta avgifter äta upp en stor del av en liten elräkning.
+        </p>
+
+        <h2>Har du ett eget elavtal?</h2>
+        <p>
+          Först och främst: kontrollera om du själv tecknar elavtal eller om elen ingår i hyran/avgiften.
+        </p>
+        <ul>
+          <li>
+            <strong>Hyresrätt:</strong> ibland ingår el i hyran, ibland tecknar du eget avtal. Kolla ditt
+            hyresavtal.
+          </li>
+          <li>
+            <strong>Bostadsrätt:</strong> du tecknar nästan alltid eget elhandelsavtal, men vissa föreningar har
+            gemensam el.
+          </li>
+        </ul>
+        <p>
+          Tecknar du eget avtal kan du fritt välja elleverantör och därmed påverka din kostnad.
+        </p>
+
+        <h2>Varför månadsavgiften är extra viktig i lägenhet</h2>
+        <p>
+          Med låg förbrukning blir <strong>fasta avgifter</strong> en större andel av räkningen. Ett avtal med
+          låg månadsavgift kan vara mer värt än ett med marginellt lägre kWh-pris.
+        </p>
+        <p>
+          Exempel: använder du bara 1 500 kWh per år spelar en månadsavgift på 45 kr (540 kr/år) mycket större
+          roll än för en villa som drar 20 000 kWh. Läs mer om{' '}
+          <Link href="/kunskap/extra-kostnader-elrakningen-dolda-avgifter-forklaring">
+            extra kostnader på elräkningen
+          </Link>
+          .
+        </p>
+
+        <h2>Rörligt eller fastpris i lägenhet?</h2>
+        <p>
+          Eftersom din totala elkostnad ofta är lägre blir risken med rörligt pris också mindre i kronor räknat.
+          Många lägenhetsboende väljer därför rörligt för att över tid få ett lågt snittpris – men prioriterar du
+          förutsägbarhet fungerar fastpris också bra.
+        </p>
+        <ul>
+          <li>
+            <Link href="/rorligt-avtal">Jämför rörliga elavtal</Link>
+          </li>
+          <li>
+            <Link href="/fastpris-avtal">Jämför fastprisavtal</Link>
+          </li>
+        </ul>
+
+        <h2>Checklista för lägenhetsboende</h2>
+        <ol>
+          <li>Kontrollera om du har eget elavtal eller om el ingår i hyran.</li>
+          <li>Jämför både kWh-pris och månadsavgift – inte bara det ena.</li>
+          <li>Undvik dyra tillsvidareavtal.</li>
+          <li>Ange ditt postnummer i <Link href="/elpriskollen">Elpriskollen</Link> för att se ditt elområde.</li>
+          <li>
+            Analysera din faktura med <Link href="/fakturaanalys">AI-fakturaanalys</Link> om du är osäker på vad
+            du betalar.
+          </li>
+        </ol>
+        <p>
+          När du hittat ett bättre alternativ är det enkelt att{' '}
+          <Link href="/byt-elavtal">byta elavtal</Link> – bytet sköts oftast helt av den nya leverantören.
+        </p>
+      </>
+    ),
+  },
+  {
+    slug: 'solceller-och-elavtal-salja-overskott-2026',
+    title: 'Solceller och elavtal – så säljer du ditt överskott 2026',
+    description:
+      'Guide till solceller och elavtal 2026. Lär dig hur du säljer överskottsel, vad du får betalt, skattereduktion och hur du väljer rätt elavtal som solcellsägare.',
+    keywords:
+      'solceller elavtal, sälja överskottsel, sälja solel, skattereduktion solceller, mikroproducent el, elavtal solceller 2026',
+    date: '2026-05-10',
+    readTime: '7 min lästid',
+    content: (
+      <>
+        <p>
+          Har du eller planerar du solceller? Då är ditt elavtal en viktig pusselbit – både för vad du betalar
+          för köpt el och vad du får betalt för din <strong>överskottsel</strong>. Här går vi igenom grunderna
+          för 2026.
+        </p>
+
+        <h2>Så fungerar det att sälja överskott</h2>
+        <p>
+          När dina solceller producerar mer el än du använder matas överskottet ut på elnätet. Som{' '}
+          <strong>mikroproducent</strong> kan du sälja den elen och få ersättning på flera sätt:
+        </p>
+        <ul>
+          <li>
+            <strong>Spotpris för såld el:</strong> du får oftast ett pris kopplat till spotpriset, ibland med ett
+            litet påslag eller avdrag.
+          </li>
+          <li>
+            <strong>Nätnytta:</strong> nätägaren betalar en ersättning för att din el minskar belastningen på
+            nätet.
+          </li>
+          <li>
+            <strong>Skattereduktion:</strong> du kan ha rätt till skattereduktion per kWh som matas ut, upp till
+            ett visst tak per år.
+          </li>
+        </ul>
+
+        <h2>Varför elavtalet spelar roll för solcellsägare</h2>
+        <p>
+          Som solcellsägare har du både köp och försäljning av el. Då blir avtalet extra viktigt:
+        </p>
+        <ul>
+          <li>
+            <strong>Rörligt/timpris</strong> gör det lättare att maximera värdet – du använder din egen sol när
+            den produceras och köper billig el på natten.
+          </li>
+          <li>Kontrollera vilken <strong>ersättning för såld el</strong> leverantören erbjuder.</li>
+          <li>Se upp med avtal som har bra köppris men dålig ersättning för överskott.</li>
+        </ul>
+        <p>
+          Med timpris kan du dra extra nytta av billiga timmar. Läs mer i vår guide om{' '}
+          <Link href="/kunskap/spotpris-och-timpris-pa-el-forklarat">spotpris och timpris</Link>.
+        </p>
+
+        <h2>Maximera värdet av din solel</h2>
+        <ol>
+          <li>Använd så mycket av din egen sol som möjligt (egenanvändning är mest värdefullt).</li>
+          <li>Styr förbrukning – tvätt, disk, elbil – till soliga timmar mitt på dagen.</li>
+          <li>Överväg batteri för att lagra överskott till kväll och natt.</li>
+          <li>Jämför vilket elavtal som ger bäst kombination av köppris och säljersättning.</li>
+        </ol>
+
+        <h2>Vill du börja med solceller?</h2>
+        <p>
+          Funderar du på att installera solceller kan du{' '}
+          <Link href="/#solceller">begära en offert via Elchef</Link>. Och oavsett om du redan har solceller är
+          det klokt att se över ditt elavtal:
+        </p>
+        <ul>
+          <li>
+            <Link href="/rorligt-avtal">Jämför rörliga elavtal</Link>
+          </li>
+          <li>
+            <Link href="/fakturaanalys">Analysera din elräkning med AI</Link>
+          </li>
+          <li>
+            <Link href="/byt-elavtal">Byt elavtal</Link> till ett som passar dig som producent och konsument
+          </li>
+        </ul>
       </>
     ),
   },
