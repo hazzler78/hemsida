@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import StyledComponentsRegistry from '../lib/registry';
-import ClientSiteShell from '@/components/ClientSiteShell';
+import SiteChrome from '@/components/SiteChrome';
 import { websiteJsonLd } from '@/lib/seo';
 
 const inter = Inter({ subsets: ["latin"] });
@@ -284,7 +284,7 @@ export default function RootLayout({
               })();
             `}
           </Script>
-          <ClientSiteShell>{children}</ClientSiteShell>
+          <SiteChrome>{children}</SiteChrome>
         </StyledComponentsRegistry>
       </body>
     </html>

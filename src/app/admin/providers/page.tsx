@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 
-const ADMIN_PASSWORD = "grodan2025";
 
 interface PageProvider {
   id?: number;
@@ -27,20 +26,12 @@ interface PageProvider {
 }
 
 export default function AdminProviders() {
-  const [authed, setAuthed] = useState(false);
-  const [input, setInput] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   
   const [providers, setProviders] = useState<PageProvider[]>([]);
   const [editingProvider, setEditingProvider] = useState<PageProvider | null>(null);
   const [activeTab, setActiveTab] = useState<'rorligt' | 'fastpris'>('rorligt');
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (sessionStorage.getItem("admin_authed") === "true") setAuthed(true);
-    }
-  }, []);
 
   const fetchProviders = async () => {
     try {
@@ -59,21 +50,10 @@ export default function AdminProviders() {
   };
 
   useEffect(() => {
-    if (!authed) return;
     fetchProviders();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authed, activeTab]);
+  }, [activeTab]);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (input === ADMIN_PASSWORD) {
-      setAuthed(true);
-      sessionStorage.setItem("admin_authed", "true");
-      setError("");
-    } else {
-      setError("Fel lösenord!");
-    }
-  };
 
   const saveProvider = async (provider: PageProvider) => {
     try {
@@ -169,27 +149,6 @@ export default function AdminProviders() {
     }
   };
 
-  if (!authed) {
-    return (
-      <div style={{ maxWidth: 400, margin: "4rem auto", padding: 24, border: "1px solid #e5e7eb", borderRadius: 12 }}>
-        <h2>Admininloggning - Leverantörer</h2>
-        <form onSubmit={handleLogin}>
-          <input
-            type="password"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder="Lösenord"
-            style={{ width: "100%", padding: 10, fontSize: 16, marginBottom: 12, borderRadius: 6, border: "1px solid #cbd5e1" }}
-            autoFocus
-          />
-          <button type="submit" style={{ width: "100%", padding: 10, fontSize: 16, borderRadius: 6, background: "var(--primary)", color: "white", border: "none", fontWeight: 600 }}>
-            Logga in
-          </button>
-        </form>
-        {error && <div style={{ color: "red", marginTop: 8 }}>{error}</div>}
-      </div>
-    );
-  }
 
   return (
     <div style={{ maxWidth: 1200, margin: "2rem auto", padding: 24 }}>

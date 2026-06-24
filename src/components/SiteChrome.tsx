@@ -17,33 +17,25 @@ const MINIMAL_CHROME_PATHS = new Set([
   '/partner/test-form',
 ]);
 
-function isAdminPath(pathname: string) {
+function isAdminPath(pathname: string): boolean {
   return pathname === '/admin' || pathname.startsWith('/admin/');
 }
 
-function isMinimalChromePath(pathname: string) {
+function isMinimalChromePath(pathname: string): boolean {
   return MINIMAL_CHROME_PATHS.has(pathname);
 }
 
-function shouldUsePublicChrome(pathname: string) {
+function shouldUsePublicChrome(pathname: string): boolean {
   return !isAdminPath(pathname) && !isMinimalChromePath(pathname);
 }
 
-function shouldLoadChat(pathname: string) {
-  return shouldUsePublicChrome(pathname);
-}
-
-type Props = {
-  children: React.ReactNode;
-};
-
-export default function ClientSiteShell({ children }: Props) {
+export default function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? '/';
   const publicChrome = shouldUsePublicChrome(pathname);
   const [chatReady, setChatReady] = useState(false);
 
   useEffect(() => {
-    if (!shouldLoadChat(pathname)) {
+    if (!shouldUsePublicChrome(pathname)) {
       setChatReady(false);
       return;
     }
@@ -59,19 +51,21 @@ export default function ClientSiteShell({ children }: Props) {
     return () => clearTimeout(timeoutId);
   }, [pathname]);
 
+  if (!publicChrome) {
+    return <>{children}</>;
+  }
+
   return (
     <>
-      {publicChrome && <CampaignBanner />}
+      <CampaignBanner />
       <div id="app">
         {children}
-        {publicChrome && (
-          <div className="bottom-nav" aria-hidden="false">
-            <BottomNav />
-          </div>
-        )}
-        {publicChrome && <Footer />}
+        <div className="bottom-nav" aria-hidden="false">
+          <BottomNav />
+        </div>
+        <Footer />
       </div>
-      {chatReady && shouldLoadChat(pathname) && (
+      {chatReady && (
         <>
           <GrokChat />
           <CheapEnergyChat />

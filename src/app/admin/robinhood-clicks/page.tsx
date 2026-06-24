@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 
-const ADMIN_PASSWORD = "grodan2025";
 
 interface RobinhoodClick {
   id: number;
@@ -41,8 +40,6 @@ const SOURCE_COLORS: Record<string, string> = {
 };
 
 export default function RobinhoodClicksPage() {
-  const [authed, setAuthed] = useState(false);
-  const [input, setInput] = useState("");
   const [clicks, setClicks] = useState<RobinhoodClick[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -71,27 +68,10 @@ export default function RobinhoodClicksPage() {
   const [refererStats, setRefererStats] = useState<RefererStat[]>([]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (sessionStorage.getItem('admin_authed') === 'true') setAuthed(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!authed) return;
     fetchClicks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authed]);
+  }, []);
 
-  function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    if (input === ADMIN_PASSWORD) {
-      setAuthed(true);
-      sessionStorage.setItem('admin_authed', 'true');
-      setError(null);
-    } else {
-      setError('Fel lösenord!');
-    }
-  }
 
   const fetchClicks = async (page?: number) => {
     try {
@@ -245,56 +225,6 @@ export default function RobinhoodClicksPage() {
     );
   };
 
-  if (!authed) {
-    return (
-      <div style={{ 
-        maxWidth: 400, 
-        margin: '4rem auto', 
-        padding: 24, 
-        border: '1px solid #e5e7eb', 
-        borderRadius: 12,
-        background: 'white',
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-      }}>
-        <h2 style={{ marginBottom: 16, textAlign: 'center' }}>Admininloggning</h2>
-        <form onSubmit={handleLogin}>
-          <input
-            type="password"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder="Lösenord"
-            style={{ 
-              width: '100%', 
-              padding: 12, 
-              fontSize: 16, 
-              marginBottom: 12, 
-              borderRadius: 8, 
-              border: '1px solid #cbd5e1',
-              boxSizing: 'border-box'
-            }}
-            autoFocus
-          />
-          <button 
-            type="submit" 
-            style={{ 
-              width: '100%', 
-              padding: 12, 
-              fontSize: 16, 
-              borderRadius: 8, 
-              background: 'var(--primary)', 
-              color: 'white', 
-              border: 'none', 
-              fontWeight: 600,
-              cursor: 'pointer'
-            }}
-          >
-            Logga in
-          </button>
-        </form>
-        {error && <div style={{ color: 'red', marginTop: 8, textAlign: 'center' }}>{error}</div>}
-      </div>
-    );
-  }
 
   return (
     <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>

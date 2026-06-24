@@ -1,12 +1,14 @@
 "use client";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 // Markdown rendering function (copied from GrokChat.tsx)
-function renderMarkdown(text: string) {
-  if (!text) return '';
+function renderMarkdown(text: unknown) {
+  if (text == null) return '';
+  const source = typeof text === 'string' ? text : String(text);
+  if (!source) return '';
   
-  let html = text
+  let html = source
     // Escape HTML to prevent XSS
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -77,7 +79,6 @@ function renderMarkdown(text: string) {
   return result.join('\n');
 }
 
-const ADMIN_PASSWORD = "grodan2025";
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -107,20 +108,12 @@ export default function AdminChatlog() {
   const [sessionGroups, setSessionGroups] = useState<SessionGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
-  const [authed, setAuthed] = useState(false);
-  const [input, setInput] = useState("");
   const [error, setError] = useState("");
   const [viewMode, setViewMode] = useState<"raw" | "grouped">("grouped");
   const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
   const [selectedSessions, setSelectedSessions] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (sessionStorage.getItem("admin_authed") === "true") setAuthed(true);
-    }
-  }, []);
 
   const fetchLogs = async () => {
     setLoading(true);
@@ -159,9 +152,8 @@ export default function AdminChatlog() {
   };
 
   useEffect(() => {
-    if (!authed) return;
     fetchLogs();
-  }, [authed]);
+  }, []);
 
   const rateLog = async (id: number, rating: number) => {
     setSaving(true);
@@ -408,38 +400,7 @@ export default function AdminChatlog() {
     setSelectedSessions(new Set());
   };
 
-  function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    if (input === ADMIN_PASSWORD) {
-      setAuthed(true);
-      sessionStorage.setItem("admin_authed", "true");
-      setError("");
-    } else {
-      setError("Fel lösenord!");
-    }
-  }
 
-  if (!authed) {
-    return (
-      <div style={{ maxWidth: 400, margin: "4rem auto", padding: 24, border: "1px solid #e5e7eb", borderRadius: 12 }}>
-        <h2>Admininloggning</h2>
-        <form onSubmit={handleLogin}>
-          <input
-            type="password"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder="Lösenord"
-            style={{ width: "100%", padding: 10, fontSize: 16, marginBottom: 12, borderRadius: 6, border: "1px solid #cbd5e1" }}
-            autoFocus
-          />
-          <button type="submit" style={{ width: "100%", padding: 10, fontSize: 16, borderRadius: 6, background: "var(--primary)", color: "white", border: "none", fontWeight: 600 }}>
-            Logga in
-          </button>
-        </form>
-        {error && <div style={{ color: "red", marginTop: 8 }}>{error}</div>}
-      </div>
-    );
-  }
 
   return (
     <div style={{ maxWidth: 1200, margin: "2rem auto", padding: 24 }}>
@@ -602,8 +563,8 @@ export default function AdminChatlog() {
           </thead>
           <tbody>
             {logs.map((log) => (
-              <>
-                <tr key={log.id}>
+              <React.Fragment key={log.id}>
+                <tr>
                   <td style={{ padding: 8, border: "1px solid #e5e7eb" }}>
                     <input
                       type="checkbox"
@@ -690,7 +651,7 @@ export default function AdminChatlog() {
                     </td>
                   </tr>
                 )}
-              </>
+              </React.Fragment>
             ))}
           </tbody>
         </table>
