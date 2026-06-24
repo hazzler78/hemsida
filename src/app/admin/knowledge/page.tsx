@@ -8,7 +8,6 @@ const getSupabase = () =>
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
   );
 
-const ADMIN_PASSWORD = "grodan2025";
 
 interface KnowledgeItem {
   id?: number;
@@ -63,8 +62,6 @@ interface ProviderInfo {
 }
 
 export default function AdminKnowledge() {
-  const [authed, setAuthed] = useState(false);
-  const [input, setInput] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   
@@ -83,15 +80,8 @@ export default function AdminKnowledge() {
   const [activeTab, setActiveTab] = useState<'knowledge' | 'campaigns' | 'providers'>('knowledge');
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (sessionStorage.getItem("admin_authed") === "true") setAuthed(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!authed) return;
     fetchKnowledgeData();
-  }, [authed]);
+  }, []);
 
   const fetchKnowledgeData = async () => {
     try {
@@ -159,16 +149,6 @@ export default function AdminKnowledge() {
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (input === ADMIN_PASSWORD) {
-      setAuthed(true);
-      sessionStorage.setItem("admin_authed", "true");
-      setError("");
-    } else {
-      setError("Fel lösenord!");
-    }
-  };
 
   const saveKnowledgeItem = async (item: KnowledgeItem) => {
     try {
@@ -407,27 +387,6 @@ export default function AdminKnowledge() {
     }
   };
 
-  if (!authed) {
-    return (
-      <div style={{ maxWidth: 400, margin: "4rem auto", padding: 24, border: "1px solid #e5e7eb", borderRadius: 12 }}>
-        <h2>Admininloggning - Kunskapsbas</h2>
-        <form onSubmit={handleLogin}>
-          <input
-            type="password"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder="Lösenord"
-            style={{ width: "100%", padding: 10, fontSize: 16, marginBottom: 12, borderRadius: 6, border: "1px solid #cbd5e1" }}
-            autoFocus
-          />
-          <button type="submit" style={{ width: "100%", padding: 10, fontSize: 16, borderRadius: 6, background: "var(--primary)", color: "white", border: "none", fontWeight: 600 }}>
-            Logga in
-          </button>
-        </form>
-        {error && <div style={{ color: "red", marginTop: 8 }}>{error}</div>}
-      </div>
-    );
-  }
 
   return (
     <div style={{ maxWidth: 1200, margin: "2rem auto", padding: 24 }}>

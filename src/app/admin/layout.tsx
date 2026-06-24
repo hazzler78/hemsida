@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import AdminAuthGate from '@/components/admin/AdminAuthGate';
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -7,7 +8,7 @@ export const metadata: Metadata = {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ minHeight: '100vh', background: '#f3f4f6' }}>
-      {children}
+      <AdminAuthGate>{children}</AdminAuthGate>
     </div>
   );
 }

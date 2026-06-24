@@ -1,3 +1,5 @@
+export const ADMIN_PASSWORD = 'grodan2025';
+
 export function readAdminAuthed(): boolean {
   if (typeof window === 'undefined') return false;
   try {

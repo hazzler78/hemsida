@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
 
-const ADMIN_PASSWORD = "grodan2025";
 
 interface PageViewStats {
   path: string;
@@ -23,8 +22,6 @@ interface RecentData {
 }
 
 export default function DataVerification() {
-  const [authed, setAuthed] = useState(false);
-  const [input, setInput] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [pageViewStats, setPageViewStats] = useState<PageViewStats[]>([]);
@@ -38,16 +35,9 @@ export default function DataVerification() {
   const [realViews, setRealViews] = useState(0);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (sessionStorage.getItem('admin_authed') === 'true') setAuthed(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!authed) return;
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authed, dateRange]);
+  }, [dateRange]);
 
   const fetchData = async () => {
     try {
@@ -152,67 +142,7 @@ export default function DataVerification() {
     }
   };
 
-  function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    if (input === ADMIN_PASSWORD) {
-      setAuthed(true);
-      sessionStorage.setItem('admin_authed', 'true');
-      setError('');
-    } else {
-      setError('Fel lösenord!');
-    }
-  }
 
-  if (!authed) {
-    return (
-      <div style={{ 
-        maxWidth: 400, 
-        margin: '4rem auto', 
-        padding: 24, 
-        border: '1px solid #e5e7eb', 
-        borderRadius: 12,
-        background: 'white',
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-      }}>
-        <h2 style={{ marginBottom: 16, textAlign: 'center' }}>Admininloggning</h2>
-        <form onSubmit={handleLogin}>
-          <input
-            type="password"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder="Lösenord"
-            style={{ 
-              width: '100%', 
-              padding: 12, 
-              fontSize: 16, 
-              marginBottom: 12, 
-              borderRadius: 8, 
-              border: '1px solid #cbd5e1',
-              boxSizing: 'border-box'
-            }}
-            autoFocus
-          />
-          <button 
-            type="submit" 
-            style={{ 
-              width: '100%', 
-              padding: 12, 
-              fontSize: 16, 
-              borderRadius: 8, 
-              background: 'var(--primary)', 
-              color: 'white', 
-              border: 'none', 
-              fontWeight: 600,
-              cursor: 'pointer'
-            }}
-          >
-            Logga in
-          </button>
-        </form>
-        {error && <div style={{ color: 'red', marginTop: 8, textAlign: 'center' }}>{error}</div>}
-      </div>
-    );
-  }
 
   // Calculate conversion rates
   const jamforPageViews = pageViewStats.find(p => p.path === '/jamfor-elpriser')?.count || 0;

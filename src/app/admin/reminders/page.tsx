@@ -1,4 +1,5 @@
 "use client";
+import { clearAdminAuthed } from '@/lib/adminAuth';
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { CustomerReminder } from "@/lib/types";
@@ -9,13 +10,10 @@ const getSupabase = () =>
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
   );
 
-const ADMIN_PASSWORD = "grodan2025";
 
 export default function AdminReminders() {
   const [reminders, setReminders] = useState<CustomerReminder[]>([]);
   const [loading, setLoading] = useState(true);
-  const [authed, setAuthed] = useState(false);
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
@@ -49,12 +47,6 @@ export default function AdminReminders() {
     notes: ""
   });
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (sessionStorage.getItem("admin_authed") === "true") setAuthed(true);
-    }
-  }, []);
-
   const fetchReminders = async () => {
     setLoading(true);
     const supabase = getSupabase();
@@ -72,10 +64,9 @@ export default function AdminReminders() {
   };
 
   useEffect(() => {
-    if (!authed) return;
     fetchReminders();
     checkSystemStatus();
-  }, [authed]);
+  }, []);
 
   const checkSystemStatus = async () => {
     try {
@@ -185,16 +176,6 @@ export default function AdminReminders() {
     }
   };
 
-  const handleAuth = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
-      setAuthed(true);
-      sessionStorage.setItem("admin_authed", "true");
-      setError("");
-    } else {
-      setError("Felaktigt lösenord");
-    }
-  };
 
   const deleteReminder = async (id: number) => {
     if (!confirm("Är du säker på att du vill radera denna påminnelse?")) return;
@@ -422,26 +403,6 @@ export default function AdminReminders() {
     }
   };
 
-  if (!authed) {
-    return (
-      <div style={{ padding: '2rem', maxWidth: '400px', margin: '0 auto' }}>
-        <h1>Admin Login</h1>
-        <form onSubmit={handleAuth}>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Lösenord"
-            style={{ width: '100%', padding: '0.5rem', marginBottom: '1rem' }}
-          />
-          <button type="submit" style={{ width: '100%', padding: '0.5rem' }}>
-            Logga in
-          </button>
-        </form>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-      </div>
-    );
-  }
 
   return (
     <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
@@ -464,8 +425,8 @@ export default function AdminReminders() {
           </button>
           <button
             onClick={() => {
-              sessionStorage.removeItem("admin_authed");
-              setAuthed(false);
+              clearAdminAuthed();
+              window.location.href = "/admin";
             }}
             style={{ padding: '0.5rem 1rem', background: '#ef4444', color: 'white', border: 'none', borderRadius: '4px' }}
           >
