@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-const ADMIN_PASSWORD = "grodan2025";
 
 type BannerClick = {
   id: number;
@@ -27,20 +26,11 @@ export default function AdminBannerClicks() {
   const [logs, setLogs] = useState<BannerClick[]>([]);
   const [impressions, setImpressions] = useState<BannerImpression[]>([]);
   const [loading, setLoading] = useState(true);
-  const [authed, setAuthed] = useState(false);
-  const [input, setInput] = useState("");
-  const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState<string>(() =>
     typeof window !== 'undefined' ? (localStorage.getItem('banner_ab_test_from') || '') : ''
   );
   const [dateTo, setDateTo] = useState<string>("");
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (sessionStorage.getItem('admin_authed') === 'true') setAuthed(true);
-    }
-  }, []);
 
   const getSupabase = () =>
     createClient(
@@ -65,43 +55,11 @@ export default function AdminBannerClicks() {
   };
 
   useEffect(() => {
-    if (!authed) return;
     fetchLogs();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authed]);
+  }, []);
 
-  function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    if (input === ADMIN_PASSWORD) {
-      setAuthed(true);
-      sessionStorage.setItem('admin_authed', 'true');
-      setError('');
-    } else {
-      setError('Fel lösenord!');
-    }
-  }
 
-  if (!authed) {
-    return (
-      <div style={{ maxWidth: 400, margin: '4rem auto', padding: 24, background: '#ffffff', border: '1px solid var(--gray-200)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)' }}>
-        <h2 style={{ color: 'var(--foreground)' }}>Admininloggning</h2>
-        <form onSubmit={handleLogin}>
-          <input
-            type="password"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder="Lösenord"
-            style={{ width: '100%', padding: 10, fontSize: 16, marginBottom: 12, borderRadius: 6, border: '1px solid #cbd5e1' }}
-            autoFocus
-          />
-        <button type="submit" style={{ width: '100%', padding: 10, fontSize: 16, borderRadius: 6, background: 'var(--primary)', color: 'white', border: 'none', fontWeight: 600 }}>
-            Logga in
-          </button>
-        </form>
-        {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
-      </div>
-    );
-  }
 
   const withinDate = (iso: string) => {
     if (!dateFrom && !dateTo) return true;
