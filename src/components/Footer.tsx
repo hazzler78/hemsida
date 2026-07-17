@@ -118,7 +118,7 @@ export default function Footer() {
           <FooterColumn>
             <h3>Tjänster</h3>
             <ul>
-              <li><Link href={withDefaultCtaUtm('/rorligt-avtal', 'footer', 'services-rorligt')}>Rörligt elavtal</Link></li>
+              <li><Link href={withDefaultCtaUtm('/rorligt-avtal-v2', 'footer', 'services-rorligt')}>Rörligt elavtal</Link></li>
               <li><Link href={withDefaultCtaUtm('/fastpris-avtal', 'footer', 'services-fastpris')}>Fastprisavtal</Link></li>
               <li><Link href={withDefaultCtaUtm('/byt-elavtal', 'footer', 'services-byt')}>Byt elavtal</Link></li>
               <li><Link href={withDefaultCtaUtm('/fakturaanalys', 'footer', 'services-jamfor')}>Fakturaanalys</Link></li>

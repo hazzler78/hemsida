@@ -21,6 +21,11 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/rorligt-avtal",
+        destination: "/rorligt-avtal-v2",
+        permanent: true,
+      },
+      {
         source: "/:path*",
         has: [
           {

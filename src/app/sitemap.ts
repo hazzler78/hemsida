@@ -8,7 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const staticRoutes: MetadataRoute.Sitemap = [
     '',
-    '/rorligt-avtal',
+    '/rorligt-avtal-v2',
     '/fastpris-avtal',
     '/byt-elavtal',
     '/elpriskollen',
@@ -33,7 +33,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     url: `${BASE_URL}${path}`,
     lastModified: now,
     changeFrequency: path === '' ? 'daily' : 'weekly',
-    priority: path === '' ? 1 : path === '/fakturaanalys' || path === '/rorligt-avtal' ? 0.9 : 0.7,
+    priority: path === '' ? 1 : path === '/fakturaanalys' || path === '/rorligt-avtal-v2' ? 0.9 : 0.7,
   }));
 
   const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => ({
