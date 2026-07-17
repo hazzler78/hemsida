@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import type { ElectricityArea } from '@/lib/types';
 import { getOrCreateSessionId } from '@/lib/sessionId';
 import { MOTALA_LOGO_SRC } from '@/lib/providerLogos';
+import { openAffiliateUrl } from '@/lib/openAffiliate';
 
 interface PageProvider {
   id: number;
@@ -446,8 +447,7 @@ export default function FastprisAvtalPage() {
         ? `${url}&elchef_ref=${encodeURIComponent(trackingId)}`
         : `${url}?elchef_ref=${encodeURIComponent(trackingId)}`;
 
-      // Öppna affiliate-länken med tracking-ID
-      window.open(urlWithTracking, '_blank');
+      openAffiliateUrl(urlWithTracking);
 
       // TikTok event
       const ttq: any = (window as any).ttq;

@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { MOTALA_LOGO_SRC } from '@/lib/providerLogos';
 import { getElectricityArea, type ElectricityArea } from '@/lib/types';
 import { getOrCreateSessionId } from '@/lib/sessionId';
+import { openAffiliateUrl } from '@/lib/openAffiliate';
 
 /** Månadskostnad, påslag och pristyp från /api/prices/providers (prisfiler). */
 type ProviderPriceItem = {
@@ -710,8 +711,7 @@ export default function RorligtAvtalPage() {
         ? `${url}&elchef_ref=${encodeURIComponent(trackingId)}`
         : `${url}?elchef_ref=${encodeURIComponent(trackingId)}`;
 
-      // Öppna affiliate-länken med tracking-ID
-      window.open(urlWithTracking, '_blank');
+      openAffiliateUrl(urlWithTracking);
 
       // TikTok event
       const ttq: any = (window as any).ttq;
