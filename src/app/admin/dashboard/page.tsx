@@ -1822,6 +1822,7 @@ export default function AdminDashboard() {
               gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
               gap: 12
             }}>
+              <QuickLink href="/admin/konvertering" icon="🗺️" label="Konvertering" />
               <QuickLink href="/admin/form-analytics" icon="📝" label="Formulär" />
               <QuickLink href="/admin/contract-clicks" icon="📈" label="Kontraktsklick" />
               <QuickLink href="/admin/funnel" icon="🔄" label="Funnel" />

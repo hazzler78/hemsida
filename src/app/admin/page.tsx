@@ -3,6 +3,13 @@ import Link from 'next/link';
 
 const adminSections = [
   {
+    title: "Konverteringskarta",
+    description: "Vad ni spårar, var ni tittar, och hur ni ökar byten (inkl. Salesys)",
+    href: "/admin/konvertering",
+    icon: "🗺️",
+    color: "bg-emerald-600"
+  },
+  {
     title: "Dashboard",
     description: "Översiktlig statistik och KPI:er för hela hemsidan",
     href: "/admin/dashboard",
@@ -211,10 +218,10 @@ export default function AdminPage() {
           color: '#6b7280',
           lineHeight: 1.6
         }}>
+          <li>Börja i <strong>Konverteringskartan</strong> – den förklarar hela flödet till kund</li>
+          <li>Jämför affiliate-klick (Dashboard) med signups i Salesys samma period</li>
           <li>Använd datumfiltren för att analysera specifika perioder</li>
-          <li>Exportera data till CSV för djupare analys</li>
-          <li>Jämför CTR (Click-Through Rate) mellan varianter</li>
-          <li>Spåra användarbeteende över tid</li>
+          <li>Jämför CTR mellan A/B-varianter (Hero + Banner)</li>
           <li>Uppdatera AI-chattens kunskap via kunskapsbasen</li>
           <li>Hantera aktiva kampanjer och leverantörer</li>
         </ul>
