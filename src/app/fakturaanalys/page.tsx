@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import GlassButton from '@/components/GlassButton';
 import ContactForm from '@/components/ContactForm';
 import ShareResults from '@/components/ShareResults';
-import { withDefaultCtaUtm } from '@/lib/utm';
+import { getAttributionUtm, withDefaultCtaUtm } from '@/lib/utm';
 import { usePageView } from '@/lib/usePageView';
 import { getOrCreateSessionId } from '@/lib/sessionId';
 import Script from 'next/script';
@@ -153,15 +153,19 @@ export default function Fakturaanalys() {
       const heroVariant =
         typeof window !== 'undefined' ? window.localStorage.getItem('hero_variant_v1') || null : null;
 
+      // Behåll first-touch (t.ex. facebook reel) om besökaren landade via UTM
+      const landingUtm = getAttributionUtm();
+
       const payload = JSON.stringify({
         contractType,
         logId,
         savingsAmount,
         sessionId: sessionIdRef.current,
         source: 'fakturaanalys',
-        utmSource: 'fakturaanalys',
-        utmMedium: 'cta',
-        utmCampaign: `cta-${contractType}`,
+        utmSource: landingUtm.utm_source || 'fakturaanalys',
+        utmMedium: landingUtm.utm_medium || 'cta',
+        utmCampaign: landingUtm.utm_campaign || `cta-${contractType}`,
+        utmContent: landingUtm.utm_content || undefined,
         heroVariant,
       });
 
