@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import ConversionExperimentPanel from '@/components/admin/ConversionExperimentPanel';
 
 const SALESYS_STATS_URL =
   'https://statistik.salesys.se/497D41e8287176eACd7f87AC0c2375da11D3354DE745CeA05CDD6d12cABb5cB0A8cf3d15/6970aa19ea9140b4172061ec';
@@ -153,6 +154,8 @@ export default function KonverteringPage() {
         Mål: bli kund = klicka affiliate-länk och byta elavtal. Här ser du vilken data ni redan har,
         var ni tittar, och vad som saknas för att öka konverteringen.
       </p>
+
+      <ConversionExperimentPanel />
 
       {/* Funnel */}
       <section

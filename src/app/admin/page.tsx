@@ -218,7 +218,7 @@ export default function AdminPage() {
           color: '#6b7280',
           lineHeight: 1.6
         }}>
-          <li>Börja i <strong>Konverteringskartan</strong> – den förklarar hela flödet till kund</li>
+          <li>Börja i <strong>Konverteringskartan</strong> – spara baseline och jämför före/efter</li>
           <li>Jämför affiliate-klick (Dashboard) med signups i Salesys samma period</li>
           <li>Använd datumfiltren för att analysera specifika perioder</li>
           <li>Jämför CTR mellan A/B-varianter (Hero + Banner)</li>

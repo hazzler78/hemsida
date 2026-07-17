@@ -9,6 +9,7 @@ import { getElectricityArea, type ElectricityArea } from '@/lib/types';
 import { usePageView } from '@/lib/usePageView';
 import { getOrCreateSessionId } from '@/lib/sessionId';
 import { openAffiliateUrl } from '@/lib/openAffiliate';
+import { CONVERSION_EXPERIMENT } from '@/lib/conversionExperiment';
 
 interface PageProvider {
   id: number;
@@ -994,7 +995,10 @@ export default function RorligtAvtalV2Page() {
           cameViaRobinhood,
           heroVariant,
           source: 'rorligt-avtal-v2',
-          preferences: preferences,
+          preferences: {
+            ...preferences,
+            experimentId: CONVERSION_EXPERIMENT.id,
+          },
           trackingId
         }),
         keepalive: true,
