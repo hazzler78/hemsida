@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
       utmSource,
       utmMedium,
       utmCampaign,
+      utmContent,
       heroVariant,
     } = body;
 
@@ -49,6 +50,7 @@ export async function POST(request: NextRequest) {
       utm_source: typeof utmSource === 'string' ? utmSource : null,
       utm_medium: typeof utmMedium === 'string' ? utmMedium : null,
       utm_campaign: typeof utmCampaign === 'string' ? utmCampaign : null,
+      utm_content: typeof utmContent === 'string' ? utmContent : null,
       hero_variant: typeof heroVariant === 'string' ? heroVariant : null,
       user_agent: ua,
       referer,

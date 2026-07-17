@@ -38,6 +38,8 @@ export function withDefaultCtaUtm(href: string, medium: string, content?: string
   });
 }
 
+const FIRST_TOUCH_KEY = 'elchef_utm_first_touch_v1';
+
 /**
  * Hämta UTM-parametrar från URL:en (för tracking)
  */
@@ -52,6 +54,39 @@ export function getUTMParams(): UtmParams {
       utm_campaign: params.get('utm_campaign') || undefined,
       utm_content: params.get('utm_content') || undefined,
     };
+  } catch {
+    return {};
+  }
+}
+
+/** Spara first-touch UTM i session så senare sidor/CTA behåller social attribuering. */
+export function persistFirstTouchUtm(utm?: UtmParams): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const current = utm && Object.keys(utm).length ? utm : getUTMParams();
+    if (!current.utm_source && !current.utm_medium && !current.utm_campaign && !current.utm_content) {
+      return;
+    }
+    const existingRaw = sessionStorage.getItem(FIRST_TOUCH_KEY);
+    if (existingRaw) return; // first-touch wins
+    sessionStorage.setItem(FIRST_TOUCH_KEY, JSON.stringify(current));
+  } catch {
+    // Safari private mode etc.
+  }
+}
+
+/** URL-UTM om de finns, annars first-touch från session. */
+export function getAttributionUtm(): UtmParams {
+  if (typeof window === 'undefined') return {};
+  try {
+    const fromUrl = getUTMParams();
+    if (fromUrl.utm_source || fromUrl.utm_medium || fromUrl.utm_campaign || fromUrl.utm_content) {
+      return fromUrl;
+    }
+    const raw = sessionStorage.getItem(FIRST_TOUCH_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as UtmParams;
+    return parsed && typeof parsed === 'object' ? parsed : {};
   } catch {
     return {};
   }

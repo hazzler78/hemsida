@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { getOrCreateSessionId } from '@/lib/sessionId';
+import { getAttributionUtm, getUTMParams, persistFirstTouchUtm } from '@/lib/utm';
 
 /**
  * Hook för att spåra sidvisningar med UTM-parametrar
@@ -11,21 +12,22 @@ export function usePageView(path: string) {
       if (typeof window === 'undefined') return;
       
       const sid = getOrCreateSessionId();
-      
-      // Hämta UTM-parametrar från URL
-      const params = new URLSearchParams(window.location.search);
-      const utmSource = params.get('utm_source') || undefined;
-      const utmMedium = params.get('utm_medium') || undefined;
-      const utmCampaign = params.get('utm_campaign') || undefined;
+
+      // First-touch: spara landningens UTM så CTA längre in i funnel behåller källan
+      const urlUtm = getUTMParams();
+      persistFirstTouchUtm(urlUtm);
+      const utm = getAttributionUtm();
+
       // document.referrer innehåller var användaren kom ifrån (t.ex. facebook.com, instagram.com)
       const landingReferrer = typeof document.referrer === 'string' ? document.referrer : '';
       
       const payload = JSON.stringify({ 
         path, 
         sessionId: sid,
-        utmSource,
-        utmMedium,
-        utmCampaign,
+        utmSource: utm.utm_source,
+        utmMedium: utm.utm_medium,
+        utmCampaign: utm.utm_campaign,
+        utmContent: utm.utm_content,
         referrer: landingReferrer
       });
       

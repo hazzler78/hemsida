@@ -80,7 +80,15 @@ export async function POST(req: NextRequest) {
     const referer = req.headers.get('referer') || '';
 
     const body = await req.json().catch(() => ({}));
-    const { path, sessionId, utmSource, utmMedium, utmCampaign, referrer: clientReferrer } = body || {};
+    const {
+      path,
+      sessionId,
+      utmSource,
+      utmMedium,
+      utmCampaign,
+      utmContent,
+      referrer: clientReferrer,
+    } = body || {};
 
     // Använd document.referrer från klient (var användaren landade ifrån) - mer korrekt än
     // fetch:s Referer-header som blir elchef.se. Klienten skickar var de kom ifrån.
@@ -103,6 +111,7 @@ export async function POST(req: NextRequest) {
       utm_source: typeof utmSource === 'string' ? utmSource : null,
       utm_medium: typeof utmMedium === 'string' ? utmMedium : null,
       utm_campaign: typeof utmCampaign === 'string' ? utmCampaign : null,
+      utm_content: typeof utmContent === 'string' ? utmContent : null,
       user_agent: ua,
       referer: effectiveReferrer,
       is_bot: bot,
