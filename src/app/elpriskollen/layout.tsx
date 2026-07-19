@@ -4,14 +4,14 @@ import BreadcrumbJsonLd from '@/components/BreadcrumbJsonLd';
 export const metadata: Metadata = {
   title: 'Elpriskollen – se ditt elområde och elpris via postnummer | Elchef',
   description:
-    'Ange postnummer och se vilket elområde du tillhör (SE1–SE4) samt prisnivå för elavtal. Kolla om ditt elpris är rimligt innan du byter.',
+    'Ange postnummer och se elområde (SE1–SE4) samt prisnivå. Kolla om du betalar onödigt mycket innan du byter elavtal.',
   alternates: {
     canonical: '/elpriskollen',
   },
   openGraph: {
     title: 'Elpriskollen – se ditt elområde och elpris via postnummer | Elchef',
     description:
-      'Ange postnummer och se vilket elområde du tillhör (SE1–SE4) samt prisnivå för elavtal. Kolla om ditt elpris är rimligt innan du byter.',
+      'Ange postnummer och se elområde (SE1–SE4) samt prisnivå. Kolla om du betalar onödigt mycket innan du byter elavtal.',
     url: 'https://www.elchef.se/elpriskollen',
   },
 };
