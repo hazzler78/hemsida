@@ -923,12 +923,12 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: 'spotpris-och-timpris-pa-el-forklarat',
-    title: 'Spotpris och timpris på el – så fungerar det',
+    title: 'Timpris el och spotpris – så fungerar det 2026',
     description:
-      'Förklaring av spotpris och timpris på el. Lär dig hur priset sätts på Nord Pool, skillnaden mellan tim- och månadsavräkning och hur du drar nytta av billiga timmar.',
+      'Vad betyder timpris el och spotpris? Lär dig hur priset sätts på Nord Pool, skillnaden mellan tim- och månadsavräkning och hur du sänker kostnaden med billiga timmar.',
     keywords:
-      'spotpris el, timpris el, vad är spotpris, Nord Pool, timavräkning, rörligt elpris timme, billiga timmar el',
-    date: '2026-04-25',
+      'timpris el, el timpris, spotpris el, vad är spotpris, Nord Pool, timavräkning, rörligt elpris timme, billiga timmar el',
+    date: '2026-07-19',
     readTime: '7 min lästid',
     content: (
       <>
@@ -1012,36 +1012,72 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: 'elavtal-for-lagenhet-sa-valjer-du-ratt',
-    title: 'Elavtal för lägenhet – så väljer du rätt',
+    title: 'Elavtal lägenhet – hyresrätt & bostadsrätt 2026',
     description:
-      'Guide till elavtal för dig som bor i lägenhet. Lär dig om låg förbrukning, månadsavgifter, vad som ingår i hyran och hur du hittar bästa elavtalet.',
+      'Hitta rätt elavtal för lägenhet 2026. Guide för hyresrätt och bostadsrätt: månadsavgift, rörligt vs fastpris och hur du tecknar elavtal utan krångel.',
     keywords:
-      'elavtal lägenhet, el lägenhet, billigt elavtal lägenhet, elavtal hyresrätt, elavtal bostadsrätt, låg elförbrukning',
-    date: '2026-05-01',
-    readTime: '6 min lästid',
+      'elavtal lägenhet, elavtal hyresrätt, elavtal bostadsrätt, teckna elavtal lägenhet, billigt elavtal lägenhet, el lägenhet, låg elförbrukning',
+    date: '2026-07-19',
+    readTime: '8 min lästid',
     content: (
       <>
         <p>
-          Bor du i lägenhet har du oftast lägre elförbrukning än en villa – men det betyder inte att valet av
-          elavtal är oviktigt. Tvärtom kan fasta avgifter äta upp en stor del av en liten elräkning.
+          Söker du <strong>elavtal för lägenhet</strong>? Med lägre förbrukning än villa är valet fortfarande
+          viktigt – fasta avgifter kan äta upp en stor del av en liten elräkning. Här får du en tydlig guide för
+          både <strong>hyresrätt</strong> och <strong>bostadsrätt</strong>, plus hur du tecknar rätt avtal.
         </p>
 
-        <h2>Har du ett eget elavtal?</h2>
+        <h2>Elavtal hyresrätt – ingår elen i hyran?</h2>
         <p>
-          Först och främst: kontrollera om du själv tecknar elavtal eller om elen ingår i hyran/avgiften.
+          Bor du i <strong>hyresrätt</strong> är första steget att kolla om elen redan ingår i hyran. Det står
+          oftast i hyresavtalet eller på din hyresspecifikation.
         </p>
         <ul>
           <li>
-            <strong>Hyresrätt:</strong> ibland ingår el i hyran, ibland tecknar du eget avtal. Kolla ditt
-            hyresavtal.
+            <strong>El ingår i hyran:</strong> du tecknar normalt inget eget elhandelsavtal. Då kan du inte
+            byta elleverantör själv – kontakta hyresvärden om du vill påverka kostnaden.
           </li>
           <li>
-            <strong>Bostadsrätt:</strong> du tecknar nästan alltid eget elhandelsavtal, men vissa föreningar har
-            gemensam el.
+            <strong>Eget elavtal:</strong> du väljer elleverantör fritt. Då lönar det sig att jämföra påslag och
+            månadsavgift, eftersom förbrukningen i lägenhet ofta är låg.
           </li>
         </ul>
         <p>
-          Tecknar du eget avtal kan du fritt välja elleverantör och därmed påverka din kostnad.
+          Tipset: om du precis flyttat in i hyresrätt och saknar avtal kan du snabbt hamna på ett dyrt
+          tillsvidareavtal. Byt aktivt så fort du har anläggnings-ID eller faktura.
+        </p>
+
+        <h2>Elavtal bostadsrätt – nästan alltid eget avtal</h2>
+        <p>
+          I <strong>bostadsrätt</strong> tecknar du nästan alltid eget elhandelsavtal. Vissa föreningar har
+          gemensam el – kolla med styrelsen om du är osäker.
+        </p>
+        <ul>
+          <li>Du betalar nätavgift till nätägaren och elhandel till den leverantör du väljer.</li>
+          <li>Månadsavgiften på elhandelsavtalet spelar större roll än i villa.</li>
+          <li>
+            Har du elbil, bastu eller många elprylar kan förbrukningen närmare villa – jämför då mer på kWh-pris
+            också.
+          </li>
+        </ul>
+        <p>
+          Använd <Link href="/elpriskollen">Elpriskollen</Link> med ditt postnummer för att se elområde (SE1–SE4)
+          innan du jämför avtal.
+        </p>
+
+        <h2>Teckna elavtal lägenhet – så gör du</h2>
+        <p>
+          Att <strong>teckna elavtal i lägenhet</strong> tar oftast några minuter. Du behöver normalt:
+        </p>
+        <ol>
+          <li>Personnummer och adress</li>
+          <li>Ungefärlig årsförbrukning (lägenhet ligger ofta runt 2 000–5 000 kWh/år, ibland mer)</li>
+          <li>Anläggnings-ID om du har det (finns på fakturan) – annars hjälper leverantören oftast till</li>
+        </ol>
+        <p>
+          Den nya leverantören säger vanligtvis upp ditt gamla avtal åt dig. Har du fastpris med bindningstid,
+          kontrollera eventuell brytavgift först. När du är redo: {' '}
+          <Link href="/byt-elavtal">byt elavtal via Elchef</Link>.
         </p>
 
         <h2>Varför månadsavgiften är extra viktig i lägenhet</h2>
@@ -1050,8 +1086,8 @@ export const blogPosts: BlogPost[] = [
           låg månadsavgift kan vara mer värt än ett med marginellt lägre kWh-pris.
         </p>
         <p>
-          Exempel: använder du bara 1 500 kWh per år spelar en månadsavgift på 45 kr (540 kr/år) mycket större
-          roll än för en villa som drar 20 000 kWh. Läs mer om{' '}
+          Exempel: använder du 2 000 kWh per år spelar en månadsavgift på 45 kr (540 kr/år) mycket större roll än
+          för en villa som drar 20 000 kWh. Läs mer om{' '}
           <Link href="/kunskap/extra-kostnader-elrakningen-dolda-avgifter-forklaring">
             extra kostnader på elräkningen
           </Link>
@@ -1066,22 +1102,27 @@ export const blogPosts: BlogPost[] = [
         </p>
         <ul>
           <li>
-            <Link href="/rorligt-avtal">Jämför rörliga elavtal</Link>
+            <Link href="/rorligt-avtal-v2">Jämför rörliga elavtal</Link>
           </li>
           <li>
             <Link href="/fastpris-avtal">Jämför fastprisavtal</Link>
+          </li>
+          <li>
+            <Link href="/kunskap/fastpris-vs-rorligt-vilket-elavtal-passar-dig">
+              Läs mer: fastpris vs rörligt
+            </Link>
           </li>
         </ul>
 
         <h2>Checklista för lägenhetsboende</h2>
         <ol>
-          <li>Kontrollera om du har eget elavtal eller om el ingår i hyran.</li>
+          <li>Kontrollera om du har eget elavtal eller om el ingår i hyran (hyresrätt).</li>
           <li>Jämför både kWh-pris och månadsavgift – inte bara det ena.</li>
-          <li>Undvik dyra tillsvidareavtal.</li>
+          <li>Undvik dyra tillsvidareavtal efter inflytt.</li>
           <li>Ange ditt postnummer i <Link href="/elpriskollen">Elpriskollen</Link> för att se ditt elområde.</li>
           <li>
-            Analysera din faktura med <Link href="/fakturaanalys">AI-fakturaanalys</Link> om du är osäker på vad
-            du betalar.
+            Analysera din faktura med <Link href="/fakturaanalys">gratis AI-fakturaanalys</Link> om du är osäker
+            på vad du betalar.
           </li>
         </ol>
         <p>

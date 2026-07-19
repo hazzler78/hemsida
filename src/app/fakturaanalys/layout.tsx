@@ -3,16 +3,16 @@ import BreadcrumbJsonLd from '@/components/BreadcrumbJsonLd';
 import ServiceJsonLd from '@/components/ServiceJsonLd';
 
 export const metadata: Metadata = {
-  title: 'Fakturaanalys av elräkning med AI | Elchef.se',
+  title: 'Analysera din elräkning gratis – hitta dolda avgifter | Elchef',
   description:
-    'Ladda upp din elräkning och få en tydlig AI-analys av dina elkostnader. Upptäck dolda avgifter och se hur mycket du kan spara med ett bättre elavtal.',
+    'Ladda upp elräkningen och få gratis AI-analys på 30 sekunder. Se dolda avgifter, påslag och hur mycket du kan spara med ett bättre elavtal.',
   alternates: {
     canonical: '/fakturaanalys',
   },
   openGraph: {
-    title: 'Fakturaanalys av elräkning med AI | Elchef.se',
+    title: 'Analysera din elräkning gratis – hitta dolda avgifter | Elchef',
     description:
-      'Ladda upp din elräkning och få en tydlig AI-analys av dina elkostnader. Upptäck dolda avgifter och se hur mycket du kan spara med ett bättre elavtal.',
+      'Ladda upp elräkningen och få gratis AI-analys på 30 sekunder. Se dolda avgifter, påslag och hur mycket du kan spara med ett bättre elavtal.',
     url: 'https://www.elchef.se/fakturaanalys',
   },
 };

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import Link from 'next/link';
 import GlassButton from '@/components/GlassButton';
 
 const PageContainer = styled.div`
@@ -228,6 +229,13 @@ export default function BytElavtal() {
           <InfoText>
             När du klickar på ett av alternativen nedan kommer du till ett enkelt formulär där du fyller i dina uppgifter. 
             Vi hjälper dig sedan att byta avtal till det bästa priset på marknaden.
+          </InfoText>
+          <InfoText>
+            Bor du i lägenhet? Läs först vår guide om{' '}
+            <Link href="/kunskap/elavtal-for-lagenhet-sa-valjer-du-ratt" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>
+              elavtal för lägenhet, hyresrätt och bostadsrätt
+            </Link>
+            {' '}– där går vi igenom månadsavgift och vad som gäller vid inflytt.
           </InfoText>
         </InfoSection>
 

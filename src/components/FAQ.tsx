@@ -133,6 +133,10 @@ Vilket elområde du tillhör beror på var du bor och påverkar elpriset i din r
     answer: "Välj elavtal utifrån din ekonomiska situation din risktolerans. Om du har en tight budget och vill undvika prissvängningar kan ett fastprisavtal vara ett bra alternativ. Rörliga avtal (spotpris) har historiskt sett varit billigare över tid, men innebär större risk för prisvariationer. Fundera på vad som passar din situation bäst innan du gör ditt val."
   },
   {
+    question: "Vilket elavtal passar i lägenhet, hyresrätt eller bostadsrätt?",
+    answer: "I lägenhet är månadsavgiften ofta viktigare än små skillnader i kWh-pris, eftersom förbrukningen är lägre. I hyresrätt: kolla först om elen ingår i hyran. I bostadsrätt tecknar du nästan alltid eget avtal. Läs vår guide <a href=\"/kunskap/elavtal-for-lagenhet-sa-valjer-du-ratt\" style=\"color: #bfdbfe; text-decoration: underline;\">Elavtal lägenhet – hyresrätt & bostadsrätt</a> för steg-för-steg."
+  },
+  {
     question: "Kan jag ångra mitt elavtal?",
     answer: `Ja, enligt distansavtalslagen har du ångerrätt i 14 dagar när du tecknar ett avtal på distans, som exempelvis digitalt eller via telefon. Det innebär att du kan ångra avtalet utan kostnad inom denna period. Det finns dock undantag:
         

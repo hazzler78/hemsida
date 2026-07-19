@@ -136,6 +136,11 @@ export default function Footer() {
               <li><Link href={withDefaultCtaUtm('/kontakt', 'footer', 'info-kontakt')}>Kontakt</Link></li>
               <li><Link href={withDefaultCtaUtm('/media', 'footer', 'info-media')}>Elchef i media</Link></li>
               <li><Link href={withDefaultCtaUtm('/kunskap', 'footer', 'info-kunskap')}>Kunskapsbank</Link></li>
+              <li>
+                <Link href={withDefaultCtaUtm('/kunskap/elavtal-for-lagenhet-sa-valjer-du-ratt', 'footer', 'info-lagenhet')}>
+                  Elavtal för lägenhet
+                </Link>
+              </li>
               <li><Link href={withDefaultCtaUtm('/partner', 'footer', 'info-partner')}>Partner</Link></li>
             </ul>
           </FooterColumn>
