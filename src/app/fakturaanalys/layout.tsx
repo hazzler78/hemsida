@@ -3,16 +3,16 @@ import BreadcrumbJsonLd from '@/components/BreadcrumbJsonLd';
 import ServiceJsonLd from '@/components/ServiceJsonLd';
 
 export const metadata: Metadata = {
-  title: 'Fakturaanalys av elräkning med AI | Elchef.se',
+  title: 'Kolla elräkningen gratis – sluta betala onödiga avgifter | Elchef',
   description:
-    'Ladda upp din elräkning och få en tydlig AI-analys av dina elkostnader. Upptäck dolda avgifter och se hur mycket du kan spara med ett bättre elavtal.',
+    'De flesta betalar extra kostnader i onödan. Ladda upp elräkningen och få gratis AI-analys: se påslag, dolda avgifter och hur mycket du kan spara.',
   alternates: {
     canonical: '/fakturaanalys',
   },
   openGraph: {
-    title: 'Fakturaanalys av elräkning med AI | Elchef.se',
+    title: 'Kolla elräkningen gratis – sluta betala onödiga avgifter | Elchef',
     description:
-      'Ladda upp din elräkning och få en tydlig AI-analys av dina elkostnader. Upptäck dolda avgifter och se hur mycket du kan spara med ett bättre elavtal.',
+      'De flesta betalar extra kostnader i onödan. Ladda upp elräkningen och få gratis AI-analys: se påslag, dolda avgifter och hur mycket du kan spara.',
     url: 'https://www.elchef.se/fakturaanalys',
   },
 };
@@ -34,7 +34,7 @@ export default function FakturaanalysLayout({
       <ServiceJsonLd
         id="service-fakturaanalys"
         name="AI-fakturaanalys av elräkning"
-        description="Ladda upp din elräkning och få en AI-analys av dina elkostnader med uppskattad besparingspotential."
+        description="Gratis AI-analys som visar onödiga extrakostnader, påslag och dolda avgifter på din elräkning – och hur mycket du kan spara."
         path="/fakturaanalys"
       />
       {children}

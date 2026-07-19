@@ -1149,6 +1149,11 @@ export default function RorligtAvtalV2Page() {
               />
               <div style={{ fontSize: '0.85rem', color: '#6b7280', marginTop: '0.5rem' }}>
                 Hittar du inte siffran? Kolla på din senaste elräkning eller använd genomsnittet 5000 kWh/år.
+                Lägenhet ligger ofta lägre – se vår{' '}
+                <Link href="/kunskap/elavtal-for-lagenhet-sa-valjer-du-ratt" style={{ color: 'inherit', textDecoration: 'underline' }}>
+                  guide till elavtal för lägenhet
+                </Link>
+                .
               </div>
             </InputGroup>
 

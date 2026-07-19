@@ -782,7 +782,10 @@ export default function RorligtAvtalPage() {
               ))}
             </Select>
             <HelperText>
-              Ungefär: lägenhet ofta 5 000–10 000 kWh/år, villa ofta 10 000–17 000 eller mer.
+              Ungefär: lägenhet ofta 2 000–5 000 kWh/år (ibland mer), villa ofta 10 000–17 000 eller mer.{' '}
+              <a href="/kunskap/elavtal-for-lagenhet-sa-valjer-du-ratt" style={{ color: 'inherit', textDecoration: 'underline' }}>
+                Guide: elavtal för lägenhet
+              </a>
             </HelperText>
           </FieldGroup>
           {providerPricesLoading && <LoadingText>Uppdaterar priser…</LoadingText>}
