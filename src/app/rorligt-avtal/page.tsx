@@ -2,6 +2,7 @@
 "use client";
 
 import React from 'react';
+import Link from 'next/link';
 import styled from 'styled-components';
 import { MOTALA_LOGO_SRC } from '@/lib/providerLogos';
 import { getElectricityArea, type ElectricityArea } from '@/lib/types';
@@ -783,9 +784,9 @@ export default function RorligtAvtalPage() {
             </Select>
             <HelperText>
               Ungefär: lägenhet ofta 2 000–5 000 kWh/år (ibland mer), villa ofta 10 000–17 000 eller mer.{' '}
-              <a href="/kunskap/elavtal-for-lagenhet-sa-valjer-du-ratt" style={{ color: 'inherit', textDecoration: 'underline' }}>
+              <Link href="/kunskap/elavtal-for-lagenhet-sa-valjer-du-ratt" style={{ color: 'inherit', textDecoration: 'underline' }}>
                 Guide: elavtal för lägenhet
-              </a>
+              </Link>
             </HelperText>
           </FieldGroup>
           {providerPricesLoading && <LoadingText>Uppdaterar priser…</LoadingText>}
