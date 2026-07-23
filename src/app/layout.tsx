@@ -4,7 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import StyledComponentsRegistry from '../lib/registry';
 import SiteChrome from '@/components/SiteChrome';
-import { websiteJsonLd } from '@/lib/seo';
+import { OG_SHARE_IMAGES, websiteJsonLd } from '@/lib/seo';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -38,20 +38,13 @@ export const metadata: Metadata = {
     siteName: "Elchef",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: [
-      {
-        url: "/og-share.png",
-        width: 1200,
-        height: 630,
-        alt: "Betalar du för mycket för elen? Byt gratis på elchef.se",
-      },
-    ],
+    images: [...OG_SHARE_IMAGES],
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: ["/og-share.png"],
+    images: [OG_SHARE_IMAGES[0].url],
   },
   verification: {
     other: {

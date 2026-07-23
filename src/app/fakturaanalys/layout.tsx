@@ -14,6 +14,14 @@ export const metadata: Metadata = {
     description:
       'De flesta betalar extra kostnader i onödan. Ladda upp elräkningen och få gratis AI-analys: se påslag, dolda avgifter och hur mycket du kan spara.',
     url: 'https://www.elchef.se/fakturaanalys',
+    images: [
+      {
+        url: '/elchef-logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Elchef',
+      },
+    ],
   },
 };
 

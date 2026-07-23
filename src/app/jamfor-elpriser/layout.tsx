@@ -12,6 +12,14 @@ export const metadata: Metadata = {
     description:
       'Ladda upp din elräkning och jämför elavtal i Sverige med AI. Få uppskattad besparing och hjälp att hitta bästa elavtal 2026 för din förbrukning och ditt elområde.',
     url: 'https://www.elchef.se/fakturaanalys',
+    images: [
+      {
+        url: '/elchef-logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Elchef',
+      },
+    ],
   },
 };
 

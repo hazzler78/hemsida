@@ -12,6 +12,14 @@ export const metadata: Metadata = {
     description:
       'Förstå elavtal, elpriser och spotpris på el. Guider om bästa elavtal 2026, hur du sänker elräkningen och vad som påverkar elpriset i Sverige.',
     url: 'https://www.elchef.se/kunskap',
+    images: [
+      {
+        url: '/elchef-logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Elchef',
+      },
+    ],
   },
 };
 

@@ -10,6 +10,14 @@ export const metadata: Metadata = {
     description:
       'Förklaring av hur väder, vind och temperatur påverkar elpriset – och vad du kan göra åt det.',
     url: 'https://www.elchef.se/media/weather-electricity-prices',
+    images: [
+      {
+        url: '/elchef-logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Elchef',
+      },
+    ],
   },
 };
 

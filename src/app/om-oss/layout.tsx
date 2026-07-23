@@ -10,6 +10,14 @@ export const metadata: Metadata = {
     description:
       'Läs om Elchef.se – vi hjälper svenska hushåll och företag att hitta och byta till bättre elavtal, enkelt och tryggt.',
     url: 'https://www.elchef.se/om-oss',
+    images: [
+      {
+        url: '/elchef-logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Elchef',
+      },
+    ],
   },
 };
 

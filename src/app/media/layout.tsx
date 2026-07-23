@@ -14,6 +14,14 @@ export const metadata: Metadata = {
     description:
       'Läs Elchefs senaste artiklar och analyser om elpriser, energibesparing och elavtal i Sverige.',
     url: 'https://www.elchef.se/media',
+    images: [
+      {
+        url: '/elchef-logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Elchef',
+      },
+    ],
   },
 };
 

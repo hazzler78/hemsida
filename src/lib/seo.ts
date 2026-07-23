@@ -1,5 +1,15 @@
 export const SITE_URL = 'https://www.elchef.se';
 
+/** Sharp logo-on-canvas OG (same pattern as Strømsjef) — preferred over og-share.png for FB comments. */
+export const OG_SHARE_IMAGE = {
+  url: '/elchef-logo.png',
+  width: 1200,
+  height: 630,
+  alt: 'Elchef',
+} as const;
+
+export const OG_SHARE_IMAGES = [OG_SHARE_IMAGE];
+
 export type BreadcrumbItem = {
   name: string;
   path: string;

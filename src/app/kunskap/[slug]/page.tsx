@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
       type: 'article',
       images: [
         {
-          url: '/og-share.png',
+          url: '/elchef-logo.png',
           width: 1200,
           height: 630,
           alt: post.title,

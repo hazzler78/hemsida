@@ -10,6 +10,14 @@ export const metadata: Metadata = {
     description:
       'Elchef.se i Hallandsposten – om att göra elmarknaden mer rättvis och ge billigare el åt alla.',
     url: 'https://www.elchef.se/media/robin-hood-electricity',
+    images: [
+      {
+        url: '/elchef-logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Elchef',
+      },
+    ],
   },
 };
 
