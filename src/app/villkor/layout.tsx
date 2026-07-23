@@ -10,6 +10,14 @@ export const metadata: Metadata = {
     description:
       'Läs användarvillkoren för Elchef.se – villkor för vår tjänst att jämföra och förmedla elavtal till konsumenter i Sverige.',
     url: 'https://www.elchef.se/villkor',
+    images: [
+      {
+        url: '/elchef-logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Elchef',
+      },
+    ],
   },
 };
 

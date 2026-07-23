@@ -14,6 +14,14 @@ export const metadata: Metadata = {
     description:
       'Jämför rörliga elavtal i Sverige, se påslag och månadsavgifter och hitta bästa rörliga elavtal 2026 för din ekonomi i elområden som SE3 och SE4.',
     url: 'https://www.elchef.se/rorligt-avtal',
+    images: [
+      {
+        url: '/elchef-logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Elchef',
+      },
+    ],
   },
 };
 

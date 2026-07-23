@@ -10,6 +10,14 @@ export const metadata: Metadata = {
     description:
       'Bli partner till Elchef.se och hjälp fler hushåll och företag hitta bättre elavtal.',
     url: 'https://www.elchef.se/partner',
+    images: [
+      {
+        url: '/elchef-logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Elchef',
+      },
+    ],
   },
 };
 

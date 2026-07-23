@@ -10,6 +10,14 @@ export const metadata: Metadata = {
     description:
       'Har du frågor om elavtal, elpriser eller byte av elleverantör? Kontakta Elchef.se – vi hjälper dig gärna.',
     url: 'https://www.elchef.se/kontakt',
+    images: [
+      {
+        url: '/elchef-logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Elchef',
+      },
+    ],
   },
 };
 

@@ -10,6 +10,14 @@ export const metadata: Metadata = {
     description:
       'Läs om hur Elchef.se använder cookies och liknande tekniker för att förbättra din upplevelse och mäta trafik.',
     url: 'https://www.elchef.se/cookies',
+    images: [
+      {
+        url: '/elchef-logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Elchef',
+      },
+    ],
   },
 };
 

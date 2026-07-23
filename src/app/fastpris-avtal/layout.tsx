@@ -14,6 +14,14 @@ export const metadata: Metadata = {
     description:
       'Jämför fastprisavtal för el i Sverige och lås elpriset. Se kampanjer, prisgaranti och månadsavgift och hitta bästa fastprisavtal 2026 för en trygg elkostnad.',
     url: 'https://www.elchef.se/fastpris-avtal',
+    images: [
+      {
+        url: '/elchef-logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Elchef',
+      },
+    ],
   },
 };
 

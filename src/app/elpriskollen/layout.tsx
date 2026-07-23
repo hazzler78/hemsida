@@ -13,6 +13,14 @@ export const metadata: Metadata = {
     description:
       'Ange postnummer och se elområde (SE1–SE4) samt prisnivå. Kolla om du betalar onödigt mycket innan du byter elavtal.',
     url: 'https://www.elchef.se/elpriskollen',
+    images: [
+      {
+        url: '/elchef-logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Elchef',
+      },
+    ],
   },
 };
 

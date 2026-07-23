@@ -14,6 +14,14 @@ export const metadata: Metadata = {
     description:
       'Byt elavtal enkelt online. Jämför rörligt elavtal och fastprisavtal och låt Elchef guida dig till det elavtal som passar din ekonomi och risknivå bäst.',
     url: 'https://www.elchef.se/byt-elavtal',
+    images: [
+      {
+        url: '/elchef-logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Elchef',
+      },
+    ],
   },
 };
 
