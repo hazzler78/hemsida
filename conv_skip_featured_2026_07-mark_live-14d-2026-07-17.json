@@ -1,0 +1,54 @@
+{
+  "experiment": {
+    "id": "conv_skip_featured_2026_07",
+    "name": "Snabbare väg till affiliate-klick",
+    "description": "Hoppa över-frågor, ett featured avtal, färre val, popup-säker affiliate-öppning, all trafik till v2.",
+    "changes": [
+      "Hoppa över preferensfrågor → se avtal direkt",
+      "Ett rekommenderat avtal först; övriga bakom \"Visa fler\"",
+      "Fastpris som länk istället för extra grid",
+      "Affiliate-öppning med fallback om popup blockeras",
+      "Redirect /rorligt-avtal → /rorligt-avtal-v2"
+    ],
+    "defaultWindowDays": 14
+  },
+  "action": "mark_live",
+  "savedAt": "2026-07-17T18:42:22.845Z",
+  "snapshot": {
+    "id": 2,
+    "experiment_id": "conv_skip_featured_2026_07",
+    "kind": "live_start",
+    "label": "Ändringen är live i produktion",
+    "window_days": 14,
+    "period_from": "2026-07-17T18:42:22.169+00:00",
+    "period_to": "2026-07-17T18:42:22.169+00:00",
+    "metrics": {
+      "to": "2026-07-17T18:42:22.169Z",
+      "from": "2026-07-03T18:42:22.169Z",
+      "heroClicks": 149,
+      "windowDays": 14,
+      "homepageViews": 691,
+      "affiliateClicks": 111,
+      "affiliateClicksV2": 106,
+      "contractPageViews": 185,
+      "homepageToHeroRate": 21.562952243125906,
+      "contractToAffiliateRate": 60,
+      "homepageToAffiliateRate": 16.063675832127352
+    },
+    "notes": "Startpunkt för efter-mätning.",
+    "created_at": "2026-07-17T18:42:22.852567+00:00"
+  },
+  "metrics": {
+    "windowDays": 14,
+    "from": "2026-07-03T18:42:22.169Z",
+    "to": "2026-07-17T18:42:22.169Z",
+    "homepageViews": 691,
+    "heroClicks": 149,
+    "contractPageViews": 185,
+    "affiliateClicks": 111,
+    "affiliateClicksV2": 106,
+    "contractToAffiliateRate": 60,
+    "homepageToAffiliateRate": 16.063675832127352,
+    "homepageToHeroRate": 21.562952243125906
+  }
+}

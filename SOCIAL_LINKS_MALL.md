@@ -10,7 +10,7 @@ Använd dessa länkar när ni postar på Elchefs sociala kanaler. Då syns trafi
 |-----------|----------|
 | **YouTube** | `https://elchef.se/yt` |
 | **Facebook** | `https://elchef.se/fb` |
-| **Instagram** | `https://elchef.se/ig` |
+| **Instagram** | `https://elchef.se/ig` → fakturaanalys (**länk i bio**; caption-URL:er är inte klickbara) |
 | **TikTok** | `https://elchef.se/tt` |
 | **Pinterest** | `https://elchef.se/pin` |
 | **X (Twitter)** | `https://elchef.se/x` |
@@ -102,7 +102,7 @@ Dessa visas under "Aktiva kampanjer" i admin-dashboarden.
 |-----------|----------|
 | **YouTube** | `https://elchef.se/yt` |
 | **Facebook** | `https://elchef.se/fb` |
-| **Instagram** | `https://elchef.se/ig` |
+| **Instagram** | `https://elchef.se/ig` → fakturaanalys (**länk i bio**; caption-URL:er är inte klickbara) |
 | **TikTok** | `https://elchef.se/tt` |
 | **Pinterest** | `https://elchef.se/pin` |
 | **X** | `https://elchef.se/x` |
