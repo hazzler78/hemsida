@@ -128,7 +128,19 @@ export default function AdminBannerClicks() {
       }}>
       <h1 style={{ marginBottom: 4, color: 'var(--foreground)' }}>Bannerklick (Admin)</h1>
       <p style={{ color: 'var(--gray-600)', marginBottom: 8, fontSize: '0.95rem' }}>
-        CTR = klick ÷ visningar per variant. Vinnare = variant med högst CTR.
+        CTR = klick ÷ visningar per variant. Historiskt A/B (A = AI, B = solceller).
+      </p>
+      <p style={{
+        color: 'var(--primary)',
+        marginBottom: 12,
+        fontSize: '0.9rem',
+        fontWeight: 600,
+        padding: '10px 12px',
+        background: 'rgba(0,106,167,0.08)',
+        borderRadius: 'var(--radius-sm)',
+        border: '1px solid rgba(0,106,167,0.25)',
+      }}>
+        Juli 2026: A vann (CTR ~2.8% vs ~1.5%). Bannern visar nu bara A (AI → fakturaanalys). Ny data loggas som variant A.
       </p>
       <p style={{ color: 'var(--gray-600)', marginBottom: 20, fontSize: '0.85rem' }}>
         Data raderas aldrig – filtren styr bara vad som visas. Använd &quot;Start nytt A/B-test&quot; för att se enbart ny statistik.

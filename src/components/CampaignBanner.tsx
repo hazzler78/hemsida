@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import Image from "next/image";
 import { withDefaultCtaUtm } from '@/lib/utm';
@@ -49,125 +49,67 @@ const StyledLink = styled.a`
   }
 `;
 
+/**
+ * Banner A/B (feb–jul 2026): A (AI/faktura) vann klart över B (solceller).
+ * CTR all time ~2.8% vs ~1.5%; senaste 30d ~3.2% vs ~0.7%.
+ * A är nu enda varianten. Tracking behålls som variant A för historik.
+ */
+const BANNER_WINNER_VARIANT = 'A' as const;
+const BANNER_VARIANT_KEY = 'banner_variant_v2';
+
 export default function CampaignBanner() {
-  const [variant, setVariant] = useState<'A' | 'B'>('A');
+  const href = withDefaultCtaUtm('/fakturaanalys', 'banner', 'variantA', 'ai-savings');
 
-  useEffect(() => {
-    try {
-      const stored = typeof window !== 'undefined' ? window.localStorage.getItem('banner_variant_v1') : null;
-      const storedExpiry = typeof window !== 'undefined' ? window.localStorage.getItem('banner_variant_expiry_v1') : null;
-      const now = Date.now();
-      const isExpired = storedExpiry ? now > Number(storedExpiry) : true;
-
-      if (stored && (stored === 'A' || stored === 'B') && !isExpired) {
-        setVariant(stored);
-        return;
-      }
-
-      const newVariant: 'A' | 'B' = Math.random() < 0.5 ? 'A' : 'B';
-      const expiry = now + 30 * 24 * 60 * 60 * 1000; // 30 dagar
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem('banner_variant_v1', newVariant);
-        window.localStorage.setItem('banner_variant_expiry_v1', String(expiry));
-      }
-      setVariant(newVariant);
-    } catch {
-      // no-op
-    }
-  }, []);
-
-  // Impression tracking: 1 per 24h per variant
   useEffect(() => {
     try {
       if (typeof window === 'undefined') return;
-      const key = `banner_impression_${variant}`;
+      window.localStorage.setItem(BANNER_VARIANT_KEY, BANNER_WINNER_VARIANT);
+      // Rensa gammal A/B-sticky så ingen sitter kvar på solceller-B
+      window.localStorage.removeItem('banner_variant_v1');
+      window.localStorage.removeItem('banner_variant_expiry_v1');
+
+      const key = `banner_impression_${BANNER_WINNER_VARIANT}`;
       const last = Number(window.localStorage.getItem(key) || '0');
       const now = Date.now();
       const dayMs = 24 * 60 * 60 * 1000;
       if (!last || now - last > dayMs) {
         const sessionId = getOrCreateSessionId();
-        const payload = JSON.stringify({ variant, sessionId });
+        const payload = JSON.stringify({ variant: BANNER_WINNER_VARIANT, sessionId });
         const url = '/api/events/banner-impression';
         if (navigator.sendBeacon) {
-          const blob = new Blob([payload], { type: 'application/json' });
-          navigator.sendBeacon(url, blob);
+          navigator.sendBeacon(url, new Blob([payload], { type: 'application/json' }));
         } else {
           fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload }).catch(() => {});
         }
         window.localStorage.setItem(key, String(now));
       }
-    } catch {}
-  }, [variant]);
+    } catch {
+      // tracking får inte störa UX
+    }
+  }, []);
 
-  // A = AI analys → /fakturaanalys. B = Solceller → scroll till #solceller
-  const hrefA = withDefaultCtaUtm('/fakturaanalys', 'banner', 'variantA', 'ai-savings');
-  const hrefB = typeof window !== 'undefined' ? `${window.location.origin}/#solceller` : '/#solceller';
-
-  const handleClickA = (e: React.MouseEvent) => {
+  const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     try {
       const sessionId = getOrCreateSessionId();
-      const payload = JSON.stringify({ variant: 'A', href: hrefA, sessionId });
+      const payload = JSON.stringify({ variant: BANNER_WINNER_VARIANT, href, sessionId });
       const url = '/api/events/banner-click';
       if (navigator.sendBeacon) {
-        const blob = new Blob([payload], { type: 'application/json' });
-        navigator.sendBeacon(url, blob);
+        navigator.sendBeacon(url, new Blob([payload], { type: 'application/json' }));
       } else {
         fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload }).catch(() => {});
       }
-      window.location.href = hrefA;
+      window.location.href = href;
     } catch {
-      window.location.href = hrefA;
+      window.location.href = href;
     }
   };
-
-  const handleClickB = (e: React.MouseEvent) => {
-    e.preventDefault();
-    try {
-      const sessionId = getOrCreateSessionId();
-      const payload = JSON.stringify({ variant: 'B', href: hrefB, sessionId });
-      const url = '/api/events/banner-click';
-      if (navigator.sendBeacon) {
-        const blob = new Blob([payload], { type: 'application/json' });
-        navigator.sendBeacon(url, blob);
-      } else {
-        fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload }).catch(() => {});
-      }
-      if (typeof window !== 'undefined') {
-        if (window.location.pathname === '/' || window.location.pathname === '') {
-          const el = document.getElementById('solceller');
-          el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
-          window.location.href = '/#solceller';
-        }
-      }
-    } catch {
-      if (typeof window !== 'undefined') window.location.href = '/#solceller';
-    }
-  };
-
-  // Nudge-stil: A = AI (låg ansträngning, snabb vinst), B = Solceller (nyfikenhet, ingen förpliktelse)
-  const textA = (
-    <>
-      Bara en faktura – se din <Highlight>möjliga besparing</Highlight> på 30 sekunder.
-    </>
-  );
-
-  const textB = (
-    <>
-      Nyfiken på <Highlight>solceller</Highlight>? Få en offert – ingen förpliktelse.
-    </>
-  );
 
   return (
     <Banner>
       <Image src="/favicon.svg" alt="Elchef" width={20} height={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
-      {variant === 'A' ? textA : textB}
-      {variant === 'A' ? (
-        <StyledLink href={hrefA} onClick={handleClickA}>Se direkt</StyledLink>
-      ) : (
-        <StyledLink href="/#solceller" onClick={handleClickB}>Begär offert</StyledLink>
-      )}
+      Bara en faktura – se din <Highlight>möjliga besparing</Highlight> på 30 sekunder.
+      <StyledLink href={href} onClick={handleClick}>Se direkt</StyledLink>
     </Banner>
   );
-} 
+}
