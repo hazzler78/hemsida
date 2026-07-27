@@ -5,6 +5,12 @@ export type UtmParams = {
   utm_content?: string;
 };
 
+const FIRST_TOUCH_KEY = 'elchef_utm_first_touch_v1';
+
+function hasAnyUtm(u: UtmParams): boolean {
+  return Boolean(u.utm_source || u.utm_medium || u.utm_campaign || u.utm_content);
+}
+
 export function withUtm(href: string, defaults: UtmParams = {}): string {
   try {
     const base = href || '/';
@@ -38,14 +44,12 @@ export function withDefaultCtaUtm(href: string, medium: string, content?: string
   });
 }
 
-const FIRST_TOUCH_KEY = 'elchef_utm_first_touch_v1';
-
 /**
  * Hämta UTM-parametrar från URL:en (för tracking)
  */
 export function getUTMParams(): UtmParams {
   if (typeof window === 'undefined') return {};
-  
+
   try {
     const params = new URLSearchParams(window.location.search);
     return {
@@ -63,10 +67,8 @@ export function getUTMParams(): UtmParams {
 export function persistFirstTouchUtm(utm?: UtmParams): void {
   if (typeof window === 'undefined') return;
   try {
-    const current = utm && Object.keys(utm).length ? utm : getUTMParams();
-    if (!current.utm_source && !current.utm_medium && !current.utm_campaign && !current.utm_content) {
-      return;
-    }
+    const current = utm && hasAnyUtm(utm) ? utm : getUTMParams();
+    if (!hasAnyUtm(current)) return;
     const existingRaw = sessionStorage.getItem(FIRST_TOUCH_KEY);
     if (existingRaw) return; // first-touch wins
     sessionStorage.setItem(FIRST_TOUCH_KEY, JSON.stringify(current));
@@ -80,9 +82,7 @@ export function getAttributionUtm(): UtmParams {
   if (typeof window === 'undefined') return {};
   try {
     const fromUrl = getUTMParams();
-    if (fromUrl.utm_source || fromUrl.utm_medium || fromUrl.utm_campaign || fromUrl.utm_content) {
-      return fromUrl;
-    }
+    if (hasAnyUtm(fromUrl)) return fromUrl;
     const raw = sessionStorage.getItem(FIRST_TOUCH_KEY);
     if (!raw) return {};
     const parsed = JSON.parse(raw) as UtmParams;
@@ -92,4 +92,16 @@ export function getAttributionUtm(): UtmParams {
   }
 }
 
+/**
+ * Spara first-touch UTM (första gången i sessionen) och returnera den.
+ * Alias som används av fakturaanalys/funnel-kod.
+ */
+export function captureFirstTouchUtm(fromUrl?: UtmParams): UtmParams {
+  persistFirstTouchUtm(fromUrl);
+  return getAttributionUtm();
+}
 
+/** First-touch om den finns, annars aktuella URL-UTM. */
+export function getFirstTouchUtm(): UtmParams {
+  return getAttributionUtm();
+}

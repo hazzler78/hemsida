@@ -4,9 +4,10 @@ import ReactMarkdown from 'react-markdown';
 import GlassButton from '@/components/GlassButton';
 import ContactForm from '@/components/ContactForm';
 import ShareResults from '@/components/ShareResults';
-import { getAttributionUtm, withDefaultCtaUtm } from '@/lib/utm';
+import { withDefaultCtaUtm, getFirstTouchUtm, captureFirstTouchUtm, getAttributionUtm } from '@/lib/utm';
 import { usePageView } from '@/lib/usePageView';
 import { getOrCreateSessionId } from '@/lib/sessionId';
+import { trackFunnelEvent } from '@/lib/trackFunnelEvent';
 import Script from 'next/script';
 
 // SVG Ikoner i glassmorphism-stil
@@ -123,11 +124,20 @@ export default function Fakturaanalys() {
 
   usePageView('/fakturaanalys');
 
+  const [fromSocial, setFromSocial] = useState(false);
+
   useEffect(() => {
     sessionIdRef.current = getOrCreateSessionId();
+    const utm = captureFirstTouchUtm();
+    const src = (utm.utm_source || '').toLowerCase();
+    setFromSocial(['facebook', 'instagram', 'tiktok', 'x', 'twitter'].includes(src));
+    trackFunnelEvent('landing_fakturaanalys', {
+      path: '/fakturaanalys',
+      meta: { from_social: ['facebook', 'instagram', 'tiktok', 'x', 'twitter'].includes(src) },
+    });
   }, []);
 
-  // Funktion för att spåra kontraktsklick från AI-användare (uppdaterad source)
+  // Funktion för att spåra kontraktsklick — behåll first-touch UTM (t.ex. facebook reel)
   const trackContractClick = (contractType: 'rorligt' | 'fastpris') => {
     try {
       const extractSavings = (text: string): number => {
@@ -154,7 +164,11 @@ export default function Fakturaanalys() {
         typeof window !== 'undefined' ? window.localStorage.getItem('hero_variant_v1') || null : null;
 
       // Behåll first-touch (t.ex. facebook reel) om besökaren landade via UTM
-      const landingUtm = getAttributionUtm();
+      const landingUtm = getAttributionUtm() || getFirstTouchUtm();
+      trackFunnelEvent('contract_click', {
+        path: '/fakturaanalys',
+        meta: { contract_type: contractType, log_id: logId },
+      });
 
       const payload = JSON.stringify({
         contractType,
@@ -199,6 +213,10 @@ export default function Fakturaanalys() {
     setError('');
     setGptResult(null);
     setShowFullAnalysis(false);
+    trackFunnelEvent('ocr_started', {
+      path: '/fakturaanalys',
+      meta: { file_type: file.type, file_size: file.size },
+    });
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -230,8 +248,16 @@ export default function Fakturaanalys() {
       cleanedResult = cleanedResult.replace(/\( [^)]*×[^)]* = [^)]* \)/g, '');
       cleanedResult = cleanedResult.replace(/\n\s*\n\s*\n/g, '\n\n');
       setGptResult(cleanedResult);
+      trackFunnelEvent('ocr_completed', {
+        path: '/fakturaanalys',
+        meta: { log_id: typeof data.logId === 'number' ? data.logId : null },
+      });
     } catch (error) {
       console.error('Error analyzing invoice:', error);
+      trackFunnelEvent('ocr_failed', {
+        path: '/fakturaanalys',
+        meta: { message: error instanceof Error ? error.message : 'unknown' },
+      });
       setError(`Kunde inte analysera fakturan: ${error instanceof Error ? error.message : 'Okänt fel'}. Prova att ladda upp bilden igen - det fungerar ofta på andra försöket!`);
     } finally {
       setLoading(false);
@@ -336,17 +362,28 @@ export default function Fakturaanalys() {
           <p style={{ 
             fontSize: '1.25rem', 
             color: 'rgba(255, 255, 255, 0.9)', 
-            marginBottom: '2rem', 
+            marginBottom: '1rem', 
             textAlign: 'center',
             textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
           }}>
-            Ladda upp en bild på din elräkning och få en smart, tydlig analys direkt!
+            {fromSocial
+              ? 'Du är rätt — ladda upp elräkningen här så ser du om du betalar onödiga avgifter.'
+              : 'Ladda upp en bild på din elräkning och få en smart, tydlig analys direkt!'}
+          </p>
+          <p style={{
+            textAlign: 'center',
+            color: 'rgba(255,255,255,0.85)',
+            fontSize: '0.95rem',
+            marginBottom: '1.5rem',
+            lineHeight: 1.5,
+          }}>
+            Gratis · ca 30 sekunder · ingen inloggning
           </p>
           {!loading && !gptResult && (
             <div style={{ 
               display: 'flex', 
               flexDirection: 'column',
-              gap: '1.5rem', 
+              gap: '1.25rem', 
               alignItems: 'stretch'
             }}>
               <div style={{ 
@@ -357,7 +394,7 @@ export default function Fakturaanalys() {
               }}>
                 <label htmlFor="file-upload" style={{ display: 'flex', justifyContent: 'center' }}>
                   <GlassButton as="span" variant="primary" size="lg" background="linear-gradient(135deg, var(--primary), var(--secondary))" disableScrollEffect disableHoverEffect>
-                    Välj fakturabild
+                    {file ? 'Byt bild' : 'Ta foto eller välj fakturabild'}
                   </GlassButton>
                 </label>
                 <input
@@ -365,6 +402,7 @@ export default function Fakturaanalys() {
                   ref={fileInputRef}
                   type="file"
                   accept="image/*"
+                  capture="environment"
                   onChange={handleFileChange}
                   style={{ display: 'none' }}
                 />
@@ -377,31 +415,31 @@ export default function Fakturaanalys() {
                   borderRadius: 'var(--radius-md)',
                   border: '1px solid rgba(255, 255, 255, 0.2)'
                 }}>
-                  {file ? file.name : 'Ingen fil vald'}
+                  {file ? file.name : 'Ingen fil vald ännu'}
                 </div>
-                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', color: 'rgba(255, 255, 255, 0.9)' }}>
-                  <input
-                    type="checkbox"
-                    checked={consentToStore}
-                    onChange={(e) => setConsentToStore(e.target.checked)}
-                    style={{ marginTop: 2 }}
-                  />
-                  <span style={{ lineHeight: 1.4 }}>
-                    Jag godkänner att min fakturabild lagras säkert för att förbättra AI‑analysen. Jag kan begära radering när som helst. Läs mer i vår <a href={withDefaultCtaUtm('/integritetspolicy', 'fakturaanalys', 'integritetspolicy')} target="_blank" rel="noreferrer" style={{ color: '#ffffff', textDecoration: 'underline', fontWeight: 600 }}>integritetspolicy</a>.
-                  </span>
-                </label>
               </div>
               <GlassButton
                 onClick={handleGptOcr}
                 disabled={!file || loading}
                 variant="primary"
                 size="lg"
-                background="linear-gradient(135deg, var(--primary), var(--secondary))"
+                background="linear-gradient(135deg, #10b981, #059669)"
                 disableScrollEffect
                 disableHoverEffect
               >
-                Analysera faktura
+                {file ? 'Analysera min elräkning nu' : 'Analysera faktura'}
               </GlassButton>
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.9rem' }}>
+                <input
+                  type="checkbox"
+                  checked={consentToStore}
+                  onChange={(e) => setConsentToStore(e.target.checked)}
+                  style={{ marginTop: 2 }}
+                />
+                <span style={{ lineHeight: 1.4 }}>
+                  Valfritt: spara bilden för att förbättra AI:n. <a href={withDefaultCtaUtm('/integritetspolicy', 'fakturaanalys', 'integritetspolicy')} target="_blank" rel="noreferrer" style={{ color: '#ffffff', textDecoration: 'underline', fontWeight: 600 }}>Integritetspolicy</a>.
+                </span>
+              </label>
             </div>
           )}
         </div>

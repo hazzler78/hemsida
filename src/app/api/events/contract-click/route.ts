@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-// removed unused createClient
 import { getSupabaseServerClient } from '@/lib/supabaseServer';
-
-// Create Supabase client per-request
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { 
-      contractType, 
-      logId, 
-      savingsAmount, 
-      sessionId, 
+    const {
+      contractType,
+      logId,
+      savingsAmount,
+      sessionId,
       source = 'jamfor-elpriser',
       utmSource,
       utmMedium,
@@ -20,7 +17,6 @@ export async function POST(request: NextRequest) {
       heroVariant,
     } = body;
 
-    // Validera att logId finns i invoice_ocr om det är angivet
     let validLogId = null;
     if (typeof logId === 'number') {
       const supabase = getSupabaseServerClient();
@@ -35,18 +31,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Hämta user agent och referer
     const ua = request.headers.get('user-agent') || '';
     const referer = request.headers.get('referer') || '';
 
-    // Logga kontraktsklick
     const supabase = getSupabaseServerClient();
     const { error } = await supabase.from('contract_clicks').insert({
       contract_type: typeof contractType === 'string' ? contractType : null,
-      log_id: validLogId, // Kan vara null om logId inte finns
+      log_id: validLogId,
       savings_amount: typeof savingsAmount === 'number' ? savingsAmount : null,
       session_id: typeof sessionId === 'string' ? sessionId : null,
       source: typeof source === 'string' ? source : 'jamfor-elpriser',
+      // First-touch / social attribution (do not overwrite with page name)
       utm_source: typeof utmSource === 'string' ? utmSource : null,
       utm_medium: typeof utmMedium === 'string' ? utmMedium : null,
       utm_campaign: typeof utmCampaign === 'string' ? utmCampaign : null,
@@ -54,7 +49,7 @@ export async function POST(request: NextRequest) {
       hero_variant: typeof heroVariant === 'string' ? heroVariant : null,
       user_agent: ua,
       referer,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     });
 
     if (error) {

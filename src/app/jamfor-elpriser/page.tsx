@@ -4,9 +4,10 @@ import ReactMarkdown from 'react-markdown';
 import GlassButton from '@/components/GlassButton';
 import ContactForm from '@/components/ContactForm';
 import ShareResults from '@/components/ShareResults';
-import { withDefaultCtaUtm } from '@/lib/utm';
+import { withDefaultCtaUtm, getFirstTouchUtm, captureFirstTouchUtm } from '@/lib/utm';
 import { usePageView } from '@/lib/usePageView';
 import { getOrCreateSessionId } from '@/lib/sessionId';
+import { trackFunnelEvent } from '@/lib/trackFunnelEvent';
 
 // SVG Ikoner i glassmorphism-stil
 const AnalysisIcon = () => (
@@ -124,9 +125,10 @@ export default function JamforElpriser() {
 
   useEffect(() => {
     sessionIdRef.current = getOrCreateSessionId();
+    captureFirstTouchUtm();
   }, []);
 
-  // Funktion för att spåra kontraktsklick från AI-användare
+  // Funktion för att spåra kontraktsklick — behåll first-touch UTM
   const trackContractClick = (contractType: 'rorligt' | 'fastpris') => {
     try {
       // Extrahera besparingsbelopp från AI-analysen
@@ -158,19 +160,22 @@ export default function JamforElpriser() {
       const heroVariant =
         typeof window !== 'undefined' ? window.localStorage.getItem('hero_variant_v1') || null : null;
 
-      // Debug: Logga extraktionsresultat
-      console.log('GPT Result:', gptResult);
-      console.log('Extracted savings amount:', savingsAmount);
-      
+      const firstTouch = getFirstTouchUtm();
+      trackFunnelEvent('contract_click', {
+        path: '/jamfor-elpriser',
+        meta: { contract_type: contractType, log_id: logId },
+      });
+
       const payload = JSON.stringify({
         contractType,
         logId,
         savingsAmount,
         sessionId: sessionIdRef.current,
         source: 'jamfor-elpriser',
-        utmSource: 'jamfor',
-        utmMedium: 'cta',
-        utmCampaign: `cta-${contractType}`,
+        utmSource: firstTouch.utm_source || 'jamfor',
+        utmMedium: firstTouch.utm_medium || 'cta',
+        utmCampaign: firstTouch.utm_campaign || `cta-${contractType}`,
+        utmContent: firstTouch.utm_content || undefined,
         heroVariant,
       });
 
@@ -205,6 +210,10 @@ export default function JamforElpriser() {
     setError('');
     setGptResult(null);
     setShowFullAnalysis(false);
+    trackFunnelEvent('ocr_started', {
+      path: '/jamfor-elpriser',
+      meta: { file_type: file.type, file_size: file.size },
+    });
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -252,8 +261,16 @@ export default function JamforElpriser() {
       cleanedResult = cleanedResult.replace(/\n\s*\n\s*\n/g, '\n\n');
       
       setGptResult(cleanedResult);
+      trackFunnelEvent('ocr_completed', {
+        path: '/jamfor-elpriser',
+        meta: { log_id: typeof data.logId === 'number' ? data.logId : null },
+      });
     } catch (error) {
       console.error('Error analyzing invoice:', error);
+      trackFunnelEvent('ocr_failed', {
+        path: '/jamfor-elpriser',
+        meta: { message: error instanceof Error ? error.message : 'unknown' },
+      });
       setError(`Kunde inte analysera fakturan: ${error instanceof Error ? error.message : 'Okänt fel'}. Prova att ladda upp bilden igen - det fungerar ofta på andra försöket!`);
     } finally {
       setLoading(false);
