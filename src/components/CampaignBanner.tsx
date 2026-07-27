@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Image from "next/image";
 import { withDefaultCtaUtm } from '@/lib/utm';
@@ -50,31 +50,59 @@ const StyledLink = styled.a`
 `;
 
 /**
- * Banner A/B (feb–jul 2026): A (AI/faktura) vann klart över B (solceller).
- * CTR all time ~2.8% vs ~1.5%; senaste 30d ~3.2% vs ~0.7%.
- * A är nu enda varianten. Tracking behålls som variant A för historik.
+ * Banner A/B v3 (jul 2026):
+ * A = kontroll (tidigare vinnare): besparing / låg friktion
+ * B = kundförslag: AI visar onödiga avgifter
+ * Båda → /fakturaanalys. Sticky 30 dagar via banner_variant_v3.
  */
-const BANNER_WINNER_VARIANT = 'A' as const;
-const BANNER_VARIANT_KEY = 'banner_variant_v2';
+const BANNER_VARIANT_KEY = 'banner_variant_v3';
+const BANNER_EXPIRY_KEY = 'banner_variant_expiry_v3';
+
+type BannerVariant = 'A' | 'B';
 
 export default function CampaignBanner() {
-  const href = withDefaultCtaUtm('/fakturaanalys', 'banner', 'variantA', 'ai-savings');
+  const [variant, setVariant] = useState<BannerVariant>('A');
 
   useEffect(() => {
     try {
       if (typeof window === 'undefined') return;
-      window.localStorage.setItem(BANNER_VARIANT_KEY, BANNER_WINNER_VARIANT);
-      // Rensa gammal A/B-sticky så ingen sitter kvar på solceller-B
+
+      // Rensa äldre test-nycklar så assignment startar om för v3
       window.localStorage.removeItem('banner_variant_v1');
       window.localStorage.removeItem('banner_variant_expiry_v1');
+      window.localStorage.removeItem('banner_variant_v2');
 
-      const key = `banner_impression_${BANNER_WINNER_VARIANT}`;
+      const stored = window.localStorage.getItem(BANNER_VARIANT_KEY);
+      const storedExpiry = window.localStorage.getItem(BANNER_EXPIRY_KEY);
+      const now = Date.now();
+      const isExpired = storedExpiry ? now > Number(storedExpiry) : true;
+
+      let next: BannerVariant;
+      if (stored && (stored === 'A' || stored === 'B') && !isExpired) {
+        next = stored;
+      } else {
+        next = Math.random() < 0.5 ? 'A' : 'B';
+        const expiry = now + 30 * 24 * 60 * 60 * 1000;
+        window.localStorage.setItem(BANNER_VARIANT_KEY, next);
+        window.localStorage.setItem(BANNER_EXPIRY_KEY, String(expiry));
+      }
+      setVariant(next);
+    } catch {
+      // no-op
+    }
+  }, []);
+
+  // Impression: max 1 / 24h per variant
+  useEffect(() => {
+    try {
+      if (typeof window === 'undefined') return;
+      const key = `banner_impression_${variant}`;
       const last = Number(window.localStorage.getItem(key) || '0');
       const now = Date.now();
       const dayMs = 24 * 60 * 60 * 1000;
       if (!last || now - last > dayMs) {
         const sessionId = getOrCreateSessionId();
-        const payload = JSON.stringify({ variant: BANNER_WINNER_VARIANT, sessionId });
+        const payload = JSON.stringify({ variant, sessionId });
         const url = '/api/events/banner-impression';
         if (navigator.sendBeacon) {
           navigator.sendBeacon(url, new Blob([payload], { type: 'application/json' }));
@@ -86,13 +114,18 @@ export default function CampaignBanner() {
     } catch {
       // tracking får inte störa UX
     }
-  }, []);
+  }, [variant]);
+
+  const href =
+    variant === 'A'
+      ? withDefaultCtaUtm('/fakturaanalys', 'banner', 'variantA', 'ai-savings')
+      : withDefaultCtaUtm('/fakturaanalys', 'banner', 'variantB', 'ai-fees');
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     try {
       const sessionId = getOrCreateSessionId();
-      const payload = JSON.stringify({ variant: BANNER_WINNER_VARIANT, href, sessionId });
+      const payload = JSON.stringify({ variant, href, sessionId });
       const url = '/api/events/banner-click';
       if (navigator.sendBeacon) {
         navigator.sendBeacon(url, new Blob([payload], { type: 'application/json' }));
@@ -105,10 +138,22 @@ export default function CampaignBanner() {
     }
   };
 
+  const textA = (
+    <>
+      Bara en faktura – se din <Highlight>möjliga besparing</Highlight> på 30 sekunder.
+    </>
+  );
+
+  const textB = (
+    <>
+      <Highlight>AI</Highlight> visar onödiga avgifter på din elräkning – på 30 sekunder.
+    </>
+  );
+
   return (
     <Banner>
       <Image src="/favicon.svg" alt="Elchef" width={20} height={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
-      Bara en faktura – se din <Highlight>möjliga besparing</Highlight> på 30 sekunder.
+      {variant === 'A' ? textA : textB}
       <StyledLink href={href} onClick={handleClick}>Se direkt</StyledLink>
     </Banner>
   );

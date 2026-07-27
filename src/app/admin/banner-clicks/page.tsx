@@ -87,10 +87,10 @@ export default function AdminBannerClicks() {
 
   const filteredImpressions = impressions.filter(i => withinDate(i.created_at));
 
-  // A/B nudge: A = AI (bara en faktura, 30 sek), B = Solceller (nyfiken, ingen förpliktelse)
+  // A/B v3 (jul 2026): A = kontroll (besparing), B = AI onödiga avgifter — båda → fakturaanalys
   const variantNames: Record<string, string> = {
-    'A': 'AI – Bara en faktura, se möjliga besparing på 30 sek (länk till fakturaanalys).',
-    'B': 'Solceller – Nyfiken? Få offert, ingen förpliktelse (scroll till formulär).'
+    'A': 'Kontroll – Bara en faktura, se möjliga besparing på 30 sek → fakturaanalys.',
+    'B': 'Ny – AI visar onödiga avgifter på din elräkning (30 sek) → fakturaanalys.',
   };
 
   // Beräkna vinnare (högst CTR vinner; vid lika vinner den med flest klick)
@@ -128,7 +128,7 @@ export default function AdminBannerClicks() {
       }}>
       <h1 style={{ marginBottom: 4, color: 'var(--foreground)' }}>Bannerklick (Admin)</h1>
       <p style={{ color: 'var(--gray-600)', marginBottom: 8, fontSize: '0.95rem' }}>
-        CTR = klick ÷ visningar per variant. Historiskt A/B (A = AI, B = solceller).
+        CTR = klick ÷ visningar per variant. Vinnare = högst CTR.
       </p>
       <p style={{
         color: 'var(--primary)',
@@ -140,10 +140,10 @@ export default function AdminBannerClicks() {
         borderRadius: 'var(--radius-sm)',
         border: '1px solid rgba(0,106,167,0.25)',
       }}>
-        Juli 2026: A vann (CTR ~2.8% vs ~1.5%). Bannern visar nu bara A (AI → fakturaanalys). Ny data loggas som variant A.
+        A/B v3 (från ~2026-07-27): A = besparing (kontroll) vs B = AI onödiga avgifter. Använd &quot;Start nytt A/B-test&quot; så datumfiltret börjar idag.
       </p>
       <p style={{ color: 'var(--gray-600)', marginBottom: 20, fontSize: '0.85rem' }}>
-        Data raderas aldrig – filtren styr bara vad som visas. Använd &quot;Start nytt A/B-test&quot; för att se enbart ny statistik.
+        Data raderas aldrig – filtren styr bara vad som visas. Äldre B = solceller (före v3).
       </p>
 
       {/* Filter och sök */}
