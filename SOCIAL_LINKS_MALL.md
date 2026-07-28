@@ -6,36 +6,38 @@ Använd dessa länkar när ni postar på Elchefs sociala kanaler. Då syns trafi
 
 ## Kortlänkar (rekommenderas – enkla att komma ihåg)
 
-| Plattform | Kortlänk |
-|-----------|----------|
-| **YouTube** | `https://elchef.se/yt` |
-| **Facebook** | `https://elchef.se/fb` |
-| **Instagram** | `https://elchef.se/ig` → fakturaanalys (**länk i bio**; caption-URL:er är inte klickbara) |
-| **TikTok** | `https://elchef.se/tt` |
-| **Pinterest** | `https://elchef.se/pin` |
-| **X (Twitter)** | `https://elchef.se/x` |
-| **LinkedIn** | `https://elchef.se/in` |
-| **Snapchat** | `https://elchef.se/snap` |
+| Plattform | Kortlänk | Landar på |
+|-----------|----------|-----------|
+| **YouTube** | `https://www.elchef.se/yt` | fakturaanalys + UTM |
+| **Facebook** | `https://www.elchef.se/fb` | fakturaanalys · facebook / bio |
+| **Instagram** | `https://www.elchef.se/ig` | fakturaanalys · instagram / bio (**länk i bio**) |
+| **TikTok** | `https://www.elchef.se/tt` | fakturaanalys · tiktok / bio |
+| **Pinterest** | `https://www.elchef.se/pin` | fakturaanalys + UTM |
+| **X (Twitter)** | `https://www.elchef.se/x` | fakturaanalys + UTM |
+| **LinkedIn** | `https://www.elchef.se/in` | fakturaanalys + UTM |
+| **Snapchat** | `https://www.elchef.se/snap` | fakturaanalys + UTM |
+
+Bio: räcker med `https://www.elchef.se/ig`. Extra `?utm_campaign=…&utm_content=…` från Reels **behålls** (middleware merge).
 
 ---
 
 ## Fullständiga länkar (med UTM)
 
-*Kortlänkarna ovan redirectar till dessa – använd dem direkt om ni föredrar.*
+*Kortlänkarna ovan redirectar via `src/middleware.ts` till fakturaanalys.*
 
 ### Facebook
 ```
-https://elchef.se?utm_source=facebook&utm_medium=social
+https://www.elchef.se/fb
 ```
 
-### Instagram (inkl. Stories & Reels)
+### Instagram (bio / Stories)
 ```
-https://elchef.se?utm_source=instagram&utm_medium=social
+https://www.elchef.se/ig
 ```
 
 ### TikTok
 ```
-https://elchef.se?utm_source=tiktok&utm_medium=social
+https://www.elchef.se/tt
 ```
 
 ### Pinterest

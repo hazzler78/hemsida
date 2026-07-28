@@ -5,40 +5,32 @@ const nextConfig: NextConfig = {
     styledComponents: true,
   },
   async redirects() {
-    return [
-      // Kortlänkar för sociala medier (UTM-spårning)
-      { source: "/yt", destination: "/?utm_source=youtube&utm_medium=social", permanent: false },
-      { source: "/fb", destination: "/?utm_source=facebook&utm_medium=social", permanent: false },
-      // Instagram bio CTA (Reels: no clickable caption links) → fakturaanalys
-      { source: "/ig", destination: "/fakturaanalys?utm_source=instagram&utm_medium=bio", permanent: false },
-      { source: "/tt", destination: "/?utm_source=tiktok&utm_medium=social", permanent: false },
-      { source: "/pin", destination: "/?utm_source=pinterest&utm_medium=social", permanent: false },
-      { source: "/x", destination: "/?utm_source=x&utm_medium=social", permanent: false },
-      { source: "/in", destination: "/?utm_source=linkedin&utm_medium=social", permanent: false },
-      { source: "/snap", destination: "/?utm_source=snapchat&utm_medium=social", permanent: false },
-      {
-        source: "/jamfor-elpriser",
-        destination: "/fakturaanalys",
-        permanent: true,
-      },
-      {
-        source: "/rorligt-avtal",
-        destination: "/rorligt-avtal-v2",
-        permanent: true,
-      },
-      {
-        source: "/:path*",
-        has: [
-          {
-            type: "host",
-            value: "elchef.se",
-          },
-        ],
-        destination: "https://www.elchef.se/:path*",
-        permanent: true,
-      },
-    ];
-  },
+      return [
+        // Social short links (/ig, /fb, …) → src/middleware.ts
+        // (lands on /fakturaanalys + merges UTM; static ?dest drops extra query)
+        {
+          source: "/jamfor-elpriser",
+          destination: "/fakturaanalys",
+          permanent: true,
+        },
+        {
+          source: "/rorligt-avtal",
+          destination: "/rorligt-avtal-v2",
+          permanent: true,
+        },
+        {
+          source: "/:path*",
+          has: [
+            {
+              type: "host",
+              value: "elchef.se",
+            },
+          ],
+          destination: "https://www.elchef.se/:path*",
+          permanent: true,
+        },
+      ];
+    },
   async headers() {
     return [
       {
