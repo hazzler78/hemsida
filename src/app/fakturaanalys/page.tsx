@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import GlassButton from '@/components/GlassButton';
 import ContactForm from '@/components/ContactForm';
 import ShareResults from '@/components/ShareResults';
-import { withDefaultCtaUtm, getFirstTouchUtm, captureFirstTouchUtm, getAttributionUtm } from '@/lib/utm';
+import { withDefaultCtaUtm, withUtm, getFirstTouchUtm, captureFirstTouchUtm, getAttributionUtm } from '@/lib/utm';
 import { usePageView } from '@/lib/usePageView';
 import { getOrCreateSessionId } from '@/lib/sessionId';
 import { trackFunnelEvent } from '@/lib/trackFunnelEvent';
@@ -138,65 +138,85 @@ export default function Fakturaanalys() {
   }, []);
 
   // Funktion för att spåra kontraktsklick — behåll first-touch UTM (t.ex. facebook reel)
-  const trackContractClick = (contractType: 'rorligt' | 'fastpris') => {
-    try {
-      const extractSavings = (text: string): number => {
-        const patterns = [
-          /spara totalt\s*(\d+(?:[,.]\d+)?)/i,
-          /spara\s*(\d+(?:[,.]\d+)?)\s*kr\/år/i,
-          /(\d+(?:[,.]\d+)?)\s*kr.*?(?:spar|bespar|minska)/i,
-          /Din årliga besparing:\s*(\d+(?:[,.]\d+)?)/i,
-          /Total besparing:\s*(\d+(?:[,.]\d+)?)/i
-        ];
-        for (const pattern of patterns) {
-          const match = text.match(pattern);
-          if (match) {
-            const amount = parseFloat(match[1].replace(',', '.'));
-            if (amount > 0) return amount;
+  const trackContractClick = (
+      contractType: 'rorligt' | 'fastpris',
+      metaExtra?: Record<string, unknown>,
+    ) => {
+      try {
+        const extractSavings = (text: string): number => {
+          const patterns = [
+            /spara totalt\s*(\d+(?:[,.]\d+)?)/i,
+            /spara\s*(\d+(?:[,.]\d+)?)\s*kr\/år/i,
+            /(\d+(?:[,.]\d+)?)\s*kr.*?(?:spar|bespar|minska)/i,
+            /Din årliga besparing:\s*(\d+(?:[,.]\d+)?)/i,
+            /Total besparing:\s*(\d+(?:[,.]\d+)?)/i
+          ];
+          for (const pattern of patterns) {
+            const match = text.match(pattern);
+            if (match) {
+              const amount = parseFloat(match[1].replace(',', '.'));
+              if (amount > 0) return amount;
+            }
           }
+          return 0;
+        };
+
+        const savingsAmount = gptResult ? extractSavings(gptResult) : 0;
+
+        const heroVariant =
+          typeof window !== 'undefined' ? window.localStorage.getItem('hero_variant_v1') || null : null;
+
+        const landingUtm = getAttributionUtm() || getFirstTouchUtm();
+        trackFunnelEvent('contract_click', {
+          path: '/fakturaanalys',
+          meta: { contract_type: contractType, log_id: logId, ...(metaExtra || {}) },
+        });
+
+        const payload = JSON.stringify({
+          contractType,
+          logId,
+          savingsAmount,
+          sessionId: sessionIdRef.current,
+          source: metaExtra?.skip_ocr ? 'fakturaanalys_skip_ocr' : 'fakturaanalys',
+          utmSource: landingUtm.utm_source || 'fakturaanalys',
+          utmMedium: landingUtm.utm_medium || (metaExtra?.skip_ocr ? 'skip_ocr' : 'cta'),
+          utmCampaign: landingUtm.utm_campaign || `cta-${contractType}`,
+          utmContent: landingUtm.utm_content || (metaExtra?.skip_ocr ? 'skip_ocr_cta' : undefined),
+          heroVariant,
+        });
+
+        if (navigator.sendBeacon) {
+          const blob = new Blob([payload], { type: 'application/json' });
+          navigator.sendBeacon('/api/events/contract-click', blob);
+        } else {
+          fetch('/api/events/contract-click', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: payload
+          }).catch(() => {});
         }
-        return 0;
-      };
-
-      const savingsAmount = gptResult ? extractSavings(gptResult) : 0;
-
-      const heroVariant =
-        typeof window !== 'undefined' ? window.localStorage.getItem('hero_variant_v1') || null : null;
-
-      // Behåll first-touch (t.ex. facebook reel) om besökaren landade via UTM
-      const landingUtm = getAttributionUtm() || getFirstTouchUtm();
-      trackFunnelEvent('contract_click', {
-        path: '/fakturaanalys',
-        meta: { contract_type: contractType, log_id: logId },
-      });
-
-      const payload = JSON.stringify({
-        contractType,
-        logId,
-        savingsAmount,
-        sessionId: sessionIdRef.current,
-        source: 'fakturaanalys',
-        utmSource: landingUtm.utm_source || 'fakturaanalys',
-        utmMedium: landingUtm.utm_medium || 'cta',
-        utmCampaign: landingUtm.utm_campaign || `cta-${contractType}`,
-        utmContent: landingUtm.utm_content || undefined,
-        heroVariant,
-      });
-
-      if (navigator.sendBeacon) {
-        const blob = new Blob([payload], { type: 'application/json' });
-        navigator.sendBeacon('/api/events/contract-click', blob);
-      } else {
-        fetch('/api/events/contract-click', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: payload
-        }).catch(() => {});
+      } catch (error) {
+        console.error('Error tracking contract click:', error);
       }
-    } catch (error) {
-      console.error('Error tracking contract click:', error);
-    }
-  };
+    };
+
+    const [skipOcrHref, setSkipOcrHref] = useState('/rorligt-avtal-v2?utm_source=fakturaanalys&utm_medium=skip_ocr&utm_campaign=fa_secondary_rorligt&utm_content=skip_ocr_cta');
+
+    useEffect(() => {
+      const landingUtm = getAttributionUtm() || getFirstTouchUtm();
+      setSkipOcrHref(
+        withUtm('/rorligt-avtal-v2', {
+          utm_source: landingUtm.utm_source || 'fakturaanalys',
+          utm_medium: landingUtm.utm_medium || 'skip_ocr',
+          utm_campaign: landingUtm.utm_campaign || 'fa_secondary_rorligt',
+          utm_content: landingUtm.utm_content || 'skip_ocr_cta',
+        }),
+      );
+    }, []);
+
+    const handleSkipOcrRorligt = () => {
+      trackContractClick('rorligt', { skip_ocr: true, cta: 'secondary_no_upload' });
+    };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -430,18 +450,59 @@ export default function Fakturaanalys() {
                 {file ? 'Analysera min elräkning nu' : 'Analysera faktura'}
               </GlassButton>
               <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.9rem' }}>
-                <input
-                  type="checkbox"
-                  checked={consentToStore}
-                  onChange={(e) => setConsentToStore(e.target.checked)}
-                  style={{ marginTop: 2 }}
-                />
-                <span style={{ lineHeight: 1.4 }}>
-                  Valfritt: spara bilden för att förbättra AI:n. <a href={withDefaultCtaUtm('/integritetspolicy', 'fakturaanalys', 'integritetspolicy')} target="_blank" rel="noreferrer" style={{ color: '#ffffff', textDecoration: 'underline', fontWeight: 600 }}>Integritetspolicy</a>.
-                </span>
-              </label>
-            </div>
-          )}
+                              <input
+                                type="checkbox"
+                                checked={consentToStore}
+                                onChange={(e) => setConsentToStore(e.target.checked)}
+                                style={{ marginTop: 2 }}
+                              />
+                              <span style={{ lineHeight: 1.4 }}>
+                                Valfritt: spara bilden för att förbättra AI:n. <a href={withDefaultCtaUtm('/integritetspolicy', 'fakturaanalys', 'integritetspolicy')} target="_blank" rel="noreferrer" style={{ color: '#ffffff', textDecoration: 'underline', fontWeight: 600 }}>Integritetspolicy</a>.
+                              </span>
+                            </label>
+
+                            {/* Lättare väg för social/kall trafik utan faktura till hands */}
+                            <div
+                              style={{
+                                marginTop: '0.25rem',
+                                paddingTop: '1.25rem',
+                                borderTop: '1px solid rgba(255,255,255,0.2)',
+                                textAlign: 'center',
+                              }}
+                            >
+                              <p
+                                style={{
+                                  margin: '0 0 0.75rem',
+                                  color: 'rgba(255,255,255,0.88)',
+                                  fontSize: '0.95rem',
+                                  lineHeight: 1.45,
+                                }}
+                              >
+                                {fromSocial
+                                  ? 'Har du inte fakturan framme? Jämför rörligt elavtal direkt — tar någon minut.'
+                                  : 'Vill du inte ladda upp just nu? Jämför rörliga elavtal utan faktura.'}
+                              </p>
+                              <a
+                                                              href={skipOcrHref}
+                                                              onClick={handleSkipOcrRorligt}
+                                                              style={{
+                                                                display: 'inline-block',
+                                                                padding: '0.85rem 1.35rem',
+                                                                borderRadius: '999px',
+                                                                border: '1.5px solid rgba(255,255,255,0.55)',
+                                                                background: 'rgba(255,255,255,0.12)',
+                                                                color: '#fff',
+                                                                fontWeight: 700,
+                                                                fontSize: '1rem',
+                                                                textDecoration: 'none',
+                                                                boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+                                                              }}
+                                                            >
+                                                              Jämför rörligt utan faktura →
+                                                            </a>
+                            </div>
+                          </div>
+                        )}
         </div>
 
         {error && (
