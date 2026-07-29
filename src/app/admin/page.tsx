@@ -88,7 +88,7 @@ const adminSections = [
   },
   {
     title: "Robinhood Klick",
-    description: "Spåra klick på /robinhood-länken som redirectar till startsidan",
+    description: "Hampus-länk /robinhood → fakturaanalys (utm_source=hampus) + klickspårning",
     href: "/admin/robinhood-clicks",
     icon: "🎯",
     color: "bg-red-500"

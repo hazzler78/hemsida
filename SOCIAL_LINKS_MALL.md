@@ -16,6 +16,16 @@ Använd dessa länkar när ni postar på Elchefs sociala kanaler. Då syns trafi
 | **X (Twitter)** | `https://www.elchef.se/x` | fakturaanalys + UTM |
 | **LinkedIn** | `https://www.elchef.se/in` | fakturaanalys + UTM |
 | **Snapchat** | `https://www.elchef.se/snap` | fakturaanalys + UTM |
+| **Hampus / Robin Hood** | `https://www.elchef.se/robinhood` | fakturaanalys · `utm_source=hampus` (+ robinhood-klickspårning) |
+
+### Hampus
+Han delar bara:
+
+```
+https://www.elchef.se/robinhood
+```
+
+Inget mer. Länken sätter UTM automatiskt (`utm_source=hampus&utm_medium=share&utm_campaign=robinhood`) och sparar `came_via_robinhood` för affiliate-insikter.
 
 Bio: räcker med `https://www.elchef.se/ig`. Extra `?utm_campaign=…&utm_content=…` från Reels **behålls** (middleware merge).
 

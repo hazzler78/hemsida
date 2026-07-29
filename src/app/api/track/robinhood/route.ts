@@ -30,7 +30,12 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json().catch(() => ({}));
-    const { referer, userAgent } = body;
+    const { referer, userAgent, source, campaign } = body as {
+      referer?: string;
+      userAgent?: string;
+      source?: string;
+      campaign?: string;
+    };
 
     // Get client IP (Cloudflare provides this in CF-Connecting-IP header)
     const ipAddress = req.headers.get('cf-connecting-ip') || 
@@ -40,13 +45,21 @@ export async function POST(req: NextRequest) {
     // Generate a simple session ID from IP and timestamp
     const sessionId = `${ipAddress}-${Date.now()}`;
 
+    // Encode share attribution in referer (D1 schema has no source column yet)
+    const sourceTag = [source || 'hampus', campaign || 'robinhood']
+      .filter(Boolean)
+      .join('/');
+    const refererStored = referer
+      ? `[${sourceTag}] ${referer}`
+      : `[${sourceTag}]`;
+
     // Insert click into D1 database
     const result = await db.prepare(
       `INSERT INTO robinhood_clicks (user_agent, referer, ip_address, session_id, created_at)
        VALUES (?, ?, ?, ?, ?)`
     ).bind(
       userAgent || null,
-      referer || null,
+      refererStored,
       ipAddress || null,
       sessionId || null,
       Math.floor(Date.now() / 1000) // Unix timestamp
