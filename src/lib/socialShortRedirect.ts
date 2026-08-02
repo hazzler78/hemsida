@@ -9,7 +9,8 @@ type Defaults = {
 /** Merge default UTM with request query (request wins on key clash). */
 export function socialShortRedirect(request: Request, defaults: Defaults): NextResponse {
   const incoming = new URL(request.url);
-  const dest = new URL('/fakturaanalys', incoming.origin);
+  // Social traffic converts better on compare/switch than OCR-first fakturaanalys.
+  const dest = new URL('/rorligt-avtal-v2', incoming.origin);
 
   for (const [key, value] of Object.entries(defaults)) {
     if (value) dest.searchParams.set(key, value);

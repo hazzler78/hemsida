@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 /**
- * Social short links (/ig, /fb, …) → fakturaanalys with UTM.
+ * Social short links (/ig, /fb, …) → /rorligt-avtal-v2 with UTM.
  * - Bare bio link gets sensible defaults (e.g. ig → instagram + bio)
  * - Extra query from Reel/CTA (utm_campaign, utm_content, …) is MERGED in
  *   (Next.js static redirects with ? in destination drop incoming query)

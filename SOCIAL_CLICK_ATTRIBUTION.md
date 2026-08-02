@@ -6,10 +6,11 @@ Veta **vilken Reel** som drev landning och kontraktsklick — inte bara "faceboo
 ## Kedja
 1. n8n skapar unik `tracking_code` per post (`fb_reel_{tema}_{...}`)
 2. CTA-länk i FB-kommentar:
-   `https://www.elchef.se/fakturaanalys?utm_source=facebook&utm_medium=reel&utm_campaign={tema}&utm_content={tracking_code}`
+   `https://www.elchef.se/rorligt-avtal-v2?utm_source=facebook&utm_medium=reel&utm_campaign={tema}&utm_content={tracking_code}`
+   (tidigare `/fakturaanalys` — OCR-väggen läckte; social går nu till jämförelse/byt)
 3. `social_posts` sparar `tracking_code` + full `cta_url`
 4. Sajten loggar UTM i `page_views` (inkl. `utm_content`)
-5. First-touch UTM sparas i session → kontraktsklick på fakturaanalys behåller källan
+5. First-touch UTM sparas i session → kontraktsklick på `/rorligt-avtal-v2` behåller källan
 6. View `social_post_performance` summerar views + landningar + kontraktsklick per post
 
 ## SQL (kör i Supabase)

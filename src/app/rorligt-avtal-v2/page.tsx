@@ -10,6 +10,8 @@ import { usePageView } from '@/lib/usePageView';
 import { getOrCreateSessionId } from '@/lib/sessionId';
 import { openAffiliateUrl } from '@/lib/openAffiliate';
 import { CONVERSION_EXPERIMENT } from '@/lib/conversionExperiment';
+import { captureFirstTouchUtm, getAttributionUtm } from '@/lib/utm';
+import { trackFunnelEvent } from '@/lib/trackFunnelEvent';
 
 interface PageProvider {
   id: number;
@@ -828,6 +830,19 @@ function getRecommendedProviders(
   return sorted;
 }
 
+function shouldAutoSkipQuestions(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('skip') === '1') return true;
+    const utm = getAttributionUtm();
+    const medium = (utm.utm_medium || '').toLowerCase();
+    return medium === 'reel' || medium === 'reels' || medium === 'bio' || medium === 'social';
+  } catch {
+    return false;
+  }
+}
+
 export default function RorligtAvtalV2Page() {
   usePageView('/rorligt-avtal-v2');
 
@@ -840,6 +855,20 @@ export default function RorligtAvtalV2Page() {
   const [priceArea, setPriceArea] = React.useState<ElectricityArea>('se3');
   const [consumptionKwhPerYear, setConsumptionKwhPerYear] = React.useState(5000);
   const [showAllProviders, setShowAllProviders] = useState(false);
+
+  // Social Reel/bio traffic: skip preference wall → show contracts immediately.
+  React.useEffect(() => {
+    captureFirstTouchUtm();
+    if (!shouldAutoSkipQuestions()) return;
+    setPreferences((prev) => ({
+      ...DEFAULT_SKIP_PREFERENCES,
+      ...prev,
+      annualUsage: prev.annualUsage || DEFAULT_SKIP_PREFERENCES.annualUsage,
+      priority: prev.priority || DEFAULT_SKIP_PREFERENCES.priority,
+    }));
+    setConsumptionKwhPerYear(DEFAULT_SKIP_PREFERENCES.annualUsage!);
+    setStep('results');
+  }, []);
 
   React.useEffect(() => {
     const fetchProviders = async () => {
@@ -968,9 +997,10 @@ export default function RorligtAvtalV2Page() {
     try {
       // Generera unikt tracking-ID för att koppla försäljningar till klick
       const trackingId = `elchef_${Date.now()}_${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-      
+
       const sessionId = getOrCreateSessionId();
       const heroVariant = typeof window !== 'undefined' ? window.localStorage.getItem('hero_variant_v1') || null : null;
+      const landingUtm = getAttributionUtm();
       const cameViaRobinhood = typeof window !== 'undefined' ? (() => {
         const flag = localStorage.getItem('came_via_robinhood');
         const time = localStorage.getItem('came_via_robinhood_time');
@@ -982,7 +1012,36 @@ export default function RorligtAvtalV2Page() {
         }
         return false;
       })() : false;
-      
+
+      // Social scoreboard joins contract_clicks.utm_content → tracking_code
+      trackFunnelEvent('contract_click', {
+        path: '/rorligt-avtal-v2',
+        meta: { contract_type: 'rorligt', provider: providerName },
+      });
+      const contractPayload = JSON.stringify({
+        contractType: 'rorligt',
+        sessionId,
+        source: 'rorligt-avtal-v2',
+        utmSource: landingUtm.utm_source || 'site',
+        utmMedium: landingUtm.utm_medium || 'cta',
+        utmCampaign: landingUtm.utm_campaign || 'rorligt-avtal-v2',
+        utmContent: landingUtm.utm_content || undefined,
+        heroVariant,
+      });
+      if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+        navigator.sendBeacon(
+          '/api/events/contract-click',
+          new Blob([contractPayload], { type: 'application/json' }),
+        );
+      } else {
+        fetch('/api/events/contract-click', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: contractPayload,
+          keepalive: true,
+        }).catch(() => {});
+      }
+
       // Skicka tracking-event (async, vänta inte)
       fetch('/api/events/affiliate-click', {
         method: 'POST',
