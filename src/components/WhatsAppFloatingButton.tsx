@@ -3,10 +3,13 @@
 import { useEffect, useState } from 'react';
 import { FaWhatsapp } from 'react-icons/fa';
 
-const WHATSAPP_NUMBER = '4745511436';
+/**
+ * Knappen visas först när NEXT_PUBLIC_WHATSAPP_NUMBER är satt
+ * (internationellt format utan +, t.ex. 46701234567).
+ * Dold tills Business-nummer är klart.
+ */
+const WHATSAPP_NUMBER = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '').replace(/\D/g, '');
 const PREFILL_TEXT = 'Hej Elchef! Jag har en fråga om elavtal.';
-
-const WHATSAPP_HREF = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(PREFILL_TEXT)}`;
 
 /** Sitter ovanför Grodan-chatten (56px knapp + 12px gap). */
 function buttonBottom(chatBottom: number) {
@@ -17,6 +20,7 @@ export default function WhatsAppFloatingButton() {
   const [chatBottom, setChatBottom] = useState(104);
 
   useEffect(() => {
+    if (!WHATSAPP_NUMBER) return;
     function updatePosition() {
       const mobile = window.innerWidth <= 600;
       setChatBottom(mobile ? 120 : 104);
@@ -26,9 +30,15 @@ export default function WhatsAppFloatingButton() {
     return () => window.removeEventListener('resize', updatePosition);
   }, []);
 
+  if (!WHATSAPP_NUMBER) {
+    return null;
+  }
+
+  const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(PREFILL_TEXT)}`;
+
   return (
     <a
-      href={WHATSAPP_HREF}
+      href={href}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chatta med oss på WhatsApp"

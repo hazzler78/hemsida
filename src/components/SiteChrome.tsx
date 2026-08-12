@@ -9,7 +9,10 @@ import Footer from '@/components/Footer';
 
 const GrokChat = dynamic(() => import('@/components/GrokChat'), { ssr: false });
 const CheapEnergyChat = dynamic(() => import('@/components/CheapEnergyChat'), { ssr: false });
-const WhatsAppFloatingButton = dynamic(() => import('@/components/WhatsAppFloatingButton'), { ssr: false });
+const whatsappEnabled = Boolean(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.trim());
+const WhatsAppFloatingButton = whatsappEnabled
+  ? dynamic(() => import('@/components/WhatsAppFloatingButton'), { ssr: false })
+  : null;
 
 const MINIMAL_CHROME_PATHS = new Set([
   '/test-cheap-energy-chat',
@@ -69,7 +72,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
       {chatReady && (
         <>
           <GrokChat />
-          <WhatsAppFloatingButton />
+          {WhatsAppFloatingButton ? <WhatsAppFloatingButton /> : null}
           <CheapEnergyChat />
         </>
       )}
