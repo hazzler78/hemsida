@@ -23,7 +23,6 @@ interface DashboardStats {
   // Engagement
   contractClicksWithAi: number;
   contractClicksWithoutAi: number;
-  socialShares: number;
   
   // Affiliate clicks
   affiliateClicks: number;
@@ -214,11 +213,6 @@ export default function AdminDashboard() {
         console.warn('Contacts from Supabase failed:', contactsErr);
       }
 
-      // 5. Social Shares
-      const { count: socialShares } = await supabase
-        .from('share_clicks')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', fromISO);
 
       // 6. A/B Test Results - Hero
       const { data: heroImpressions } = await supabase
@@ -595,7 +589,6 @@ export default function AdminDashboard() {
         newsletterSubs,
         contractClicksWithAi,
         contractClicksWithoutAi,
-        socialShares: socialShares || 0,
         affiliateClicks: affiliateClicks || 0,
         affiliateClicksFromRobinhood: affiliateClicksFromRobinhood || 0,
         affiliateClicksList: affiliateClicksList || [],
@@ -1153,12 +1146,6 @@ export default function AdminDashboard() {
                   <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: 4 }}>Nyhetsbrevsprenumeranter</div>
                   <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#3b82f6' }}>
                     {stats.newsletterSubs}
-                  </div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: 4 }}>Sociala delningar</div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#8b5cf6' }}>
-                    {stats.socialShares}
                   </div>
                 </div>
               </div>
