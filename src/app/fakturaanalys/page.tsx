@@ -3,7 +3,6 @@ import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import GlassButton from '@/components/GlassButton';
 import ContactForm from '@/components/ContactForm';
-import ShareResults from '@/components/ShareResults';
 import { withDefaultCtaUtm, withUtm, getFirstTouchUtm, captureFirstTouchUtm, getAttributionUtm } from '@/lib/utm';
 import { buildRorligtHrefFromFa, parseInvoiceHints, saveFaPrefill } from '@/lib/faContractPrefill';
 import { usePageView } from '@/lib/usePageView';
@@ -1114,15 +1113,6 @@ export default function Fakturaanalys() {
                 Ladda upp ny faktura
               </GlassButton>
             </div>
-
-            <ShareResults 
-              analysisResult={gptResult}
-              logId={logId}
-              onShare={(platform) => {
-                console.log(`Shared on ${platform}`);
-              }}
-            />
-
             <div className="analysis-slide-in" style={{ 
               marginTop: '3rem'
             }}>
