@@ -17,9 +17,9 @@ export interface GlassButtonProps {
 /** Use translateZ(0) so Safari keeps a stable compositor layer and avoids flicker. */
 const layerTransform = (t: string) => (t ? `${t} translateZ(0)` : 'translateZ(0)');
 
-export default function GlassButton({ 
-  children, 
-  variant = 'primary', 
+export default function GlassButton({
+  children,
+  variant = 'primary',
   size = 'md',
   className = '',
   onClick,
@@ -32,6 +32,8 @@ export default function GlassButton({
 }: GlassButtonProps) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [isTouchOrNoHover, setIsTouchOrNoHover] = useState(true);
+  const [isPressed, setIsPressed] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     const hasHover = typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches;
@@ -44,7 +46,7 @@ export default function GlassButton({
     const handleScroll = () => {
       rafId = requestAnimationFrame(() => {
         const offset = window.scrollY;
-        if (buttonRef.current && !disabled) {
+        if (buttonRef.current && !disabled && !isPressed) {
           buttonRef.current.style.transform = layerTransform(`translateY(${offset * 0.1}px)`);
         }
       });
@@ -54,7 +56,7 @@ export default function GlassButton({
       window.removeEventListener('scroll', handleScroll);
       cancelAnimationFrame(rafId);
     };
-  }, [disabled, disableScrollEffect, isTouchOrNoHover]);
+  }, [disabled, disableScrollEffect, isTouchOrNoHover, isPressed]);
 
   const getVariantStyles = () => {
     switch (variant) {
@@ -112,42 +114,33 @@ export default function GlassButton({
   const variantStyles = getVariantStyles();
   const sizeStyles = getSizeStyles();
   const hoverBackground = getHoverBackground();
+  const baseBackground = background || variantStyles.background;
 
   const Element: ElementType = as;
-
   const useHover = !disableHoverEffect && !disabled && !isTouchOrNoHover;
 
-  const handleMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
-    if (useHover) {
-      const target = e.currentTarget;
-      target.style.background = hoverBackground;
-      target.style.transform = layerTransform('translateY(-2px) scale(1.02)');
-      target.style.boxShadow = 'var(--glass-shadow-medium)';
-    }
+  const pressIn = () => {
+    if (!disabled) setIsPressed(true);
   };
+  const pressOut = () => setIsPressed(false);
 
-  const handleMouseLeave = (e: React.MouseEvent<HTMLElement>) => {
-    if (useHover) {
-      const target = e.currentTarget;
-      target.style.background = variantStyles.background;
-      target.style.transform = layerTransform('translateY(0) scale(1)');
-      target.style.boxShadow = 'var(--glass-shadow-light)';
-    }
-  };
+  // Clear visual feedback: press on all devices; hover only where hover exists
+  let transform = 'translateZ(0)';
+  let boxShadow = 'var(--glass-shadow-light)';
+  let filter: string | undefined;
+  let bg = baseBackground;
+  let border = variantStyles.border;
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLElement>) => {
-    if (useHover) {
-      const target = e.currentTarget;
-      target.style.transform = layerTransform('translateY(0) scale(0.98)');
-    }
-  };
-
-  const handleMouseUp = (e: React.MouseEvent<HTMLElement>) => {
-    if (useHover) {
-      const target = e.currentTarget;
-      target.style.transform = layerTransform('translateY(-2px) scale(1.02)');
-    }
-  };
+  if (!disabled && isPressed) {
+    transform = layerTransform('scale(0.96)');
+    boxShadow = 'inset 0 2px 8px rgba(0, 0, 0, 0.28), 0 0 0 2px rgba(255, 255, 255, 0.35)';
+    filter = 'brightness(0.88)';
+    border = '1px solid rgba(255, 255, 255, 0.55)';
+  } else if (!disabled && useHover && isHovered) {
+    transform = layerTransform('translateY(-2px) scale(1.02)');
+    boxShadow = 'var(--glass-shadow-medium), 0 0 0 1px rgba(255,255,255,0.25)';
+    bg = background ? baseBackground : hoverBackground;
+  }
 
   return (
     <Element
@@ -155,36 +148,46 @@ export default function GlassButton({
       onClick={onClick}
       disabled={as === 'button' ? disabled : undefined}
       className={`glass-button ${className}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
+      onMouseEnter={() => {
+        if (useHover) setIsHovered(true);
+      }}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        pressOut();
+      }}
+      onPointerDown={pressIn}
+      onPointerUp={pressOut}
+      onPointerCancel={pressOut}
+      onBlur={pressOut}
       style={{
         ...variantStyles,
         ...sizeStyles,
+        background: bg,
+        border,
         color: color ?? variantStyles.color,
         borderRadius: 'var(--radius-full)',
         fontWeight: 600,
         cursor: disabled ? 'not-allowed' : 'pointer',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        transition:
+          'transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease, background 0.2s ease, border-color 0.12s ease',
         backdropFilter: 'var(--glass-blur)',
         WebkitBackdropFilter: 'var(--glass-blur)',
-        boxShadow: 'var(--glass-shadow-light)',
+        boxShadow,
         position: 'relative',
         overflow: 'hidden',
         opacity: disabled ? 0.6 : 1,
-        transform: disabled ? 'none' : 'translateZ(0)',
+        transform: disabled ? 'none' : transform,
+        filter: disabled ? undefined : filter,
         whiteSpace: 'nowrap',
         WebkitAppearance: 'none',
         appearance: 'none',
         touchAction: 'manipulation',
         backfaceVisibility: 'hidden' as const,
-        ...(background ? { background } : {}),
+        outline: 'none',
+        WebkitTapHighlightColor: 'transparent',
       }}
     >
-      <span style={{ position: 'relative', zIndex: 1 }}>
-        {children}
-      </span>
+      <span style={{ position: 'relative', zIndex: 1 }}>{children}</span>
     </Element>
   );
-} 
+}

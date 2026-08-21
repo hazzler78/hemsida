@@ -240,10 +240,6 @@ p {
   background: linear-gradient(135deg, rgba(22, 147, 255, 0.7), rgba(0, 201, 107, 0.7));
 }
 
-.button-primary:active {
-  transform: translateY(0) scale(0.98);
-}
-
 /* Subtle animated glow for buttons – Safari/iOS safe */
 .glass-button {
   position: relative;
@@ -253,6 +249,36 @@ p {
   touch-action: manipulation;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  /* Kill grey iOS tap flash + default “invisible” focus ring */
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+/* Keyboard / a11y: clear brand ring (not the faint browser rectangle) */
+.glass-button:focus-visible {
+  box-shadow:
+    0 0 0 3px rgba(22, 147, 255, 0.65),
+    0 0 0 6px rgba(0, 201, 107, 0.25),
+    var(--glass-shadow-medium) !important;
+}
+
+/* Extra press affordance via CSS when JS laggs on slow phones */
+.glass-button:active:not(:disabled) {
+  filter: brightness(0.9);
+}
+
+.button:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(22, 147, 255, 0.65),
+    0 0 0 6px rgba(0, 201, 107, 0.25),
+    var(--glass-shadow-medium);
+}
+
+.button-primary:active {
+  transform: translateY(0) scale(0.96);
+  filter: brightness(0.9);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 /* Only run sweep/shimmer on devices with hover to avoid iOS repaint flicker */
