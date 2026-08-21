@@ -414,15 +414,14 @@ export default function Fakturaanalys() {
               }}>
                 <label htmlFor="file-upload" style={{ display: 'flex', justifyContent: 'center' }}>
                   <GlassButton as="span" variant="primary" size="lg" background="linear-gradient(135deg, var(--primary), var(--secondary))" disableScrollEffect disableHoverEffect>
-                    {file ? 'Byt bild' : 'Ta foto eller välj fakturabild'}
+                    {file ? 'Byt fil' : 'Välj faktura (bild eller PDF)'}
                   </GlassButton>
                 </label>
                 <input
                   id="file-upload"
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
-                  capture="environment"
+                  accept="image/*,application/pdf,.pdf"
                   onChange={handleFileChange}
                   style={{ display: 'none' }}
                 />
