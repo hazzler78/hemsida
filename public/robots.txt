@@ -6,7 +6,6 @@ Disallow: /test-cheap-energy-chat
 Disallow: /glassmorphism-demo
 Disallow: /rorligt-avtal-v2
 Disallow: /partner/test-form
-Disallow: /delad-kalkyl
 Disallow: /tack
 Disallow: /energiradgivning
 
