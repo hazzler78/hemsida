@@ -11,6 +11,7 @@ import { getOrCreateSessionId } from '@/lib/sessionId';
 import { openAffiliateUrl } from '@/lib/openAffiliate';
 import { CONVERSION_EXPERIMENT } from '@/lib/conversionExperiment';
 import { captureFirstTouchUtm, getAttributionUtm } from '@/lib/utm';
+import { loadFaPrefill, shouldSkipQuestionsForContract } from '@/lib/faContractPrefill';
 import { trackFunnelEvent } from '@/lib/trackFunnelEvent';
 
 interface PageProvider {
@@ -831,16 +832,29 @@ function getRecommendedProviders(
 }
 
 function shouldAutoSkipQuestions(): boolean {
-  if (typeof window === 'undefined') return false;
-  try {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('skip') === '1') return true;
-    const utm = getAttributionUtm();
-    const medium = (utm.utm_medium || '').toLowerCase();
-    return medium === 'reel' || medium === 'reels' || medium === 'bio' || medium === 'social';
-  } catch {
-    return false;
-  }
+  return shouldSkipQuestionsForContract();
+}
+
+function readPrefillFromUrlAndSession(): {
+  annualUsage?: number;
+  postalCode?: string;
+  currentProvider?: string;
+  priority?: 'price' | 'security' | 'flexibility';
+} {
+  if (typeof window === 'undefined') return {};
+  const params = new URLSearchParams(window.location.search);
+  const session = loadFaPrefill() || {};
+  const usageRaw = params.get('usage') || params.get('annualUsage');
+  const usage = usageRaw ? parseInt(usageRaw, 10) : session.annualUsage;
+  const postal = (params.get('postal') || params.get('postalCode') || session.postalCode || '').replace(/\D/g, '').slice(0, 5);
+  const provider = params.get('provider') || session.currentProvider;
+  const pr = (params.get('priority') || session.priority || 'price') as 'price' | 'security' | 'flexibility';
+  return {
+    annualUsage: usage && usage > 0 ? usage : undefined,
+    postalCode: postal.length === 5 ? postal : undefined,
+    currentProvider: provider || undefined,
+    priority: pr,
+  };
 }
 
 export default function RorligtAvtalV2Page() {
@@ -856,17 +870,24 @@ export default function RorligtAvtalV2Page() {
   const [consumptionKwhPerYear, setConsumptionKwhPerYear] = React.useState(5000);
   const [showAllProviders, setShowAllProviders] = useState(false);
 
-  // Social Reel/bio traffic: skip preference wall → show contracts immediately.
+  // Social + fakturaanalys: skip preference wall → show ranked contracts immediately.
   React.useEffect(() => {
     captureFirstTouchUtm();
     if (!shouldAutoSkipQuestions()) return;
+    const prefill = readPrefillFromUrlAndSession();
+    const annual =
+      prefill.annualUsage && prefill.annualUsage > 0
+        ? prefill.annualUsage
+        : DEFAULT_SKIP_PREFERENCES.annualUsage!;
     setPreferences((prev) => ({
       ...DEFAULT_SKIP_PREFERENCES,
       ...prev,
-      annualUsage: prev.annualUsage || DEFAULT_SKIP_PREFERENCES.annualUsage,
-      priority: prev.priority || DEFAULT_SKIP_PREFERENCES.priority,
+      annualUsage: annual,
+      priority: prefill.priority || prev.priority || DEFAULT_SKIP_PREFERENCES.priority,
+      postalCode: prefill.postalCode || prev.postalCode,
+      currentProvider: prefill.currentProvider || prev.currentProvider,
     }));
-    setConsumptionKwhPerYear(DEFAULT_SKIP_PREFERENCES.annualUsage!);
+    setConsumptionKwhPerYear(annual);
     setStep('results');
   }, []);
 

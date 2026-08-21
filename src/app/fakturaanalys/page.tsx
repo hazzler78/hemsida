@@ -5,6 +5,7 @@ import GlassButton from '@/components/GlassButton';
 import ContactForm from '@/components/ContactForm';
 import ShareResults from '@/components/ShareResults';
 import { withDefaultCtaUtm, withUtm, getFirstTouchUtm, captureFirstTouchUtm, getAttributionUtm } from '@/lib/utm';
+import { buildRorligtHrefFromFa, parseInvoiceHints, saveFaPrefill } from '@/lib/faContractPrefill';
 import { usePageView } from '@/lib/usePageView';
 import { getOrCreateSessionId } from '@/lib/sessionId';
 import { trackFunnelEvent } from '@/lib/trackFunnelEvent';
@@ -125,6 +126,10 @@ export default function Fakturaanalys() {
   usePageView('/fakturaanalys');
 
   const [fromSocial, setFromSocial] = useState(false);
+  const [rorligtHref, setRorligtHref] = useState('/rorligt-avtal-v2?skip=1&from=fakturaanalys');
+  const [skipOcrHref, setSkipOcrHref] = useState(
+    '/rorligt-avtal-v2?skip=1&from=fakturaanalys&utm_source=fakturaanalys&utm_medium=skip_ocr&utm_campaign=fa_secondary_rorligt&utm_content=skip_ocr_cta',
+  );
 
   useEffect(() => {
     sessionIdRef.current = getOrCreateSessionId();
@@ -136,6 +141,22 @@ export default function Fakturaanalys() {
       meta: { from_social: ['facebook', 'instagram', 'tiktok', 'x', 'twitter'].includes(src) },
     });
   }, []);
+
+  useEffect(() => {
+    try {
+      const landingUtm = getAttributionUtm() || getFirstTouchUtm();
+      setSkipOcrHref(
+        withUtm('/rorligt-avtal-v2?skip=1&from=fakturaanalys', {
+          utm_source: landingUtm.utm_source || 'fakturaanalys',
+          utm_medium: 'skip_ocr',
+          utm_campaign: landingUtm.utm_campaign || 'fa_secondary_rorligt',
+          utm_content: 'skip_ocr_cta',
+        }),
+      );
+      setRorligtHref(buildRorligtHrefFromFa());
+    } catch { /* ignore */ }
+  }, []);
+
 
   // Funktion för att spåra kontraktsklick — behåll first-touch UTM (t.ex. facebook reel)
   const trackContractClick = (
@@ -200,23 +221,9 @@ export default function Fakturaanalys() {
       }
     };
 
-    const [skipOcrHref, setSkipOcrHref] = useState('/rorligt-avtal-v2?utm_source=fakturaanalys&utm_medium=skip_ocr&utm_campaign=fa_secondary_rorligt&utm_content=skip_ocr_cta');
-
-    useEffect(() => {
-      const landingUtm = getAttributionUtm() || getFirstTouchUtm();
-      setSkipOcrHref(
-        withUtm('/rorligt-avtal-v2', {
-          utm_source: landingUtm.utm_source || 'fakturaanalys',
-          utm_medium: landingUtm.utm_medium || 'skip_ocr',
-          utm_campaign: landingUtm.utm_campaign || 'fa_secondary_rorligt',
-          utm_content: landingUtm.utm_content || 'skip_ocr_cta',
-        }),
-      );
-    }, []);
-
-    const handleSkipOcrRorligt = () => {
-      trackContractClick('rorligt', { skip_ocr: true, cta: 'secondary_no_upload' });
-    };
+  const handleSkipOcrRorligt = () => {
+    trackContractClick('rorligt', { skip_ocr: true, cta: 'secondary_no_upload' });
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -268,6 +275,11 @@ export default function Fakturaanalys() {
       cleanedResult = cleanedResult.replace(/\( [^)]*×[^)]* = [^)]* \)/g, '');
       cleanedResult = cleanedResult.replace(/\n\s*\n\s*\n/g, '\n\n');
       setGptResult(cleanedResult);
+      try {
+        const hints = parseInvoiceHints(cleanedResult);
+        saveFaPrefill({ ...hints, source: 'fakturaanalys', priority: 'price' });
+        setRorligtHref(buildRorligtHrefFromFa(hints));
+      } catch { /* ignore */ }
       trackFunnelEvent('ocr_completed', {
         path: '/fakturaanalys',
         meta: { log_id: typeof data.logId === 'number' ? data.logId : null },
@@ -714,7 +726,7 @@ export default function Fakturaanalys() {
                           textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
                         }}>
                           <a 
-                            href={withDefaultCtaUtm('/rorligt-avtal-v2', 'fakturaanalys', 'cta-rorligt')}
+                            href={rorligtHref}
                             onClick={() => trackContractClick('rorligt')}
                             style={{
                               color: '#10b981',
@@ -935,7 +947,7 @@ export default function Fakturaanalys() {
                             textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
                           }}>
                             <a 
-                              href={withDefaultCtaUtm('/rorligt-avtal-v2', 'fakturaanalys', 'cta-rorligt')}
+                              href={rorligtHref}
                               onClick={() => trackContractClick('rorligt')}
                               style={{
                                 color: '#10b981',
@@ -1070,7 +1082,7 @@ export default function Fakturaanalys() {
                     disableHoverEffect={true}
                     onClick={() => {
                       trackContractClick('rorligt');
-                      window.location.href = withDefaultCtaUtm('/rorligt-avtal-v2', 'fakturaanalys', 'cta-rorligt');
+                      window.location.href = buildRorligtHrefFromFa();
                     }}
                     aria-label="Rörligt avtal - 0 kr i avgifter första året – utan bindningstid"
                   >
