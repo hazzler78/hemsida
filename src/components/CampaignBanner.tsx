@@ -4,6 +4,7 @@ import styled from "styled-components";
 import Image from "next/image";
 import { withDefaultCtaUtm } from '@/lib/utm';
 import { getOrCreateSessionId } from '@/lib/sessionId';
+import ClickIntroVideo from '@/components/ClickIntroVideo';
 
 const Banner = styled.div`
   width: 100%;
@@ -62,6 +63,8 @@ type BannerVariant = 'A' | 'B';
 
 export default function CampaignBanner() {
   const [variant, setVariant] = useState<BannerVariant>('A');
+  const [showClickIntro, setShowClickIntro] = useState(false);
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -132,9 +135,11 @@ export default function CampaignBanner() {
       } else {
         fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload }).catch(() => {});
       }
-      window.location.href = href;
+      setPendingHref(href);
+      setShowClickIntro(true);
     } catch {
-      window.location.href = href;
+      setPendingHref(href);
+      setShowClickIntro(true);
     }
   };
 
@@ -151,10 +156,19 @@ export default function CampaignBanner() {
   );
 
   return (
-    <Banner>
-      <Image src="/favicon.svg" alt="Elchef" width={20} height={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
-      {variant === 'A' ? textA : textB}
-      <StyledLink href={href} onClick={handleClick}>Se direkt</StyledLink>
-    </Banner>
+    <>
+      <Banner>
+        <Image src="/favicon.svg" alt="Elchef" width={20} height={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+        {variant === 'A' ? textA : textB}
+        <StyledLink href={href} onClick={handleClick}>Se direkt</StyledLink>
+      </Banner>
+      {showClickIntro && pendingHref && (
+        <ClickIntroVideo
+          onComplete={() => {
+            window.location.href = pendingHref;
+          }}
+        />
+      )}
+    </>
   );
 }

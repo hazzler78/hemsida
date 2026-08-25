@@ -4,6 +4,7 @@
 import styled from 'styled-components';
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import GlassButton from './GlassButton';
+import ClickIntroVideo from './ClickIntroVideo';
 import { withDefaultCtaUtm } from '@/lib/utm';
 import { getOrCreateSessionId } from '@/lib/sessionId';
 
@@ -79,22 +80,25 @@ const VideoWrapper = styled.div`
   justify-content: center;
   align-items: center;
   position: relative;
-  aspect-ratio: 16/9;
+  aspect-ratio: 9 / 16;
+  width: 100%;
+  max-width: min(360px, 85vw);
+  max-height: min(640px, 70vh);
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--glass-shadow-heavy);
-  max-width: 600px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.35);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid rgba(255, 255, 255, 0.2);
 
-  video, iframe {
+  video {
     width: 100%;
     height: 100%;
     object-fit: cover;
     border-radius: var(--radius-lg);
     border: none;
+    display: block;
   }
 
   img {
@@ -118,17 +122,21 @@ const VideoOverlay = styled.div`
 
 const VideoOverlayContent = styled.div`
   width: 100%;
-  max-width: 800px;
-  aspect-ratio: 16/9;
+  max-width: min(420px, 92vw);
+  aspect-ratio: 9 / 16;
+  max-height: min(88vh, 760px);
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--glass-shadow-heavy);
   position: relative;
+  background: #000;
 
-  iframe {
+  video {
     width: 100%;
     height: 100%;
+    object-fit: contain;
     border: none;
+    display: block;
   }
 
   button.close-overlay {
@@ -170,10 +178,15 @@ const HERO_CTA_BACKGROUND = 'linear-gradient(135deg, #22c55e, #16a34a)';
 const HERO_CTA_TEXT_COLOR = 'white';
 const HERO_TITLE = 'Trött på elräkningar som rusar?';
 const HERO_SUB = 'Billigare el väntar – se avtal som lönar sig just nu!';
+const HERO_VIDEO_SRC = '/videos/elchef-hero.mp4';
+const HERO_VIDEO_POSTER = '/videos/elchef-hero-poster.jpg';
 
 export default function Hero() {
   const [videoStarted, setVideoStarted] = useState(false);
+  const [showClickIntro, setShowClickIntro] = useState(false);
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
   const videoContainerRef = useRef<HTMLDivElement | null>(null);
+  const heroVideoRef = useRef<HTMLVideoElement | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -212,6 +225,20 @@ export default function Hero() {
       // no-op
     }
   }, []);
+
+  useEffect(() => {
+    if (!videoStarted || isMobile) return;
+    const video = heroVideoRef.current;
+    if (!video) return;
+    const play = async () => {
+      try {
+        await video.play();
+      } catch {
+        // autoplay kan blockeras
+      }
+    };
+    play();
+  }, [videoStarted, isMobile]);
 
   const trackHeroClick = useCallback((target: 'rorligt' | 'fastpris', href: string) => {
     try {
@@ -260,10 +287,34 @@ export default function Hero() {
   const handleStartVideo = useCallback(() => {
     setVideoStarted(true);
   }, []);
-  
-  const YOUTUBE_VIDEO_ID = '9qwwv5kwHYM';
-  // Play with sound when user explicitly starts the video
-  const youtubeEmbedUrl = `https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&loop=1&playlist=${YOUTUBE_VIDEO_ID}`;
+
+  const goToPendingHref = useCallback(() => {
+    if (!pendingHref) return;
+    window.location.href = pendingHref;
+  }, [pendingHref]);
+
+  const handleCtaClick = useCallback(() => {
+    trackHeroClick('rorligt', '/rorligt-avtal-v2');
+    try {
+      const ttq: any = (window as any).ttq;
+      const cookiebot: any =
+        (window as any).cookiebot || (window as any).Cookiebot || (window as any).CookieControl;
+      if (ttq && (!cookiebot || cookiebot?.consent?.marketing)) {
+        ttq.track('InitiateCheckout', {
+          content_name: 'rorligt_avtal_click',
+        });
+        if ((window as any).__ttq_capi) {
+          (window as any).__ttq_capi('InitiateCheckout', { content_name: 'rorligt_avtal_click' });
+        }
+      }
+    } catch {
+      /* no-op */
+    }
+    const sid = typeof window !== 'undefined' ? getOrCreateSessionId() : '';
+    const url = '/rorligt-avtal-v2' + (sid ? `?sid=${encodeURIComponent(sid)}` : '');
+    setPendingHref(url);
+    setShowClickIntro(true);
+  }, [trackHeroClick]);
 
   return (
     <HeroSection>
@@ -300,29 +351,7 @@ export default function Hero() {
                     e.currentTarget.style.transform = 'translateY(0) scale(1)';
                     e.currentTarget.style.filter = 'brightness(1)';
                   }, [])}
-                  onClick={() => {
-                    trackHeroClick('rorligt', '/rorligt-avtal-v2');
-                    // TikTok InitiateCheckout-style event när vi skickar användaren till Salesys-flödet
-                    try {
-                      const ttq: any = (window as any).ttq;
-                      const cookiebot: any =
-                        (window as any).cookiebot || (window as any).Cookiebot || (window as any).CookieControl;
-                      if (ttq && (!cookiebot || cookiebot?.consent?.marketing)) {
-                        ttq.track('InitiateCheckout', {
-                          content_name: 'rorligt_avtal_click',
-                        });
-                        if ((window as any).__ttq_capi) {
-                          (window as any).__ttq_capi('InitiateCheckout', { content_name: 'rorligt_avtal_click' });
-                        }
-                      }
-                    } catch {
-                      /* no-op */
-                    }
-                    const sid =
-                      typeof window !== 'undefined' ? getOrCreateSessionId() : '';
-                    const url = '/rorligt-avtal-v2' + (sid ? `?sid=${encodeURIComponent(sid)}` : '');
-                    window.location.href = url;
-                  }}
+                  onClick={handleCtaClick}
                 >
                   <GlassButton
                     variant="primary"
@@ -355,12 +384,9 @@ export default function Hero() {
                 aria-label="Spela video"
               >
                 <img
-                  src={`https://img.youtube.com/vi/${YOUTUBE_VIDEO_ID}/maxresdefault.jpg`}
+                  src={HERO_VIDEO_POSTER}
                   alt="Klicka för att spela video"
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${YOUTUBE_VIDEO_ID}/hqdefault.jpg`;
-                  }}
                 />
                 <div
                   style={{
@@ -381,16 +407,18 @@ export default function Hero() {
                 >
                   <svg viewBox="0 0 68 48" width="68" height="48">
                     <path fill="#fff" d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.31 1.55c-2.93.78-4.63 3.26-5.42 6.19C.06 13.05 0 24 0 24s.06 10.95 1.61 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.69-1.55c2.93-.78 4.63-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.61-16.26z" />
-                    <path fill="#f00" d="M45 24L27 14v20" />
+                    <path fill="#22c55e" d="M45 24L27 14v20" />
                   </svg>
                 </div>
               </button>
             ) : (
-              <iframe
-                src={youtubeEmbedUrl}
-                title="Elchef presentationsvideo"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
+              <video
+                ref={heroVideoRef}
+                src={HERO_VIDEO_SRC}
+                poster={HERO_VIDEO_POSTER}
+                controls
+                playsInline
+                autoPlay
                 style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
               />
             )}
@@ -417,14 +445,18 @@ export default function Hero() {
             >
               Stäng
             </button>
-            <iframe
-              src={youtubeEmbedUrl}
-              title="Elchef presentationsvideo"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
+            <video
+              src={HERO_VIDEO_SRC}
+              poster={HERO_VIDEO_POSTER}
+              controls
+              playsInline
+              autoPlay
             />
           </VideoOverlayContent>
         </VideoOverlay>
+      )}
+      {showClickIntro && pendingHref && (
+        <ClickIntroVideo onComplete={goToPendingHref} />
       )}
     </HeroSection>
   );
