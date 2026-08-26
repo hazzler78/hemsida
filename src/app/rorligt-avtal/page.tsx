@@ -8,6 +8,7 @@ import { MOTALA_LOGO_SRC } from '@/lib/providerLogos';
 import { getElectricityArea, type ElectricityArea } from '@/lib/types';
 import { getOrCreateSessionId } from '@/lib/sessionId';
 import { openAffiliateUrl } from '@/lib/openAffiliate';
+import ClickIntroVideo, { AFFILIATE_INTRO_VIDEO_SRC } from '@/components/ClickIntroVideo';
 
 /** Månadskostnad, påslag och pristyp från /api/prices/providers (prisfiler). */
 type ProviderPriceItem = {
@@ -566,6 +567,8 @@ export default function RorligtAvtalPage() {
   const [priceArea, setPriceArea] = React.useState<ElectricityArea>('se3');
   const [consumptionKwhPerYear, setConsumptionKwhPerYear] = React.useState(13500);
   const [postalInput, setPostalInput] = React.useState('');
+  const [showAffiliateIntro, setShowAffiliateIntro] = React.useState(false);
+  const [pendingAffiliateUrl, setPendingAffiliateUrl] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -712,7 +715,8 @@ export default function RorligtAvtalPage() {
         ? `${url}&elchef_ref=${encodeURIComponent(trackingId)}`
         : `${url}?elchef_ref=${encodeURIComponent(trackingId)}`;
 
-      openAffiliateUrl(urlWithTracking);
+      setPendingAffiliateUrl(urlWithTracking);
+      setShowAffiliateIntro(true);
 
       // TikTok event
       const ttq: any = (window as any).ttq;
@@ -728,6 +732,13 @@ export default function RorligtAvtalPage() {
       }
     } catch { /* no-op */ }
   };
+
+  const finishAffiliateIntro = React.useCallback(() => {
+    const nextUrl = pendingAffiliateUrl;
+    setShowAffiliateIntro(false);
+    setPendingAffiliateUrl(null);
+    if (nextUrl) openAffiliateUrl(nextUrl);
+  }, [pendingAffiliateUrl]);
 
   return (
     <PageContainer>
@@ -873,6 +884,13 @@ export default function RorligtAvtalPage() {
           </ProvidersGrid>
         )}
       </Content>
+      {showAffiliateIntro && pendingAffiliateUrl && (
+        <ClickIntroVideo
+          src={AFFILIATE_INTRO_VIDEO_SRC}
+          hint="Så här tecknar du avtalet – sedan öppnas leverantören"
+          onComplete={finishAffiliateIntro}
+        />
+      )}
     </PageContainer>
   );
 }

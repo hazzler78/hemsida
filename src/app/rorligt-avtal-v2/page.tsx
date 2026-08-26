@@ -13,6 +13,7 @@ import { CONVERSION_EXPERIMENT } from '@/lib/conversionExperiment';
 import { captureFirstTouchUtm, getAttributionUtm } from '@/lib/utm';
 import { loadFaPrefill, shouldSkipQuestionsForContract } from '@/lib/faContractPrefill';
 import { trackFunnelEvent } from '@/lib/trackFunnelEvent';
+import ClickIntroVideo, { AFFILIATE_INTRO_VIDEO_SRC } from '@/components/ClickIntroVideo';
 
 interface PageProvider {
   id: number;
@@ -869,6 +870,8 @@ export default function RorligtAvtalV2Page() {
   const [priceArea, setPriceArea] = React.useState<ElectricityArea>('se3');
   const [consumptionKwhPerYear, setConsumptionKwhPerYear] = React.useState(5000);
   const [showAllProviders, setShowAllProviders] = useState(false);
+  const [showAffiliateIntro, setShowAffiliateIntro] = useState(false);
+  const [pendingAffiliateUrl, setPendingAffiliateUrl] = useState<string | null>(null);
 
   // Social + fakturaanalys: skip preference wall → show ranked contracts immediately.
   React.useEffect(() => {
@@ -1089,7 +1092,9 @@ export default function RorligtAvtalV2Page() {
         ? `${url}&elchef_ref=${encodeURIComponent(trackingId)}`
         : `${url}?elchef_ref=${encodeURIComponent(trackingId)}`;
 
-      openAffiliateUrl(urlWithTracking);
+      // Visa kort instruktionsfilm innan kunden öppnas hos leverantören
+      setPendingAffiliateUrl(urlWithTracking);
+      setShowAffiliateIntro(true);
 
       const ttq: any = (window as any).ttq;
       const cookiebot: any = (window as any).cookiebot || (window as any).Cookiebot || (window as any).CookieControl;
@@ -1104,6 +1109,13 @@ export default function RorligtAvtalV2Page() {
       }
     } catch { /* no-op */ }
   };
+
+  const finishAffiliateIntro = React.useCallback(() => {
+    const url = pendingAffiliateUrl;
+    setShowAffiliateIntro(false);
+    setPendingAffiliateUrl(null);
+    if (url) openAffiliateUrl(url);
+  }, [pendingAffiliateUrl]);
 
   const recommendedProviders = React.useMemo(
     () =>
@@ -1410,6 +1422,13 @@ export default function RorligtAvtalV2Page() {
         )}
       </Content>
       {step === 'results' && <SafeBottomSpacer />}
+      {showAffiliateIntro && pendingAffiliateUrl && (
+        <ClickIntroVideo
+          src={AFFILIATE_INTRO_VIDEO_SRC}
+          hint="Så här tecknar du avtalet – sedan öppnas leverantören"
+          onComplete={finishAffiliateIntro}
+        />
+      )}
     </PageContainer>
   );
 }

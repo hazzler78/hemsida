@@ -7,6 +7,7 @@ import type { ElectricityArea } from '@/lib/types';
 import { getOrCreateSessionId } from '@/lib/sessionId';
 import { MOTALA_LOGO_SRC } from '@/lib/providerLogos';
 import { openAffiliateUrl } from '@/lib/openAffiliate';
+import ClickIntroVideo, { AFFILIATE_INTRO_VIDEO_SRC } from '@/components/ClickIntroVideo';
 
 interface PageProvider {
   id: number;
@@ -319,6 +320,8 @@ export default function FastprisAvtalPage() {
   const [loadingPrices, setLoadingPrices] = React.useState(true);
   const [priceArea, setPriceArea] = React.useState<ElectricityArea>('se3');
   const [contractPeriod, setContractPeriod] = React.useState<FixedPeriodKey>('1_year');
+  const [showAffiliateIntro, setShowAffiliateIntro] = React.useState(false);
+  const [pendingAffiliateUrl, setPendingAffiliateUrl] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -447,7 +450,8 @@ export default function FastprisAvtalPage() {
         ? `${url}&elchef_ref=${encodeURIComponent(trackingId)}`
         : `${url}?elchef_ref=${encodeURIComponent(trackingId)}`;
 
-      openAffiliateUrl(urlWithTracking);
+      setPendingAffiliateUrl(urlWithTracking);
+      setShowAffiliateIntro(true);
 
       // TikTok event
       const ttq: any = (window as any).ttq;
@@ -463,6 +467,13 @@ export default function FastprisAvtalPage() {
       }
     } catch { /* no-op */ }
   };
+
+  const finishAffiliateIntro = React.useCallback(() => {
+    const nextUrl = pendingAffiliateUrl;
+    setShowAffiliateIntro(false);
+    setPendingAffiliateUrl(null);
+    if (nextUrl) openAffiliateUrl(nextUrl);
+  }, [pendingAffiliateUrl]);
 
   return (
     <PageContainer>
@@ -587,6 +598,13 @@ export default function FastprisAvtalPage() {
           </ProvidersGrid>
         )}
       </Content>
+      {showAffiliateIntro && pendingAffiliateUrl && (
+        <ClickIntroVideo
+          src={AFFILIATE_INTRO_VIDEO_SRC}
+          hint="Så här tecknar du avtalet – sedan öppnas leverantören"
+          onComplete={finishAffiliateIntro}
+        />
+      )}
     </PageContainer>
   );
 }

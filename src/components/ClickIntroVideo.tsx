@@ -63,16 +63,25 @@ const Hint = styled.p`
 `;
 
 export const CLICK_INTRO_VIDEO_SRC = '/videos/elchef-click-intro.mp4';
+/** Visas innan kunden öppnar affiliate-länk hos leverantören. */
+export const AFFILIATE_INTRO_VIDEO_SRC = '/videos/elchef-affiliate-intro.mp4';
 
 type ClickIntroVideoProps = {
   onComplete: () => void;
+  /** Standard: CTA/banner-intro. Använd AFFILIATE_INTRO_VIDEO_SRC för affiliate-klick. */
+  src?: string;
+  hint?: string;
 };
 
 /**
- * Kort introfilm (ca 15 s) som visas innan kunden skickas vidare
- * efter klick på t.ex. "Byt elavtal" eller banner till fakturaanalys.
+ * Kort introfilm som visas innan kunden skickas vidare
+ * (CTA, banner till fakturaanalys, eller affiliate-länk till leverantör).
  */
-export default function ClickIntroVideo({ onComplete }: ClickIntroVideoProps) {
+export default function ClickIntroVideo({
+  onComplete,
+  src = CLICK_INTRO_VIDEO_SRC,
+  hint = 'Kort tips innan du går vidare',
+}: ClickIntroVideoProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const completedRef = useRef(false);
 
@@ -83,6 +92,7 @@ export default function ClickIntroVideo({ onComplete }: ClickIntroVideoProps) {
   }, [onComplete]);
 
   useEffect(() => {
+    completedRef.current = false;
     const video = videoRef.current;
     if (!video) return;
     const play = async () => {
@@ -99,7 +109,7 @@ export default function ClickIntroVideo({ onComplete }: ClickIntroVideoProps) {
       }
     };
     play();
-  }, []);
+  }, [src]);
 
   return (
     <Overlay role="dialog" aria-modal="true" aria-label="Kort introduktionsfilm">
@@ -109,13 +119,14 @@ export default function ClickIntroVideo({ onComplete }: ClickIntroVideoProps) {
         </SkipButton>
         <video
           ref={videoRef}
-          src={CLICK_INTRO_VIDEO_SRC}
+          key={src}
+          src={src}
           playsInline
           autoPlay
           controls={false}
           onEnded={finish}
         />
-        <Hint>Kort tips innan du går vidare</Hint>
+        <Hint>{hint}</Hint>
       </Content>
     </Overlay>
   );
