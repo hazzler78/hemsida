@@ -178,8 +178,8 @@ const HERO_CTA_BACKGROUND = 'linear-gradient(135deg, #22c55e, #16a34a)';
 const HERO_CTA_TEXT_COLOR = 'white';
 const HERO_TITLE = 'Trött på elräkningar som rusar?';
 const HERO_SUB = 'Billigare el väntar – se avtal som lönar sig just nu!';
-const HERO_VIDEO_SRC = '/videos/elchef-hero.mp4';
-const HERO_VIDEO_POSTER = '/videos/elchef-hero-poster.jpg';
+const HERO_VIDEO_SRC = '/videos/elchef-hero-v2.mp4';
+const HERO_VIDEO_POSTER = '/videos/elchef-hero-v2-poster.jpg';
 
 export default function Hero() {
   const [videoStarted, setVideoStarted] = useState(false);
