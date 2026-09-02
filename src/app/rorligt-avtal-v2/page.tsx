@@ -1391,8 +1391,8 @@ export default function RorligtAvtalV2Page() {
                   automatiskt. Elen fortsätter fungera som vanligt.
                 </li>
                 <li>
-                  <strong>Är det bindningstid?</strong> Många avtal har ingen bindningstid och 0–3
-                  månaders uppsägningstid. Det står hos leverantören innan du bekräftar.
+                  <strong>Är det bindningstid?</strong> Många avtal har ingen bindningstid.
+                  Exakta villkor står hos leverantören innan du bekräftar.
                 </li>
               </ul>
             </div>
