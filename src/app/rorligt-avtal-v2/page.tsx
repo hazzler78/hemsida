@@ -1319,7 +1319,6 @@ export default function RorligtAvtalV2Page() {
             <TrustSection>
               <TrustBadge>✓ 100% säkert – du betalar bara till det nya elbolaget</TrustBadge>
               <TrustBadge>✓ Din gamla elavtal sägs upp automatiskt vid bytet</TrustBadge>
-              <TrustBadge>✓ De flesta avtal har 0–3 månaders uppsägningstid</TrustBadge>
               <TrustBadge>✓ Vi hjälper dig om något känns oklart</TrustBadge>
             </TrustSection>
 
