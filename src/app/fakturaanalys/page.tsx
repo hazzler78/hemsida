@@ -5,6 +5,7 @@ import GlassButton from '@/components/GlassButton';
 import ContactForm from '@/components/ContactForm';
 import { withDefaultCtaUtm, withUtm, getFirstTouchUtm, captureFirstTouchUtm, getAttributionUtm } from '@/lib/utm';
 import { buildRorligtHrefFromFa, parseInvoiceHints, saveFaPrefill } from '@/lib/faContractPrefill';
+import { isPdfFile, pdfToJpeg } from '@/lib/pdfToJpeg';
 import { usePageView } from '@/lib/usePageView';
 import { getOrCreateSessionId } from '@/lib/sessionId';
 import { trackFunnelEvent } from '@/lib/trackFunnelEvent';
@@ -113,6 +114,8 @@ const ButtonWrapper = ({ children }: { children: React.ReactNode }) => {
 
 export default function Fakturaanalys() {
   const [file, setFile] = useState<File | null>(null);
+  const [convertingPdf, setConvertingPdf] = useState(false);
+  const [fileNameDisplay, setFileNameDisplay] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [gptResult, setGptResult] = useState<string | null>(null);
@@ -224,12 +227,36 @@ export default function Fakturaanalys() {
     trackContractClick('rorligt', { skip_ocr: true, cta: 'secondary_no_upload' });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-      setError('');
-      setGptResult(null);
-      setShowFullAnalysis(false);
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0];
+    if (!selected) return;
+    setError('');
+    setGptResult(null);
+    setShowFullAnalysis(false);
+
+    if (isPdfFile(selected)) {
+      setConvertingPdf(true);
+      try {
+        const converted = await pdfToJpeg(selected, 3, 2);
+        setFile(converted.file);
+        setFileNameDisplay(
+          converted.pageCount > 1
+            ? `${selected.name} (${converted.pageCount} sidor konverterade till bild)`
+            : selected.name,
+        );
+      } catch (convErr) {
+        console.error('PDF-konvertering misslyckades:', convErr);
+        setFile(null);
+        setFileNameDisplay('');
+        setError(
+          'Kunde inte läsa PDF:en. Prova att ladda upp en skärmdump eller foto av fakturan i stället (JPG/PNG).',
+        );
+      } finally {
+        setConvertingPdf(false);
+      }
+    } else {
+      setFile(selected);
+      setFileNameDisplay(selected.name);
     }
   };
 
@@ -298,6 +325,8 @@ export default function Fakturaanalys() {
 
   function handleUploadNew() {
     setFile(null);
+    setFileNameDisplay('');
+    setConvertingPdf(false);
     setGptResult(null);
     setError('');
     setShowFullAnalysis(false);
@@ -425,7 +454,7 @@ export default function Fakturaanalys() {
               }}>
                 <label htmlFor="file-upload" style={{ display: 'flex', justifyContent: 'center' }}>
                   <GlassButton as="span" variant="primary" size="lg" background="linear-gradient(135deg, var(--primary), var(--secondary))" disableScrollEffect disableHoverEffect>
-                    {file ? 'Byt fil' : 'Välj faktura (bild eller PDF)'}
+                    {convertingPdf ? 'Konverterar PDF…' : file ? 'Byt fil' : 'Välj faktura (bild eller PDF)'}
                   </GlassButton>
                 </label>
                 <input
@@ -435,6 +464,7 @@ export default function Fakturaanalys() {
                   accept="image/*,application/pdf,.pdf"
                   onChange={handleFileChange}
                   style={{ display: 'none' }}
+                  disabled={convertingPdf}
                 />
                 <div style={{ 
                   color: 'rgba(255, 255, 255, 0.8)', 
@@ -445,19 +475,27 @@ export default function Fakturaanalys() {
                   borderRadius: 'var(--radius-md)',
                   border: '1px solid rgba(255, 255, 255, 0.2)'
                 }}>
-                  {file ? file.name : 'Ingen fil vald ännu'}
+                  {convertingPdf
+                    ? 'Läser PDF:en…'
+                    : file
+                      ? fileNameDisplay || file.name
+                      : 'Ingen fil vald ännu — JPG, PNG eller PDF'}
                 </div>
               </div>
               <GlassButton
                 onClick={handleGptOcr}
-                disabled={!file || loading}
+                disabled={!file || loading || convertingPdf}
                 variant="primary"
                 size="lg"
                 background="linear-gradient(135deg, #10b981, #059669)"
                 disableScrollEffect
                 disableHoverEffect
               >
-                {file ? 'Analysera min elräkning nu' : 'Analysera faktura'}
+                {convertingPdf
+                  ? 'Konverterar…'
+                  : file
+                    ? 'Analysera min elräkning nu'
+                    : 'Analysera faktura'}
               </GlassButton>
               <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.9rem' }}>
                               <input
