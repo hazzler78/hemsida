@@ -1,7 +1,10 @@
 "use client";
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
+import { isPdfFile, pdfToJpeg } from '@/lib/pdfToJpeg';
+import { getOrCreateSessionId } from '@/lib/sessionId';
+import { trackFunnelEvent } from '@/lib/trackFunnelEvent';
 
 const BillUploadContainer = styled.div`
   background: rgba(255, 255, 255, 0.95);
@@ -171,28 +174,60 @@ interface BillUploadProps {
 
 export default function BillUpload({ onAnalyzed }: BillUploadProps) {
   const [file, setFile] = useState<File | null>(null);
+  const [convertingPdf, setConvertingPdf] = useState(false);
+  const [pdfInfo, setPdfInfo] = useState('');
   const [isDragOver, setIsDragOver] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [consent, setConsent] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const sessionIdRef = useRef<string>('');
 
-  const handleFileChange = (selectedFile: File) => {
-    // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-    if (!allowedTypes.includes(selectedFile.type)) {
-      setError('Endast JPG och PNG bilder stöds');
-      return;
-    }
+  useEffect(() => {
+    sessionIdRef.current = getOrCreateSessionId();
+  }, []);
 
+  const handleFileChange = async (selectedFile: File) => {
+    setError('');
+    setPdfInfo('');
     // Validate file size (20MB max)
     if (selectedFile.size > 20 * 1024 * 1024) {
       setError('Filen är för stor. Max storlek är 20MB');
       return;
     }
 
+    if (isPdfFile(selectedFile)) {
+      setConvertingPdf(true);
+      try {
+        const converted = await pdfToJpeg(selectedFile, 3, 2);
+        setFile(converted.file);
+        setPdfInfo(
+          converted.pageCount > 1
+            ? `${selectedFile.name} (${converted.pageCount} sidor konverterade)`
+            : selectedFile.name,
+        );
+      } catch (convErr) {
+        console.error('PDF-konvertering misslyckades:', convErr);
+        setFile(null);
+        setPdfInfo('');
+        setError(
+          'Kunde inte läsa PDF:en. Prova att ladda upp en skärmdump eller foto av fakturan i stället (JPG/PNG).',
+        );
+      } finally {
+        setConvertingPdf(false);
+      }
+      return;
+    }
+
+    // Validate image file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (!allowedTypes.includes(selectedFile.type)) {
+      setError('Endast JPG, PNG eller PDF stöds');
+      return;
+    }
+
     setFile(selectedFile);
-    setError('');
+    setPdfInfo('');
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -225,6 +260,7 @@ export default function BillUpload({ onAnalyzed }: BillUploadProps) {
   const removeFile = () => {
     setFile(null);
     setError('');
+    setPdfInfo('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -232,11 +268,15 @@ export default function BillUpload({ onAnalyzed }: BillUploadProps) {
 
   const handleAnalyze = async () => {
     if (!file || !consent) return;
-    
+
     setLoading(true);
     setError('');
 
     try {
+      trackFunnelEvent('ocr_started', {
+        path: '/grokchat-bill-upload',
+        meta: { file_type: file.type, file_size: file.size },
+      });
       const formData = new FormData();
       formData.append('file', file);
       formData.append('consent', String(consent));
@@ -244,6 +284,9 @@ export default function BillUpload({ onAnalyzed }: BillUploadProps) {
       const response = await fetch('/api/gpt-ocr', {
         method: 'POST',
         body: formData,
+        headers: {
+          'x-session-id': sessionIdRef.current || '',
+        },
       });
 
       if (!response.ok) {
@@ -299,22 +342,28 @@ export default function BillUpload({ onAnalyzed }: BillUploadProps) {
       <UploadArea
         $isDragOver={isDragOver}
         $hasFile={!!file}
-        onClick={() => fileInputRef.current?.click()}
+        onClick={() => { if (!convertingPdf) fileInputRef.current?.click(); }}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
+        style={convertingPdf ? { pointerEvents: 'none', opacity: 0.7 } : undefined}
       >
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/jpeg,image/jpg,image/png"
+          accept="image/jpeg,image/jpg,image/png,application/pdf,.pdf"
           onChange={handleFileInputChange}
           style={{ display: 'none' }}
+          disabled={convertingPdf}
         />
         
-        {file ? (
+        {convertingPdf ? (
           <FileInfo>
-            <FileName>{file.name}</FileName>
+            <FileName>Konverterar PDF…</FileName>
+          </FileInfo>
+        ) : file ? (
+          <FileInfo>
+            <FileName>{pdfInfo || file.name}</FileName>
             <RemoveButton onClick={(e) => { e.stopPropagation(); removeFile(); }}>
               Ta bort
             </RemoveButton>
@@ -323,7 +372,7 @@ export default function BillUpload({ onAnalyzed }: BillUploadProps) {
           <>
             <UploadIcon>📁</UploadIcon>
             <UploadText>Klicka för att välja fil eller dra och släpp här</UploadText>
-            <UploadSubtext>JPG, PNG • Max 20MB</UploadSubtext>
+            <UploadSubtext>JPG, PNG eller PDF • Max 20MB</UploadSubtext>
           </>
         )}
       </UploadArea>
@@ -343,9 +392,9 @@ export default function BillUpload({ onAnalyzed }: BillUploadProps) {
 
       <AnalyzeButton 
         onClick={handleAnalyze} 
-        disabled={!file || !consent || loading}
+        disabled={!file || !consent || loading || convertingPdf}
       >
-        {loading ? 'Analyserar...' : 'Analysera elräkning'}
+        {convertingPdf ? 'Konverterar…' : loading ? 'Analyserar...' : 'Analysera elräkning'}
       </AnalyzeButton>
     </BillUploadContainer>
   );
