@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 
 const ALLOWED = new Set([
   'landing_fakturaanalys',
+  'fa_upload_cta_click',
+  'fa_file_selected',
   'ocr_started',
   'ocr_completed',
   'ocr_failed',

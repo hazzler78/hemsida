@@ -6,6 +6,8 @@ import { getFirstTouchUtm, type UtmParams } from '@/lib/utm';
 
 export type FunnelEventName =
   | 'landing_fakturaanalys'
+  | 'fa_upload_cta_click'
+  | 'fa_file_selected'
   | 'ocr_started'
   | 'ocr_completed'
   | 'ocr_failed'

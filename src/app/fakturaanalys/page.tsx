@@ -239,6 +239,10 @@ export default function Fakturaanalys() {
       try {
         const converted = await pdfToJpeg(selected, 3, 2);
         setFile(converted.file);
+        trackFunnelEvent('fa_file_selected', {
+          path: '/fakturaanalys',
+          meta: { file_type: 'pdf', pages: converted.pageCount, size: selected.size },
+        });
         setFileNameDisplay(
           converted.pageCount > 1
             ? `${selected.name} (${converted.pageCount} sidor konverterade till bild)`
@@ -257,6 +261,10 @@ export default function Fakturaanalys() {
     } else {
       setFile(selected);
       setFileNameDisplay(selected.name);
+      trackFunnelEvent('fa_file_selected', {
+        path: '/fakturaanalys',
+        meta: { file_type: selected.type || 'image', size: selected.size },
+      });
     }
   };
 
@@ -452,7 +460,15 @@ export default function Fakturaanalys() {
                 gap: '1rem',
                 alignItems: 'stretch'
               }}>
-                <label htmlFor="file-upload" style={{ display: 'flex', justifyContent: 'center' }}>
+                <label
+                  htmlFor="file-upload"
+                  style={{ display: 'flex', justifyContent: 'center' }}
+                  onClick={() => {
+                    try {
+                      trackFunnelEvent('fa_upload_cta_click', { path: '/fakturaanalys' });
+                    } catch { /* ignore */ }
+                  }}
+                >
                   <GlassButton as="span" variant="primary" size="lg" background="linear-gradient(135deg, var(--primary), var(--secondary))" disableScrollEffect disableHoverEffect>
                     {convertingPdf ? 'Konverterar PDF…' : file ? 'Byt fil' : 'Välj faktura (bild eller PDF)'}
                   </GlassButton>
@@ -481,6 +497,15 @@ export default function Fakturaanalys() {
                       ? fileNameDisplay || file.name
                       : 'Ingen fil vald ännu — JPG, PNG eller PDF'}
                 </div>
+                <p style={{
+                  margin: 0,
+                  textAlign: 'center',
+                  color: 'rgba(255,255,255,0.75)',
+                  fontSize: '0.85rem',
+                  lineHeight: 1.4,
+                }}>
+                  🔒 Behandlas säkert · Spara bara om du vill · Ingen inloggning
+                </p>
               </div>
               <GlassButton
                 onClick={handleGptOcr}
