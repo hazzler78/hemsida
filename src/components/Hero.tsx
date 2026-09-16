@@ -355,7 +355,7 @@ export default function Hero() {
                     disableScrollEffect={true}
                     disableHoverEffect={true}
                   >
-                    Analysera din elräkning – kom igång
+                    Analysera din elräkning
                   </GlassButton>
                 </div>
                 <a

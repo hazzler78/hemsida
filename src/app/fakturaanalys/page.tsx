@@ -396,15 +396,9 @@ export default function Fakturaanalys() {
         })}
       </Script>
       <main className="container" style={{ maxWidth: 800, margin: '0 auto', padding: 'var(--section-spacing) 0' }}>
-        <div style={{ 
-          background: 'var(--glass-bg)', 
-          backdropFilter: 'var(--glass-blur)', 
-          WebkitBackdropFilter: 'var(--glass-blur)',
-          border: '1px solid var(--glass-border)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '3rem 2rem',
-          boxShadow: 'var(--glass-shadow-medium)',
-          marginBottom: '2rem'
+        <div style={{
+          padding: '0.5rem 0.25rem 1rem',
+          marginBottom: '1rem'
         }}>
           <h1 style={{ 
             fontSize: '2.5rem', 
