@@ -177,7 +177,7 @@ const HERO_WINNER_VARIANT = 'B' as const;
 const HERO_CTA_BACKGROUND = 'linear-gradient(135deg, #22c55e, #16a34a)';
 const HERO_CTA_TEXT_COLOR = 'white';
 const HERO_TITLE = 'Trött på elräkningar som rusar?';
-const HERO_SUB = 'Billigare el väntar – se avtal som lönar sig just nu!';
+const HERO_SUB = 'Ladda upp din elräkning – AI:n hittar onödiga avgifter på 30 sekunder.';
 const HERO_VIDEO_SRC = '/videos/elchef-hero-v2.mp4';
 const HERO_VIDEO_POSTER = '/videos/elchef-hero-v2-poster.jpg';
 
@@ -240,7 +240,7 @@ export default function Hero() {
     play();
   }, [videoStarted, isMobile]);
 
-  const trackHeroClick = useCallback((target: 'rorligt' | 'fastpris', href: string) => {
+  const trackHeroClick = useCallback((target: 'rorligt' | 'fastpris' | 'fakturaanalys', href: string) => {
     try {
       const sessionId = getOrCreateSessionId();
       const sid = sessionId;
@@ -294,24 +294,26 @@ export default function Hero() {
   }, [pendingHref]);
 
   const handleCtaClick = useCallback(() => {
-    trackHeroClick('rorligt', '/rorligt-avtal-v2');
+    trackHeroClick('fakturaanalys', '/fakturaanalys');
     try {
       const ttq: any = (window as any).ttq;
       const cookiebot: any =
         (window as any).cookiebot || (window as any).Cookiebot || (window as any).CookieControl;
       if (ttq && (!cookiebot || cookiebot?.consent?.marketing)) {
         ttq.track('InitiateCheckout', {
-          content_name: 'rorligt_avtal_click',
+          content_name: 'fakturaanalys_click',
         });
         if ((window as any).__ttq_capi) {
-          (window as any).__ttq_capi('InitiateCheckout', { content_name: 'rorligt_avtal_click' });
+          (window as any).__ttq_capi('InitiateCheckout', { content_name: 'fakturaanalys_click' });
         }
       }
     } catch {
       /* no-op */
     }
     const sid = typeof window !== 'undefined' ? getOrCreateSessionId() : '';
-    const url = '/rorligt-avtal-v2' + (sid ? `?sid=${encodeURIComponent(sid)}` : '');
+    const url =
+      '/fakturaanalys?utm_source=hero&utm_medium=cta' +
+      (sid ? `&sid=${encodeURIComponent(sid)}` : '');
     setPendingHref(url);
     setShowClickIntro(true);
   }, [trackHeroClick]);
@@ -358,13 +360,24 @@ export default function Hero() {
                     size="lg"
                     background={HERO_CTA_BACKGROUND}
                     color={HERO_CTA_TEXT_COLOR}
-                    aria-label="Byt elavtal och kom igång"
+                    aria-label="Analysera din elräkning gratis"
                     disableScrollEffect={true}
                     disableHoverEffect={true}
                   >
-                    Byt elavtal – kom igång
+                    Analysera din elräkning – kom igång
                   </GlassButton>
                 </div>
+                <a
+                  href={withDefaultCtaUtm('/rorligt-avtal-v2', 'hero', 'cta-secondary', 'hero')}
+                  style={{
+                    color: 'rgba(255, 255, 255, 0.85)',
+                    fontSize: '0.9rem',
+                    textDecoration: 'underline',
+                    textUnderlineOffset: 3,
+                  }}
+                >
+                  eller jämför elavtal →
+                </a>
               </div>
             </ButtonRow>
           </TextContent>
@@ -456,7 +469,11 @@ export default function Hero() {
         </VideoOverlay>
       )}
       {showClickIntro && pendingHref && (
-        <ClickIntroVideo onComplete={goToPendingHref} />
+        <ClickIntroVideo
+          onComplete={goToPendingHref}
+          src="/videos/forsta_video_klicka.mp4"
+          hint="Så här gör du – tar 30 sekunder"
+        />
       )}
     </HeroSection>
   );
