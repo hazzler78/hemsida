@@ -9,19 +9,37 @@ const DEFAULT_UTM = {
 } as const;
 
 /**
- * Hampus share link: https://www.elchef.se/robinhood
- * - Marks came_via_robinhood (affiliate conversion)
- * - Logs click to D1
- * - Sends visitor to fakturaanalys with UTM so insights show Hampus
+ * Hampus delningslänk: https://www.elchef.se/robinhood
+ * - Sparar came_via_robinhood (affiliate-insikter)
+ * - Loggar besöket till BÅDE D1 (/api/track/robinhood) och Supabase page_views
+ *   så Hampus-trafiken mäts i samma tabell som norsk trafik (path=/robinhood)
+ * - Vidarebefordrar utm_content så Hampus kan tagga enskilda inlägg
+ * - Skickar besökaren till /fakturaanalys med UTM
  */
 export default function RobinhoodPage() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    localStorage.setItem('came_via_robinhood', 'true');
-    localStorage.setItem('came_via_robinhood_time', Date.now().toString());
+    try {
+      localStorage.setItem('came_via_robinhood', 'true');
+      localStorage.setItem('came_via_robinhood_time', Date.now().toString());
+    } catch { /* ignore */ }
 
-    const trackClick = async () => {
+    // Session-id (samma nyckel som analyssidan använder)
+    let sid = '';
+    try {
+      sid = localStorage.getItem('invoiceSessionId') || '';
+      if (!sid) {
+        sid = Math.random().toString(36).slice(2) + Date.now().toString(36);
+        localStorage.setItem('invoiceSessionId', sid);
+      }
+    } catch { /* ignore */ }
+
+    const incoming = new URLSearchParams(window.location.search);
+    const utmContent = incoming.get('utm_content') || null;
+
+    // 1) D1-spårning (behålls — affiliate-insikter)
+    const trackD1 = async () => {
       try {
         await fetch('/api/track/robinhood', {
           method: 'POST',
@@ -38,7 +56,33 @@ export default function RobinhoodPage() {
       }
     };
 
-    const incoming = new URLSearchParams(window.location.search);
+    // 2) Supabase page_views (konsekvent med norska /robinhood)
+    const trackSupabase = () => {
+      try {
+        const payload = JSON.stringify({
+          path: '/robinhood',
+          sessionId: sid,
+          utmSource: DEFAULT_UTM.utm_source,
+          utmMedium: DEFAULT_UTM.utm_medium,
+          utmCampaign: DEFAULT_UTM.utm_campaign,
+          utmContent,
+          referrer: document.referrer || '',
+        });
+        const url = '/api/events/page-view';
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(url, new Blob([payload], { type: 'application/json' }));
+        } else {
+          fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: payload,
+            keepalive: true,
+          }).catch(() => {});
+        }
+      } catch { /* ignore */ }
+    };
+
+    // Bygg mål-URL: /fakturaanalys med Hampus-UTM (behåll inkommande parametrar)
     const dest = new URL('/fakturaanalys', window.location.origin);
     for (const [key, value] of Object.entries(DEFAULT_UTM)) {
       dest.searchParams.set(key, value);
@@ -56,7 +100,8 @@ export default function RobinhoodPage() {
       dest.searchParams.set('utm_campaign', DEFAULT_UTM.utm_campaign);
     }
 
-    void trackClick().finally(() => {
+    trackSupabase();
+    void trackD1().finally(() => {
       window.location.replace(dest.pathname + dest.search);
     });
   }, []);
