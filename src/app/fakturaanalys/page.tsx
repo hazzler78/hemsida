@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import GlassButton from '@/components/GlassButton';
 import ContactForm from '@/components/ContactForm';
-import { withDefaultCtaUtm, withUtm, getFirstTouchUtm, captureFirstTouchUtm, getAttributionUtm } from '@/lib/utm';
+import { withDefaultCtaUtm, getFirstTouchUtm, captureFirstTouchUtm, getAttributionUtm } from '@/lib/utm';
 import { buildRorligtHrefFromFa, parseInvoiceHints, saveFaPrefill } from '@/lib/faContractPrefill';
 import { isPdfFile, pdfToJpeg } from '@/lib/pdfToJpeg';
 import { usePageView } from '@/lib/usePageView';
@@ -123,15 +123,12 @@ export default function Fakturaanalys() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [logId, setLogId] = useState<number | null>(null);
   const sessionIdRef = useRef<string>('');
-  const [consentToStore, setConsentToStore] = useState(false);
+  const consentToStore = false;
 
   usePageView('/fakturaanalys');
 
   const [fromSocial, setFromSocial] = useState(false);
   const [rorligtHref, setRorligtHref] = useState('/rorligt-avtal-v2?skip=1&from=fakturaanalys');
-  const [skipOcrHref, setSkipOcrHref] = useState(
-    '/rorligt-avtal-v2?skip=1&from=fakturaanalys&utm_source=fakturaanalys&utm_medium=skip_ocr&utm_campaign=fa_secondary_rorligt&utm_content=skip_ocr_cta',
-  );
 
   useEffect(() => {
     sessionIdRef.current = getOrCreateSessionId();
@@ -146,15 +143,6 @@ export default function Fakturaanalys() {
 
   useEffect(() => {
     try {
-      const landingUtm = getAttributionUtm() || getFirstTouchUtm();
-      setSkipOcrHref(
-        withUtm('/rorligt-avtal-v2?skip=1&from=fakturaanalys', {
-          utm_source: landingUtm.utm_source || 'fakturaanalys',
-          utm_medium: 'skip_ocr',
-          utm_campaign: landingUtm.utm_campaign || 'fa_secondary_rorligt',
-          utm_content: 'skip_ocr_cta',
-        }),
-      );
       setRorligtHref(buildRorligtHrefFromFa());
     } catch { /* ignore */ }
   }, []);
@@ -223,10 +211,6 @@ export default function Fakturaanalys() {
       }
     };
 
-  const handleSkipOcrRorligt = () => {
-    trackContractClick('rorligt', { skip_ocr: true, cta: 'secondary_no_upload' });
-  };
-
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
     if (!selected) return;
@@ -248,6 +232,9 @@ export default function Fakturaanalys() {
             ? `${selected.name} (${converted.pageCount} sidor konverterade till bild)`
             : selected.name,
         );
+        setConvertingPdf(false);
+        void handleGptOcr(converted.file);
+        return;
       } catch (convErr) {
         console.error('PDF-konvertering misslyckades:', convErr);
         setFile(null);
@@ -265,22 +252,24 @@ export default function Fakturaanalys() {
         path: '/fakturaanalys',
         meta: { file_type: selected.type || 'image', size: selected.size },
       });
+      void handleGptOcr(selected);
     }
   };
 
-  async function handleGptOcr() {
-    if (!file) return;
+  async function handleGptOcr(fileOverride?: File) {
+    const activeFile = fileOverride || file;
+    if (!activeFile) return;
     setLoading(true);
     setError('');
     setGptResult(null);
     setShowFullAnalysis(false);
     trackFunnelEvent('ocr_started', {
       path: '/fakturaanalys',
-      meta: { file_type: file.type, file_size: file.size },
+      meta: { file_type: activeFile.type, file_size: activeFile.size },
     });
     try {
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', activeFile);
       formData.append('consent', String(consentToStore));
       const res = await fetch('/api/gpt-ocr', {
         method: 'POST',
@@ -448,134 +437,56 @@ export default function Fakturaanalys() {
             Gratis · ca 30 sekunder · ingen inloggning
           </p>
           {!loading && !gptResult && (
-            <div style={{ 
-              display: 'flex', 
+            <div style={{
+              display: 'flex',
               flexDirection: 'column',
-              gap: '1.25rem', 
+              gap: '1.25rem',
               alignItems: 'stretch'
             }}>
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column',
-                gap: '1rem',
-                alignItems: 'stretch'
-              }}>
-                <label
-                  htmlFor="file-upload"
-                  style={{ display: 'flex', justifyContent: 'center' }}
-                  onClick={() => {
-                    try {
-                      trackFunnelEvent('fa_upload_cta_click', { path: '/fakturaanalys' });
-                    } catch { /* ignore */ }
-                  }}
-                >
-                  <GlassButton as="span" variant="primary" size="lg" background="linear-gradient(135deg, var(--primary), var(--secondary))" disableScrollEffect disableHoverEffect>
-                    {convertingPdf ? 'Konverterar PDF…' : file ? 'Byt fil' : 'Välj faktura (bild eller PDF)'}
-                  </GlassButton>
-                </label>
-                <input
-                  id="file-upload"
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*,application/pdf,.pdf"
-                  onChange={handleFileChange}
-                  style={{ display: 'none' }}
-                  disabled={convertingPdf}
-                />
-                <div style={{ 
-                  color: 'rgba(255, 255, 255, 0.8)', 
-                  fontSize: '1rem', 
-                  textAlign: 'center',
-                  padding: '0.5rem 0',
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  borderRadius: 'var(--radius-md)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)'
-                }}>
-                  {convertingPdf
-                    ? 'Läser PDF:en…'
-                    : file
-                      ? fileNameDisplay || file.name
-                      : 'Ingen fil vald ännu — JPG, PNG eller PDF'}
-                </div>
+              <label
+                htmlFor="file-upload"
+                style={{ display: 'flex', justifyContent: 'center' }}
+                onClick={() => {
+                  try {
+                    trackFunnelEvent('fa_upload_cta_click', { path: '/fakturaanalys' });
+                  } catch { /* ignore */ }
+                }}
+              >
+                <GlassButton as="span" variant="primary" size="lg" background="linear-gradient(135deg, var(--primary), var(--secondary))" disableScrollEffect disableHoverEffect>
+                  {convertingPdf ? 'Konverterar PDF…' : file ? 'Byt fil' : 'Välj faktura (bild eller PDF)'}
+                </GlassButton>
+              </label>
+              <input
+                id="file-upload"
+                ref={fileInputRef}
+                type="file"
+                accept="image/*,application/pdf,.pdf"
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+                disabled={convertingPdf}
+              />
+              {file && !convertingPdf && (
                 <p style={{
                   margin: 0,
                   textAlign: 'center',
-                  color: 'rgba(255,255,255,0.75)',
-                  fontSize: '0.85rem',
-                  lineHeight: 1.4,
+                  color: 'rgba(255, 255, 255, 0.85)',
+                  fontSize: '0.9rem',
+                  overflowWrap: 'anywhere',
                 }}>
-                  🔒 Behandlas säkert · Spara bara om du vill · Ingen inloggning
+                  {fileNameDisplay || file.name}
                 </p>
-              </div>
-              <GlassButton
-                onClick={handleGptOcr}
-                disabled={!file || loading || convertingPdf}
-                variant="primary"
-                size="lg"
-                background="linear-gradient(135deg, #10b981, #059669)"
-                disableScrollEffect
-                disableHoverEffect
-              >
-                {convertingPdf
-                  ? 'Konverterar…'
-                  : file
-                    ? 'Analysera min elräkning nu'
-                    : 'Analysera faktura'}
-              </GlassButton>
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.9rem' }}>
-                              <input
-                                type="checkbox"
-                                checked={consentToStore}
-                                onChange={(e) => setConsentToStore(e.target.checked)}
-                                style={{ marginTop: 2 }}
-                              />
-                              <span style={{ lineHeight: 1.4 }}>
-                                Valfritt: spara bilden för att förbättra AI:n. <a href={withDefaultCtaUtm('/integritetspolicy', 'fakturaanalys', 'integritetspolicy')} target="_blank" rel="noreferrer" style={{ color: '#ffffff', textDecoration: 'underline', fontWeight: 600 }}>Integritetspolicy</a>.
-                              </span>
-                            </label>
-
-                            {/* Lättare väg för social/kall trafik utan faktura till hands */}
-                            <div
-                              style={{
-                                marginTop: '0.25rem',
-                                paddingTop: '1.25rem',
-                                borderTop: '1px solid rgba(255,255,255,0.2)',
-                                textAlign: 'center',
-                              }}
-                            >
-                              <p
-                                style={{
-                                  margin: '0 0 0.75rem',
-                                  color: 'rgba(255,255,255,0.88)',
-                                  fontSize: '0.95rem',
-                                  lineHeight: 1.45,
-                                }}
-                              >
-                                {fromSocial
-                                  ? 'Har du inte fakturan framme? Jämför rörligt elavtal direkt — tar någon minut.'
-                                  : 'Vill du inte ladda upp just nu? Jämför rörliga elavtal utan faktura.'}
-                              </p>
-                              <a
-                                                              href={skipOcrHref}
-                                                              onClick={handleSkipOcrRorligt}
-                                                              style={{
-                                                                display: 'inline-block',
-                                                                padding: '0.85rem 1.35rem',
-                                                                borderRadius: '999px',
-                                                                border: '1.5px solid rgba(255,255,255,0.55)',
-                                                                background: 'rgba(255,255,255,0.12)',
-                                                                color: '#fff',
-                                                                fontWeight: 700,
-                                                                fontSize: '1rem',
-                                                                textDecoration: 'none',
-                                                                boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
-                                                              }}
-                                                            >
-                                                              Jämför rörligt utan faktura →
-                                                            </a>
-                            </div>
-                          </div>
-                        )}
+              )}
+              <p style={{
+                margin: 0,
+                textAlign: 'center',
+                color: 'rgba(255,255,255,0.75)',
+                fontSize: '0.85rem',
+                lineHeight: 1.4,
+              }}>
+                🔒 Behandlas säkert
+              </p>
+            </div>
+          )}
         </div>
 
         {error && (
