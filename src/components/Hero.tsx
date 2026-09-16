@@ -4,7 +4,6 @@
 import styled from 'styled-components';
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import GlassButton from './GlassButton';
-import ClickIntroVideo from './ClickIntroVideo';
 import { withDefaultCtaUtm } from '@/lib/utm';
 import { getOrCreateSessionId } from '@/lib/sessionId';
 
@@ -183,8 +182,6 @@ const HERO_VIDEO_POSTER = '/videos/elchef-hero-v2-poster.jpg';
 
 export default function Hero() {
   const [videoStarted, setVideoStarted] = useState(false);
-  const [showClickIntro, setShowClickIntro] = useState(false);
-  const [pendingHref, setPendingHref] = useState<string | null>(null);
   const videoContainerRef = useRef<HTMLDivElement | null>(null);
   const heroVideoRef = useRef<HTMLVideoElement | null>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -288,11 +285,6 @@ export default function Hero() {
     setVideoStarted(true);
   }, []);
 
-  const goToPendingHref = useCallback(() => {
-    if (!pendingHref) return;
-    window.location.href = pendingHref;
-  }, [pendingHref]);
-
   const handleCtaClick = useCallback(() => {
     trackHeroClick('fakturaanalys', '/fakturaanalys');
     try {
@@ -314,8 +306,7 @@ export default function Hero() {
     const url =
       '/fakturaanalys?utm_source=hero&utm_medium=cta' +
       (sid ? `&sid=${encodeURIComponent(sid)}` : '');
-    setPendingHref(url);
-    setShowClickIntro(true);
+    window.location.href = url;
   }, [trackHeroClick]);
 
   return (
@@ -467,13 +458,6 @@ export default function Hero() {
             />
           </VideoOverlayContent>
         </VideoOverlay>
-      )}
-      {showClickIntro && pendingHref && (
-        <ClickIntroVideo
-          onComplete={goToPendingHref}
-          src="/videos/forsta_video_klicka.mp4"
-          hint="Så här gör du – tar 30 sekunder"
-        />
       )}
     </HeroSection>
   );
