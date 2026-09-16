@@ -401,12 +401,14 @@ export default function Fakturaanalys() {
           marginBottom: '1rem'
         }}>
           <h1 style={{ 
-            fontSize: '2.5rem', 
+            fontSize: 'clamp(1.6rem, 7vw, 2.5rem)', 
             fontWeight: 700, 
             marginBottom: '1rem',
             color: 'white',
             textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-            textAlign: 'center'
+            textAlign: 'center',
+            lineHeight: 1.15,
+            overflowWrap: 'break-word'
           }}>
             Fakturaanalys med AI
           </h1>
