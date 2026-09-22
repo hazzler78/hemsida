@@ -41,11 +41,11 @@ interface UserPreferences {
   postalCode?: string;
 }
 
-/** Månadskostnad, påslag och pristyp från /api/prices/providers (prisfiler). */
+/** Månadskostnad, påslag och pristyp från /api/prices/providers. */
 type ProviderPriceItem = {
   monthly_fee_kr: number;
   surcharge_ore_per_kwh: number;
-  rate_type: 'hourly' | 'monthly';
+  rate_type: 'hourly' | 'monthly' | 'quarterly';
 };
 
 type ProviderPricesMap = Record<string, ProviderPriceItem>;
@@ -1132,13 +1132,12 @@ export default function RorligtAvtalV2Page() {
     const fromApi = getProviderPriceFromApi(provider.name, providerPrices);
     const månadKr = fromApi?.monthly_fee_kr ?? provider.manual_monthly_fee_kr ?? getMånadskostnadKr(provider.name);
     const påslagValue = fromApi?.surcharge_ore_per_kwh ?? provider.manual_surcharge_ore_per_kwh ?? getPåslagÖrePerKwh(provider.name);
-    const rateLabel = fromApi?.rate_type === 'monthly'
+    const rate = fromApi?.rate_type ?? provider.manual_rate_type;
+    const rateLabel = rate === 'monthly'
       ? 'Rörligt månadspris'
-      : provider.manual_rate_type === 'monthly'
-        ? 'Rörligt månadspris'
-        : provider.manual_rate_type === 'quarterly'
-          ? 'Rörligt kvartspris'
-          : 'Rörligt timpris';
+      : rate === 'quarterly'
+        ? 'Rörligt kvartspris'
+        : 'Rörligt timpris';
     const påslagText =
       påslagValue === 0
         ? '0 öre/kWh i påslag'

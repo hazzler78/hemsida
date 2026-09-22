@@ -5,7 +5,7 @@ import {
 } from '@/lib/knowledgeBase';
 
 // Typer för pris-API:t (hämtas via våra egna endpoints, inte direkt från leverantörer)
-type ProviderRateType = 'hourly' | 'monthly';
+type ProviderRateType = 'hourly' | 'monthly' | 'quarterly';
 
 interface ProviderPriceItem {
   monthly_fee_kr: number;
@@ -91,7 +91,7 @@ async function getLiveProviderPriceSummary(req: NextRequest): Promise<string | n
 
     const lines: string[] = [];
     lines.push('## AKTUELLA ELPRISER (automatisk hämtning, ungefärliga)');
-    lines.push('> Priserna är uppskattningar baserade på leverantörernas egna prisfiler. Exakta villkor visas alltid på respektive avtalssida.');
+    lines.push('> Priserna hämtas från elprishantering och är ungefärliga. Exakta villkor visas alltid på respektive avtalssida.');
     lines.push('');
 
     if (variableData && Object.keys(variableData.providers).length > 0) {
@@ -100,7 +100,11 @@ async function getLiveProviderPriceSummary(req: NextRequest): Promise<string | n
         if (!p) return;
         const monthly = formatSwedishDecimal(p.monthly_fee_kr, 0);
         const surcharge = formatSwedishDecimal(p.surcharge_ore_per_kwh, 1);
-        const rateLabel = p.rate_type === 'hourly' ? 'rörligt timpris' : 'rörligt månadspris';
+        const rateLabel = p.rate_type === 'monthly'
+          ? 'rörligt månadspris'
+          : p.rate_type === 'quarterly'
+            ? 'rörligt kvartspris'
+            : 'rörligt timpris';
         lines.push(`• **${name}**: ca ${monthly} kr/mån + ~${surcharge} öre/kWh (${rateLabel})`);
       });
       lines.push('');
