@@ -64,6 +64,8 @@ export interface VariableOffer {
 
 type PriceComponents = {
   monthly_fee?: number | null;
+  /** Rabatt på månadsavgiften, samma enhet som monthly_fee (exkl. moms). */
+  customer_discount_per_month?: number | null;
   fixed_price?: number | null;
 };
 
@@ -149,11 +151,18 @@ function annualCostKr(monthlyFee: number, surchargeOre: number, consumptionKwh: 
   return monthlyFee * 12 + (surchargeOre * consumptionKwh) / 100;
 }
 
+/** Avgift kunden betalar. Listpriset kan vara helt rabatterat, som hos Cheap Energy. */
+function monthlyFeeAfterDiscount(product: AreaProduct): number {
+  const list = product.components?.monthly_fee ?? 0;
+  const discount = product.components?.customer_discount_per_month ?? 0;
+  return Math.max(0, Math.round(list - discount));
+}
+
 function toVariableOffer(product: AreaProduct, spotOreExclVat: number): VariableOffer | null {
   const energy = product.breakdown?.energy_price_excl_vat;
   if (typeof energy !== 'number' || !Number.isFinite(energy)) return null;
   return {
-    monthly_fee_kr: Math.round(product.components?.monthly_fee ?? 0),
+    monthly_fee_kr: monthlyFeeAfterDiscount(product),
     surcharge_ore_per_kwh: Math.round((energy - spotOreExclVat) * 100) / 100,
     rate_type: rateTypeOf(product.type),
   };
