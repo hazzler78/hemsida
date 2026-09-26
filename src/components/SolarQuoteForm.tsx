@@ -142,6 +142,15 @@ const SubmitButton = styled.button`
   }
 `;
 
+const FormNote = styled.p`
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  text-align: center;
+  margin: 1rem auto 0;
+  max-width: 480px;
+`;
+
 const SuccessMessage = styled.div`
   background: rgba(16, 185, 129, 0.9);
   color: white;
@@ -329,6 +338,10 @@ export default function SolarQuoteForm() {
           <SubmitButton type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Skickar...' : 'Begär gratis offert'}
           </SubmitButton>
+          <FormNote>
+            Vi förmedlar kontakten till vår solcellspartner, som ringer upp dig med ett
+            kostnadsfritt tillbud. Ingen förpliktelse — du bestämmer själv om du vill gå vidare.
+          </FormNote>
         </Form>
 
         {submitStatus === 'success' && (
