@@ -1,38 +1,61 @@
 "use client";
 
 import React from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import Link from 'next/link';
 import GlassButton from '@/components/GlassButton';
+
+/* ---------- Design-tokens -------------------------------------------------
+   En yta för alla rutor på sidan. Tidigare hade avtalskorten egna värden
+   (15px radie, 0.9 bakgrund, 24px padding, annan skugga) vilket gjorde sidan
+   oenhetlig — och checklistan saknade marginal så den klistrade mot korten.
+   Ändra här, slår igenom överallt.
+-------------------------------------------------------------------------- */
+const RADIUS = '20px';
+const GAP = '2rem';
+
+const surface = css`
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: ${RADIUS};
+  padding: 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+`;
 
 const PageContainer = styled.div`
   min-height: 100vh;
   background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
   padding: 2rem 1rem;
-  
+
   @media (min-width: 768px) {
     padding: 3rem 2rem;
   }
 `;
 
+/* flex-kolumn med gap -> exakt samma avstand mellan alla block,
+   inga marginalkollapser (som var det som gjorde att rutorna klistrade) */
 const Content = styled.div`
   max-width: 1000px;
   width: 100%;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: ${GAP};
 `;
 
 const Header = styled.div`
   text-align: center;
-  margin-bottom: 3rem;
 `;
 
 const Title = styled.h1`
   font-size: 2rem;
   font-weight: 700;
   color: white;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  
+
   @media (min-width: 768px) {
     font-size: 3rem;
   }
@@ -40,28 +63,21 @@ const Title = styled.h1`
 
 const Subtitle = styled.p`
   font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 2rem;
+  color: rgba(255, 255, 255, 0.92);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  
+
   @media (min-width: 768px) {
     font-size: 1.3rem;
   }
 `;
 
 const InfoSection = styled.div`
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 20px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  ${surface}
 `;
 
-const InfoTitle = styled.h2`
-  font-size: 1.5rem;
+const SectionTitle = styled.h2`
+  font-size: 1.4rem;
+  font-weight: 700;
   color: var(--primary);
   margin-bottom: 1rem;
   text-align: center;
@@ -69,142 +85,32 @@ const InfoTitle = styled.h2`
 
 const InfoText = styled.p`
   color: #374151;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-`;
+  line-height: 1.65;
+  margin-bottom: 0.75rem;
 
-const ComparisonGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-  
-  @media (min-width: 768px) {
-    grid-template-columns: 1fr 1fr;
+  &:last-child {
+    margin-bottom: 0;
   }
-`;
-
-const ContractCard = styled.div`
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 15px;
-  padding: 1.5rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  text-align: center;
-`;
-
-const ContractTitle = styled.h3`
-  font-size: 1.3rem;
-  color: var(--primary);
-  margin-bottom: 1rem;
-`;
-
-const ContractDescription = styled.p`
-  color: #374151;
-  margin-bottom: 1rem;
-  line-height: 1.5;
-`;
-
-const ContractFeatures = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 1rem 0;
-`;
-
-const FeatureItem = styled.li`
-  color: #374151;
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  
-  &::before {
-    content: "✓";
-    color: #22c55e;
-    font-weight: bold;
-  }
-`;
-
-const ButtonContainer = styled.div`
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 2rem;
-  
-  @media (min-width: 768px) {
-    gap: 2rem;
-  }
-`;
-
-const ButtonWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  min-width: 200px;
-  
-  @media (min-width: 768px) {
-    min-width: 220px;
-  }
-`;
-
-const ButtonLabel = styled.div`
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.95);
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  text-align: center;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  position: relative;
-  z-index: 10;
-  font-weight: 600;
-`;
-
-const RorligtLabel = styled(ButtonLabel)`
-  background: rgba(34, 197, 94, 0.2);
-  border: 1px solid rgba(34, 197, 94, 0.4);
-  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.15);
-`;
-
-const FastprisLabel = styled(ButtonLabel)`
-  background: rgba(59, 130, 246, 0.2);
-  border: 1px solid rgba(59, 130, 246, 0.4);
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
 `;
 
 const NextSteps = styled.div`
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 20px;
-  padding: 2rem;
-  margin-top: 2rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  text-align: center;
-`;
-
-const NextStepsTitle = styled.h3`
-  font-size: 1.3rem;
-  color: var(--primary);
-  margin-bottom: 1rem;
+  ${surface}
 `;
 
 const NextStepsList = styled.ol`
   color: #374151;
   text-align: left;
-  max-width: 460px;
+  max-width: 520px;
   margin: 0 auto;
+  padding-left: 1.25rem;
 
   li {
-    margin-bottom: 0.5rem;
-    line-height: 1.5;
-    padding-left: 0.25rem;
+    margin-bottom: 0.6rem;
+    line-height: 1.6;
+  }
+
+  li:last-child {
+    margin-bottom: 0;
   }
 
   li strong {
@@ -215,12 +121,101 @@ const NextStepsList = styled.ol`
 const NextStepsNote = styled.p`
   color: #6b7280;
   text-align: center;
-  max-width: 460px;
-  margin: 1.25rem auto 0;
+  max-width: 520px;
+  margin: 1.5rem auto 0;
   font-size: 0.95rem;
-  line-height: 1.55;
-  padding-top: 1rem;
+  line-height: 1.6;
+  padding-top: 1.25rem;
   border-top: 1px solid #e5e7eb;
+`;
+
+const ComparisonGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: ${GAP};
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+  }
+`;
+
+/* korten anvander samma yta som ovriga rutor — och rymmer nu sin egen knapp
+   sa att kortet ar en enhet istallet for att knapparna ligger losa under */
+const ContractCard = styled.div`
+  ${surface}
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+`;
+
+const ContractTitle = styled.h3`
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 0.75rem;
+`;
+
+const ContractDescription = styled.p`
+  color: #374151;
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+`;
+
+const ContractFeatures = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+`;
+
+const FeatureItem = styled.li`
+  color: #374151;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  line-height: 1.45;
+
+  &::before {
+    content: "✓";
+    color: #22c55e;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+`;
+
+/* knappen skjuts ned till kortets botten sa bada korten linjerar,
+   aven nar texten ar olika lang */
+const CardAction = styled.div`
+  margin-top: auto;
+  padding-top: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+`;
+
+const ButtonLabel = styled.div`
+  font-size: 0.9rem;
+  color: #374151;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  text-align: center;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+`;
+
+const RorligtLabel = styled(ButtonLabel)`
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.25);
+  color: #15803d;
+`;
+
+const FastprisLabel = styled(ButtonLabel)`
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.25);
+  color: #1d4ed8;
 `;
 
 export default function BytElavtal() {
@@ -237,11 +232,11 @@ export default function BytElavtal() {
       <Content>
         <Header>
           <Title>Välj ditt nya elavtal</Title>
-          <Subtitle>Jämför rörligt och fastpris - välj det som passar dig bäst</Subtitle>
+          <Subtitle>Jämför rörligt och fastpris – välj det som passar dig bäst</Subtitle>
         </Header>
 
         <InfoSection>
-          <InfoTitle>Vad händer härnäst?</InfoTitle>
+          <SectionTitle>Vad händer härnäst?</SectionTitle>
           <InfoText>
             Bytet görs hos det nya bolaget och tar ungefär fem minuter — du fyller i
             dina uppgifter och signerar med BankID. Vi hjälper dig sedan att byta
@@ -257,7 +252,7 @@ export default function BytElavtal() {
         </InfoSection>
 
         <NextSteps>
-          <NextStepsTitle>Det här behöver du ha redo</NextStepsTitle>
+          <SectionTitle>Det här behöver du ha redo</SectionTitle>
           <NextStepsList>
             <li>Ditt <strong>personnummer</strong></li>
             <li>
@@ -267,7 +262,7 @@ export default function BytElavtal() {
             </li>
             <li>Din <strong>adress</strong> och kontaktuppgifter</li>
             <li><strong>BankID</strong> för att signera avtalet</li>
-            <li>Ungefärligt <strong>årsförbrukning</strong> om du vet den</li>
+            <li>Ungefärlig <strong>årsförbrukning</strong> om du vet den</li>
           </NextStepsList>
           <NextStepsNote>
             Hela bytet tar ungefär fem minuter. Det nya bolaget säger upp ditt gamla
@@ -280,7 +275,7 @@ export default function BytElavtal() {
           <ContractCard>
             <ContractTitle>Rörligt avtal</ContractTitle>
             <ContractDescription>
-              Priset följer marknadspriset och kan variera från månad till månad. 
+              Priset följer marknadspriset och kan variera från månad till månad.
               Perfekt om du vill ha flexibilitet och tror att elpriserna kommer att sjunka.
             </ContractDescription>
             <ContractFeatures>
@@ -289,12 +284,28 @@ export default function BytElavtal() {
               <FeatureItem>Följer marknadspriset</FeatureItem>
               <FeatureItem>Kan spara pengar vid låga priser</FeatureItem>
             </ContractFeatures>
+            <CardAction>
+              <GlassButton
+                variant="primary"
+                size="lg"
+                onClick={handleRorligtClick}
+                background="linear-gradient(135deg, var(--primary), var(--secondary))"
+                aria-label="Rörligt avtal - 0 kr i avgifter första året – utan bindningstid"
+                disableScrollEffect={true}
+                disableHoverEffect={true}
+              >
+                Välj rörligt avtal
+              </GlassButton>
+              <RorligtLabel>
+                0 kr i avgifter första året – utan bindningstid
+              </RorligtLabel>
+            </CardAction>
           </ContractCard>
 
           <ContractCard>
             <ContractTitle>Fastpris avtal</ContractTitle>
             <ContractDescription>
-              Du betalar samma pris hela avtalsperioden, oavsett vad som händer på elmarknaden. 
+              Du betalar samma pris hela avtalsperioden, oavsett vad som händer på elmarknaden.
               Perfekt om du vill ha förutsägbarhet och tror att elpriserna kommer att stiga.
             </ContractDescription>
             <ContractFeatures>
@@ -303,65 +314,11 @@ export default function BytElavtal() {
               <FeatureItem>Skydd mot prisstegringar</FeatureItem>
               <FeatureItem>Personliga priser baserat på din förbrukning</FeatureItem>
             </ContractFeatures>
-          </ContractCard>
-        </ComparisonGrid>
-
-        <ButtonContainer>
-          <ButtonWrapper>
-            <div
-              style={{
-                cursor: 'pointer',
-                position: 'relative',
-                zIndex: 10,
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
-                e.currentTarget.style.filter = 'brightness(1.1)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                e.currentTarget.style.filter = 'brightness(1)';
-              }}
-              onClick={handleRorligtClick}
-            >
-              <GlassButton 
-                variant="primary" 
+            <CardAction>
+              <GlassButton
+                variant="secondary"
                 size="lg"
-                background="linear-gradient(135deg, var(--primary), var(--secondary))"
-                aria-label="Rörligt avtal - 0 kr i avgifter första året – utan bindningstid"
-                disableScrollEffect={true}
-                disableHoverEffect={true}
-              >
-                Välj rörligt avtal
-              </GlassButton>
-            </div>
-            <RorligtLabel>
-              0 kr i avgifter första året – utan bindningstid
-            </RorligtLabel>
-          </ButtonWrapper>
-
-          <ButtonWrapper>
-            <div
-              style={{
-                cursor: 'pointer',
-                position: 'relative',
-                zIndex: 10,
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
-                e.currentTarget.style.filter = 'brightness(1.1)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                e.currentTarget.style.filter = 'brightness(1)';
-              }}
-              onClick={handleFastprisClick}
-            >
-              <GlassButton 
-                variant="secondary" 
-                size="lg"
+                onClick={handleFastprisClick}
                 background="linear-gradient(135deg, var(--secondary), var(--primary))"
                 aria-label="Fastpris - samma elpris under hela avtalstiden"
                 disableScrollEffect={true}
@@ -369,12 +326,12 @@ export default function BytElavtal() {
               >
                 Välj fastpris avtal
               </GlassButton>
-            </div>
-            <FastprisLabel>
-              Samma elpris under hela avtalstiden
-            </FastprisLabel>
-          </ButtonWrapper>
-        </ButtonContainer>
+              <FastprisLabel>
+                Samma elpris under hela avtalstiden
+              </FastprisLabel>
+            </CardAction>
+          </ContractCard>
+        </ComparisonGrid>
       </Content>
     </PageContainer>
   );
