@@ -198,13 +198,29 @@ const NextStepsTitle = styled.h3`
 const NextStepsList = styled.ol`
   color: #374151;
   text-align: left;
-  max-width: 400px;
+  max-width: 460px;
   margin: 0 auto;
-  
+
   li {
     margin-bottom: 0.5rem;
     line-height: 1.5;
+    padding-left: 0.25rem;
   }
+
+  li strong {
+    color: #111827;
+  }
+`;
+
+const NextStepsNote = styled.p`
+  color: #6b7280;
+  text-align: center;
+  max-width: 460px;
+  margin: 1.25rem auto 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
 `;
 
 export default function BytElavtal() {
@@ -227,8 +243,9 @@ export default function BytElavtal() {
         <InfoSection>
           <InfoTitle>Vad händer härnäst?</InfoTitle>
           <InfoText>
-            När du klickar på ett av alternativen nedan kommer du till ett enkelt formulär där du fyller i dina uppgifter. 
-            Vi hjälper dig sedan att byta avtal till det bästa priset på marknaden.
+            Bytet görs hos det nya bolaget och tar ungefär fem minuter — du fyller i
+            dina uppgifter och signerar med BankID. Vi hjälper dig sedan att byta
+            avtal till det bästa priset på marknaden.
           </InfoText>
           <InfoText>
             Bor du i lägenhet? Läs först vår guide om{' '}
@@ -238,6 +255,26 @@ export default function BytElavtal() {
             {' '}– där går vi igenom månadsavgift och vad som gäller vid inflytt.
           </InfoText>
         </InfoSection>
+
+        <NextSteps>
+          <NextStepsTitle>Det här behöver du ha redo</NextStepsTitle>
+          <NextStepsList>
+            <li>Ditt <strong>personnummer</strong></li>
+            <li>
+              Ditt <strong>anläggnings-ID</strong> — 18 siffror, står på din nätfaktura
+              (hos elnätsbolaget, inte elhandlaren). Vet du inte var det finns går det
+              att ringa nätägaren och få det.
+            </li>
+            <li>Din <strong>adress</strong> och kontaktuppgifter</li>
+            <li><strong>BankID</strong> för att signera avtalet</li>
+            <li>Ungefärligt <strong>årsförbrukning</strong> om du vet den</li>
+          </NextStepsList>
+          <NextStepsNote>
+            Hela bytet tar ungefär fem minuter. Det nya bolaget säger upp ditt gamla
+            avtal åt dig — du behöver inte ringa någon. Har du avtal kvar hos det gamla
+            bolaget gäller det tills bytet är klart.
+          </NextStepsNote>
+        </NextSteps>
 
         <ComparisonGrid>
           <ContractCard>
@@ -338,16 +375,6 @@ export default function BytElavtal() {
             </FastprisLabel>
           </ButtonWrapper>
         </ButtonContainer>
-
-        <NextSteps>
-          <NextStepsTitle>Vad behöver du ha redo?</NextStepsTitle>
-          <NextStepsList>
-            <li>Ditt personnummer</li>
-            <li>Din adress och kontaktuppgifter</li>
-            <li>Ungefärlig årsförbrukning (om du vet den)</li>
-            <li>5 minuter av din tid</li>
-          </NextStepsList>
-        </NextSteps>
       </Content>
     </PageContainer>
   );
